@@ -6,6 +6,7 @@
 		<script src="scripts/ocel/objectsView.js"></script>
 		<script src="scripts/ocel/edgesView.js"></script>
 		<script src="scripts/ocel/ocdfg-model.js"></script>
+		<script src="scripts/ocel/ocdfg-visualization.js"></script>
 	</html>
 	<body>
 		<div id="graphContainer">
@@ -21,6 +22,7 @@
 			//}
 			model = new OcdfgModel(eventLog);
 			console.log(model.ocel);
+			visualization = new OcdfgVisualization(model, null);
 		</script>
 	</body>
 </html>
