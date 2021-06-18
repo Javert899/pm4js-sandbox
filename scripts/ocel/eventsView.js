@@ -22,7 +22,6 @@ class EventsView {
 		this.calculateActivityNumUniqueObjects();
 		this.calculateActivityNumTotalObjects();
 		this.calculateActivityMinMaxRelatedObjects();
-		console.log(this.activitiesCounters);
 	}
 	
 	calculateActivityNumEvents() {

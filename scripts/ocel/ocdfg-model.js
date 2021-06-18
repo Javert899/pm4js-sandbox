@@ -5,6 +5,7 @@ class OcdfgModel {
 		this.overallObjectsView = new ObjectsView(ocel);
 		this.otEventsView = {};
 		this.otObjectsView = {};
+		this.otEdges = {};
 		this.calculate();
 	}
 	
@@ -40,6 +41,7 @@ class OcdfgModel {
 		for (let ot in this.otEventsView) {
 			this.otEventsView[ot].calculate();
 			this.otObjectsView[ot].calculate();
+			this.otEdges[ot] = new EdgesView(this.ocel, this.otObjectsView[ot], this.otEventsView[ot]);
 		}
 	}
 }
