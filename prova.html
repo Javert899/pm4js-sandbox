@@ -1,10 +1,25 @@
 <html>
 	<head>
+		<!--<script src="scripts/generic/mxClient.min.js"></script>-->
 		<script src="logs/example-jsonocel.js"></script>
+		<script src="scripts/ocel/eventsView.js"></script>
+		<script src="scripts/ocel/objectsView.js"></script>
+		<script src="scripts/ocel/ocdfg-model.js"></script>
 	</html>
 	<body>
+		<div id="graphContainer">
+		</div>
 		<script type="text/javascript">
-			console.log(eventLog);
+			//var graph = new mxGraph(document.getElementById("graphContainer"));
+			//function update(stru) {
+			//	var parent = graph.getDefaultParent();
+			//	graph.getModel().beginUpdate();
+			//	var v1 = graph.insertVertex(parent, null, stru, 60, 60, 90, 40);
+			//	graph.getModel().endUpdate();
+			//	console.log("Ciao");
+			//}
+			model = new OcdfgModel(eventLog);
+			console.log(model.ocel);
 		</script>
 	</body>
 </html>
