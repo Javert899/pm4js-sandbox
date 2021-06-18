@@ -18,6 +18,7 @@ class OcdfgModel {
 			let ot = this.ocel["ocel:global-log"]["ocel:object-types"][otId];
 			this.otEventsView[ot] = new EventsView(this.ocel);
 			this.otObjectsView[ot] = new ObjectsView(this.ocel);
+			this.otEventsView[ot].objectType = ot;
 			this.otObjectsView[ot].objectType = ot;
 		}
 		for (let objId in this.ocel["ocel:objects"]) {

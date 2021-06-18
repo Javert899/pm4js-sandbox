@@ -1,6 +1,7 @@
 class EventsView {
 	constructor(ocel) {
 		this.ocel = ocel;
+		this.objectType = null;
 		this.eventsIds = {};
 		this.activities = {};
 		this.activitiesCounters = {};
@@ -72,5 +73,53 @@ class EventsView {
 			this.activitiesCounters[act]["min_related_objects"] = minRel;
 			this.activitiesCounters[act]["max_related_objects"] = maxRel;
 		}
+	}
+	
+	satisfy(acti, idx, count) {
+		return getValue(acti, idx) >= count;
+	}
+	
+	getValue(acti, idx) {
+		if (idx == 0) {
+			return this.activitiesCounters[acti]["events"];
+		}
+		else if (idx == 1) {
+			return this.activitiesCounters[acti]["unique_objects"];
+		}
+		else if (idx == 2) {
+			return this.activitiesCounters[acti]["total_objects"];
+		}
+		return 0;
+	}
+	
+	toReducedString(acti, idx) {
+		if (idx == 0) {
+			return "EC="+this.activitiesCounters[acti]["events"];
+		}
+		else if (idx == 1) {
+			return "UO="+this.activitiesCounters[acti]["unique_objects"];
+		}
+		else if (idx == 2) {
+			return "TO="+this.activitiesCounters[acti]["total_objects"];
+		}
+		return "";
+	}
+	
+	toCompleteString(acti) {
+		let ret = "";
+		if (this.objectType != null) {
+			ret += acti+" ("+this.objectType+")\n\n"
+		}
+		else {
+			ret += acti+"\n\n";
+		}
+		ret += "events = "+this.activitiesCounters[acti]["events"]+"\n";
+		ret += "unique objects = "+this.activitiesCounters[acti]["unique_objects"]+"\n";
+		ret += "total objects = "+this.activitiesCounters[acti]["total_objects"]+"\n";
+		if (this.objectType != null) {
+			ret += "min rel. obj = "+this.activitiesCounters[acti]["min_related_objects"]+"\n";
+			ret += "max rel. obj = "+this.activitiesCounters[acti]["max_related_objects"]+"\n";
+		}
+		return ret;
 	}
 }

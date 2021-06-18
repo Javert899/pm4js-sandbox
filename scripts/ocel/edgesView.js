@@ -57,6 +57,7 @@ class EdgesView {
 		else if (idx == 2) {
 			return this.edgesStatistics[actCouple]["total_objects"];
 		}
+		return 0;
 	}
 	
 	toReducedString(actCouple, idx) {
@@ -69,6 +70,7 @@ class EdgesView {
 		else if (idx == 2) {
 			return "TO="+this.edgesStatistics[actCouple]["total_objects"];
 		}
+		return "";
 	}
 	
 	toCompleteString(actCouple) {
