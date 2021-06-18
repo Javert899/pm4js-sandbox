@@ -1,6 +1,7 @@
 class ObjectsView {
 	constructor(ocel) {
 		this.ocel = ocel;
+		this.objectType = null;
 		this.objectsIds = {};
 		this.objectsIdsSorted = {};
 	}
