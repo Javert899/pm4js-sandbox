@@ -4,6 +4,8 @@ class ObjectsView {
 		this.objectType = null;
 		this.objectsIds = {};
 		this.objectsIdsSorted = {};
+		this.startActivities = {};
+		this.endActivities = {};
 	}
 	
 	addObject(objectId) {
@@ -30,6 +32,42 @@ class ObjectsView {
 					}
 					return 0;
 			});
+			if (this.objectsIdsSorted[objId].length > 0) {
+				let sa = this.objectsIdsSorted[objId][0][1];
+				let ea = this.objectsIdsSorted[objId][this.objectsIdsSorted[objId].length - 1][1];
+				if (!(sa in this.startActivities)) {
+					this.startActivities[sa] = 1;
+				}
+				else {
+					this.startActivities[sa] = this.startActivities[sa] + 1;
+				}
+				if (!(ea in this.endActivities)) {
+					this.endActivities[ea] = 1;
+				}
+				else {
+					this.endActivities[ea] = this.endActivities[ea] + 1;
+				}
+			}
 		}
+	}
+	
+	filteredSa(count) {
+		let ret = {};
+		for (let sa in this.startActivities) {
+			if (this.startActivities[sa] >= count) {
+				ret[sa] = count;
+			}
+		}
+		return ret;
+	}
+	
+	filteredEa(count) {
+		let ret = {};
+		for (let ea in this.endActivities) {
+			if (this.endActivities[ea] >= count) {
+				ret[ea] = count;
+			}
+		}
+		return ret;
 	}
 }
