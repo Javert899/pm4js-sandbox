@@ -21,8 +21,25 @@ class OcdfgModel {
 		for (let objId in this.ocel["ocel:objects"]) {
 			let obj = this.ocel["ocel:objects"][objId];
 			let objType = obj["ocel:type"];
-			this.overallObjectsView[obj] = {};
-			this.otObjectsView[objType][obj] = {};
+			this.overallObjectsView.addObject(objId);
+			this.otObjectsView[objType].addObject(objId);
+		}
+		for (let evId in this.ocel["ocel:events"]) {
+			let eve = this.ocel["ocel:events"][evId];
+			for (let objIdx in this.ocel["ocel:events"][evId]["ocel:omap"]) {
+				let relObj = this.ocel["ocel:events"][evId]["ocel:omap"][objIdx];
+				let relObjType = this.ocel["ocel:objects"][relObj]["ocel:type"];
+				this.overallEventsView.addEvent(evId);
+				this.otEventsView[relObjType].addEvent(evId);
+				this.overallObjectsView.addEventForObject(relObj, evId);
+				this.otObjectsView[relObjType].addEventForObject(relObj, evId);
+			}
+		}
+		this.overallEventsView.calculate();
+		this.overallObjectsView.calculate();
+		for (let ot in this.otEventsView) {
+			this.otEventsView[ot].calculate();
+			this.otObjectsView[ot].calculate();
 		}
 	}
 }
