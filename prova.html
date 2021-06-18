@@ -1,6 +1,6 @@
 <html>
 	<head>
-		<!--<script src="scripts/generic/mxClient.min.js"></script>-->
+		<script src="scripts/generic/mxClient.min.js"></script>
 		<script src="logs/example-jsonocel.js"></script>
 		<script src="scripts/ocel/eventsView.js"></script>
 		<script src="scripts/ocel/objectsView.js"></script>
@@ -12,7 +12,7 @@
 		<div id="graphContainer">
 		</div>
 		<script type="text/javascript">
-			//var graph = new mxGraph(document.getElementById("graphContainer"));
+			var graph = new mxGraph(document.getElementById("graphContainer"));
 			//function update(stru) {
 			//	var parent = graph.getDefaultParent();
 			//	graph.getModel().beginUpdate();
@@ -22,7 +22,8 @@
 			//}
 			model = new OcdfgModel(eventLog);
 			console.log(model.ocel);
-			visualization = new OcdfgVisualization(model, null);
+			visualization = new OcdfgVisualization(model, graph);
+			visualization.represent(0, 0.2, 0.2);
 		</script>
 	</body>
 </html>

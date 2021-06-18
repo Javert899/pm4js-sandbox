@@ -7,6 +7,8 @@ class OcdfgVisualization {
 		this.MAX_INDIPENDENT_ACT_COUNT = 0;
 		this.MIN_EDGE_COUNT = 100000000000000;
 		this.MAX_EDGE_COUNT = 0;
+		this.expandedActivities = [];
+		this.expandedEdges = [];
 		this.calculatePre(0);
 	}
 	
@@ -24,11 +26,14 @@ class OcdfgVisualization {
 				this.MAX_EDGE_COUNT = Math.max(this.MAX_EDGE_COUNT, edge_count);
 			}
 		}
-		console.log(this.MIN_EDGE_COUNT);
-		console.log(this.MAX_EDGE_COUNT);
 	}
 	
-	represent(af, pf) {
-	
+	represent(idx, af, pf) {
+		let minActiCount = af * this.MAX_INDIPENDENT_ACT_COUNT;
+		let minEdgeCount = pf * this.MAX_EDGE_COUNT;
+		var parent = graph.getDefaultParent();
+		graph.getModel().beginUpdate();
+		graph.getModel().endUpdate();
+		console.log("end representation");
 	}
 }
