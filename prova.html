@@ -1,5 +1,12 @@
 <html>
 	<head>
+		<script src="scripts/generic/jquery.min.js"></script>
+		<script src="scripts/generic/download-utility.js"></script>
+		<script src="scripts/pm4js/eventLog.js"></script>
+		<script src="scripts/pm4js/xesParser.js"></script>
+		<script src="scripts/pm4js/xesExporter.js"></script>
+		<script src="scripts/pm4js/log-statistics.js"></script>
+		<script src="scripts/pm4js/dfg.js"></script>
 		<script src="scripts/generic/mxClient.min.js"></script>
 		<script src="logs/example-jsonocel.js"></script>
 		<script src="scripts/ocel/eventsView.js"></script>
@@ -7,11 +14,36 @@
 		<script src="scripts/ocel/edgesView.js"></script>
 		<script src="scripts/ocel/ocdfg-model.js"></script>
 		<script src="scripts/ocel/ocdfg-visualization.js"></script>
+		<script src="scripts/ocel/xmlocel-exporter.js"></script>
+		<script src="scripts/ocel/xmlocel-importer.js"></script>
 	</html>
 	<body>
+		<input type="file" id="upload" />
 		<div id="graphContainer">
 		</div>
 		<script type="text/javascript">
+		function handleFileSelect(evt) {
+			var files = evt.target.files; // FileList object
+
+			// use the 1st file from the list
+			f = files[0];
+
+			var reader = new FileReader();
+
+			// Closure to capture the file information.
+			reader.onload = function(e) {
+				let xmlStri = e.target.result;
+				let log = XesParser.parse(xmlStri);
+				let dfg = new Dfg(log);
+				let fdfg = dfg.calculateFrequencyDfg();
+				console.log(fdfg);
+			}
+
+			  // Read in the image file as a data URL.
+			  reader.readAsText(f);
+		  }
+  
+			document.getElementById('upload').addEventListener('change', handleFileSelect, false);
 			var graph = new mxGraph(document.getElementById("graphContainer"));
 			//function update(stru) {
 			//	var parent = graph.getDefaultParent();
@@ -24,6 +56,37 @@
 			console.log(model.ocel);
 			visualization = new OcdfgVisualization(model, graph);
 			visualization.represent(0, 0.2, 0.2);
+			
+			/*$.get('http://localhost:8000/logs/log.xmlocel', function(data) {
+				let ocel = XmlOcelImporter.importLog(data);
+				console.log(ocel);
+			});
+			
+			let xmlStri = XmlOcelExporter.exportLog(model.ocel);
+			download(xmlStri, "prova.xmlocel", "text/xml");*/
+			
+
+			//console.log(xmlStri);
+			//console.log(new Date().getTime());
+			let log = null;
+			$.get('http://localhost:8000/logs/receipt.xes', function(data) {
+				console.log("parsing");
+				log = XesParser.parse(data);
+				/*let aa = (new Date()).getTime();
+				let sa = LogStatistics.getStartActivities(log);
+				let ea = LogStatistics.getEndActivities(log);
+				let att = LogStatistics.getAttributeValues(log, "concept:name");
+				let vars = LogStatistics.getVariants(log);
+				let bb = (new Date()).getTime();*/
+				let aa = (new Date()).getTime();
+				let dfg = new Dfg(log);
+				//let fdfg = dfg.calculateFrequencyDfg();
+				let pdfg = dfg.calculatePerformanceDfg();
+				let bb = (new Date()).getTime();
+				console.log((bb-aa)/1000.0);
+				console.log(pdfg);
+				//console.log(pdfg);
+			});
 		</script>
 	</body>
 </html>
