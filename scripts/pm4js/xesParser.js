@@ -3,7 +3,6 @@ class XesParser {
 		var parser = new DOMParser();
 		var xmlDoc = parser.parseFromString(xmlString, "text/xml");
 		let xmlLog = xmlDoc.getElementsByTagName("log")[0];
-		console.log(xmlLog);
 		let eventLog = new EventLog();
 		XesParser.parseXmlObj(xmlLog, eventLog);
 		return eventLog;
@@ -28,6 +27,5 @@ class XesParser {
 				XesParser.parseXmlObj(child, trace);
 			}
 		}
-		console.log(target.attributes);
 	}
 }
