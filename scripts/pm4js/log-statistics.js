@@ -49,4 +49,24 @@ class LogStatistics {
 		}
 		return ret;
 	}
+	
+	static getVariants(log, activity_key="concept:name") {
+		let ret = {};
+		for (let trace of log.traces) {
+			let activities = [];
+			for (let eve of trace.events) {
+				let act = eve.attributes[activity_key].value;
+				activities.push(act);
+			}
+			activities = activities.toString();
+			let count = ret[activities];
+			if (count == null) {
+				ret[activities] = 1
+			}
+			else {
+				ret[activities] = count + 1;
+			}
+		}
+		return ret;
+	}
 }
