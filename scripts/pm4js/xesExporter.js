@@ -4,11 +4,12 @@ class XesExporter {
 		XesExporter.exportXmlObjToDom(eventLog, xmlDoc);
 		const serializer = new XMLSerializer();
 		const xmlStr = serializer.serializeToString(xmlDoc);
+		return xmlStr;
 	}
 	
 	static exportXmlObjToDom(obj, dom) {
 		for (let att in obj.attributes) {
-			let attValue = obj.attributes[att];
+			let attValue = obj.attributes[att].value;
 			let xmlTag = null;
 			let value = null;
 			if (typeof attValue == "string") {
@@ -19,26 +20,52 @@ class XesExporter {
 				xmlTag = "date";
 				value = attValue.toISOString();
 			}
+			else if (typeof attValue == "number") {
+				xmlTag = "float";
+				value = ""+attValue;
+			}
 			
 			if (value != null) {
 				let attr = document.createElement(xmlTag);
 				dom.appendChild(attr);
 				attr.setAttribute("key", att);
 				attr.setAttribute("value", value);
+				XesExporter.exportXmlObjToDom(obj.attributes[att], attr);
 			}
 		}
-		if (obj.hasOwnProperty("events")) {
-			for (let eve of obj.events) {
-				let xmlEvent = document.createElement("event");
-				dom.appendChild(xmlEvent);
-				XesExporter.exportXmlObjToDom(eve, xmlEvent);
+		if (obj.constructor.name == "EventLog") {
+			for (let ext in obj.extensions) {
+				let extValue = obj.extensions[ext];
+				let xmlExtension = document.createElement("extension");
+				dom.appendChild(xmlExtension);
+				xmlExtension.setAttribute("name", ext);
+				xmlExtension.setAttribute("prefix", extValue[0]);
+				xmlExtension.setAttribute("uri", extValue[1]);
 			}
-		}
-		else if (obj.hasOwnProperty("traces")) {
+			for (let scope in obj.globals) {
+				let global = obj.globals[scope];
+				let xmlGlobal = document.createElement("global");
+				dom.appendChild(xmlGlobal);
+				xmlGlobal.setAttribute("scope", scope);
+				XesExporter.exportXmlObjToDom(global, xmlGlobal);
+			}
+			for (let classifier in obj.classifiers) {
+				let xmlClassifier = document.createElement("classifier");
+				dom.appendChild(xmlClassifier);
+				xmlClassifier.setAttribute("name", classifier);
+				xmlClassifier.setAttribute("keys", obj.classifiers[classifier]);
+			}
 			for (let trace of obj.traces) {
 				let xmlTrace = document.createElement("trace");
 				dom.appendChild(xmlTrace);
 				XesExporter.exportXmlObjToDom(trace, xmlTrace);
+			}
+		}
+		else if (obj.constructor.name == "Trace") {
+			for (let eve of obj.events) {
+				let xmlEvent = document.createElement("event");
+				dom.appendChild(xmlEvent);
+				XesExporter.exportXmlObjToDom(eve, xmlEvent);
 			}
 		}
 	}

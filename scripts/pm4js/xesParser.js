@@ -11,10 +11,19 @@ class XesParser {
 	static parseXmlObj(xmlObj, target) {
 		for (let child of xmlObj.children) {
 			if (child.tagName == "string") {
-				target.attributes[child.getAttribute("key")] = child.getAttribute("value");
+				let xmlAttr = new Attribute(child.getAttribute("value"));
+				target.attributes[child.getAttribute("key")] = xmlAttr;
+				XesParser.parseXmlObj(child, xmlAttr);
 			}
 			else if (child.tagName == "date") {
-				target.attributes[child.getAttribute("key")] = new Date(child.getAttribute("value"));
+				let xmlAttr = new Attribute(new Date(child.getAttribute("value")));
+				target.attributes[child.getAttribute("key")] = xmlAttr;
+				XesParser.parseXmlObj(child, xmlAttr);
+			}
+			else if (child.tagName == "float") {
+				let xmlAttr = new Attribute(parseFloat(child.getAttribute("value")));
+				target.attributes[child.getAttribute("key")] = xmlAttr;
+				XesParser.parseXmlObj(child, xmlAttr);
 			}
 			else if (child.tagName == "event") {
 				let eve = new Event();
@@ -25,6 +34,17 @@ class XesParser {
 				let trace = new Trace();
 				target.traces.push(trace);
 				XesParser.parseXmlObj(child, trace);
+			}
+			else if (child.tagName == "extension") {
+				target.extensions[child.getAttribute("name")] = [child.getAttribute("prefix"), child.getAttribute("uri")];
+			}
+			else if (child.tagName == "global") {
+				let targetObj = new Global();
+				target.globals[child.getAttribute("scope")] = targetObj;
+				XesParser.parseXmlObj(child, targetObj);
+			}
+			else if (child.tagName == "classifier") {
+				target.classifiers[child.getAttribute("name")] = child.getAttribute("keys");
 			}
 		}
 	}
