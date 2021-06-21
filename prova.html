@@ -16,6 +16,7 @@
 		<script src="scripts/ocel/ocdfg-visualization.js"></script>
 		<script src="scripts/ocel/xmlocel-exporter.js"></script>
 		<script src="scripts/ocel/xmlocel-importer.js"></script>
+		<script src="scripts/ocel/ocel-flattening.js"></script>
 	</html>
 	<body>
 		<input type="file" id="upload" />
@@ -57,36 +58,38 @@
 			visualization = new OcdfgVisualization(model, graph);
 			visualization.represent(0, 0.2, 0.2);
 			
-			/*$.get('http://localhost:8000/logs/log.xmlocel', function(data) {
+			$.get('http://localhost:8000/logs/log.xmlocel', function(data) {
 				let ocel = XmlOcelImporter.importLog(data);
 				console.log(ocel);
+				let log = OcelFlattening.flatten(ocel, "DOCTYPE_Order");
+				console.log(log);
 			});
 			
-			let xmlStri = XmlOcelExporter.exportLog(model.ocel);
-			download(xmlStri, "prova.xmlocel", "text/xml");*/
+			//let xmlStri = XmlOcelExporter.exportLog(model.ocel);
+			//download(xmlStri, "prova.xmlocel", "text/xml");
 			
 
 			//console.log(xmlStri);
 			//console.log(new Date().getTime());
-			let log = null;
-			$.get('http://localhost:8000/logs/receipt.xes', function(data) {
-				console.log("parsing");
-				log = XesParser.parse(data);
-				/*let aa = (new Date()).getTime();
-				let sa = LogStatistics.getStartActivities(log);
-				let ea = LogStatistics.getEndActivities(log);
-				let att = LogStatistics.getAttributeValues(log, "concept:name");
-				let vars = LogStatistics.getVariants(log);
-				let bb = (new Date()).getTime();*/
-				let aa = (new Date()).getTime();
-				let dfg = new Dfg(log);
+			//let log = null;
+			//$.get('http://localhost:8000/logs/receipt.xes', function(data) {
+			//	console.log("parsing");
+			//	log = XesParser.parse(data);
+			//	let aa = (new Date()).getTime();
+			//	let sa = LogStatistics.getStartActivities(log);
+			//	let ea = LogStatistics.getEndActivities(log);
+			//	let att = LogStatistics.getAttributeValues(log, "concept:name");
+			//	let vars = LogStatistics.getVariants(log);
+			//	let bb = (new Date()).getTime();
+			//	let aa = (new Date()).getTime();
+			//	let dfg = new Dfg(log);
 				//let fdfg = dfg.calculateFrequencyDfg();
-				let pdfg = dfg.calculatePerformanceDfg();
-				let bb = (new Date()).getTime();
-				console.log((bb-aa)/1000.0);
-				console.log(pdfg);
+			//	let pdfg = dfg.calculatePerformanceDfg();
+			//	let bb = (new Date()).getTime();
+			//	console.log((bb-aa)/1000.0);
+			//	console.log(pdfg);
 				//console.log(pdfg);
-			});
+			//});
 		</script>
 	</body>
 </html>
