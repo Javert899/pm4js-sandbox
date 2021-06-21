@@ -15,8 +15,12 @@ class XmlOcelExporter {
 		xmlDocument.appendChild(events);
 		xmlDocument.appendChild(objects);
 		
+		XmlOcelExporter.exportGlobalLog(ocel, globalLog);
+		XmlOcelExporter.exportGlobalObject(ocel, globalObject);
+		XmlOcelExporter.exportGlobalEvent(ocel, globalEvent);
 		XmlOcelExporter.exportEvents(ocel, events);
-		
+		XmlOcelExporter.exportObjects(ocel, objects);
+
 		const serializer = new XMLSerializer();
 		const xmlStr = serializer.serializeToString(xmlDocument);
 		return xmlStr;
@@ -60,20 +64,56 @@ class XmlOcelExporter {
 	static exportObjects(ocel, xmlObjects) {
 		for (let objId in ocel["ocel:objects"]) {
 			let obj = ocel["ocel:objects"][objId];
-			let xmlObj = document.createElement(obj);
+			let xmlObj = document.createElement("object");
+			xmlObjects.appendChild(xmlObj);
+			let xmlObjId = document.createElement("string");
+			xmlObjId.setAttribute("key", "id");
+			xmlObjId.setAttribute("value", objId);
+			xmlObj.appendChild(xmlObjId);
+			let xmlObjType = document.createElement("string");
+			xmlObjType.setAttribute("key", "type")
+			xmlObjType.setAttribute("value", obj["ocel:type"]);
+			xmlObj.appendChild(xmlObjType);
+			let xmlObjOvmap = document.createElement("list");
+			xmlObjOvmap.setAttribute("key", "ovmap");
+			xmlObj.appendChild(xmlObjOvmap);
+			for (let att in obj["ocel:ovmap"]) {
+				XmlOcelExporter.exportAttribute(att, obj["ocel:ovmap"][att], xmlObj);
+			}
 		}
 	}
 	
 	static exportGlobalLog(ocel, globalLog) {
-	
+		let attributeNames = document.createElement("list");
+		globalLog.appendChild(attributeNames);
+		attributeNames.setAttribute("key", "attribute-names");
+		let objectTypes = document.createElement("list");
+		globalLog.appendChild(objectTypes);
+		objectTypes.setAttribute("key", "object-types");
+		for (let att of ocel["ocel:global-log"]["ocel:attribute-names"]) {
+			let xmlAttr = document.createElement("string");
+			xmlAttr.setAttribute("key", "attribute-name");
+			xmlAttr.setAttribute("value", att);
+			attributeNames.appendChild(xmlAttr);
+		}
+		for (let ot of ocel["ocel:global-log"]["ocel:object-types"]) {
+			let xmlOt = document.createElement("string");
+			xmlOt.setAttribute("key", "object-type");
+			xmlOt.setAttribute("value", ot);
+			objectTypes.appendChild(xmlOt);
+		}
 	}
 	
 	static exportGlobalEvent(ocel, globalEvent) {
-	
+		for (let att in ocel["ocel:global-event"]) {
+			XmlOcelExporter.exportAttribute(att, ocel["ocel:global-event"][att], globalEvent);
+		}
 	}
 	
 	static exportGlobalObject(ocel, globalObject) {
-	
+		for (let att in ocel["ocel:global-object"]) {
+			XmlOcelExporter.exportAttribute(att, ocel["ocel:global-object"][att], globalObject);
+		}
 	}
 	
 	static exportAttribute(attName, attValue, parentObj) {
@@ -85,6 +125,7 @@ class XmlOcelExporter {
 			}
 			else if (typeof attValue == "object") {
 				xmlTag = "date";
+				console.log(attValue);
 				value = attValue.toISOString();
 			}
 			else if (typeof attValue == "number") {
