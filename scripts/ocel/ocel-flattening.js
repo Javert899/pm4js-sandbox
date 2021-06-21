@@ -20,10 +20,10 @@ class OcelFlattening {
 					}
 					let xesEve = new Event();
 					trace.events.push(xesEve);
-					xesEve["concept:name"] = eve["ocel:activity"];
-					xesEve["time:timestamp"] = eve["ocel:timestamp"];
+					xesEve.attributes["concept:name"] = new Attribute(eve["ocel:activity"]);
+					xesEve.attributes["time:timestamp"] = new Attribute(new Date(eve["ocel:timestamp"]));
 					for (let attr in eve["ocel:vmap"]) {
-						xesEve[attr] = eve["ocel:vmap"][attr];
+						xesEve.attributes[attr] = new Attribute(eve["ocel:vmap"][attr]);
 					}
 				}
 			}

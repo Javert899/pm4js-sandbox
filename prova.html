@@ -17,7 +17,7 @@
 		<script src="scripts/ocel/xmlocel-exporter.js"></script>
 		<script src="scripts/ocel/xmlocel-importer.js"></script>
 		<script src="scripts/ocel/ocel-flattening.js"></script>
-	</html>
+	</head>
 	<body>
 		<input type="file" id="upload" />
 		<div id="graphContainer">
@@ -33,6 +33,7 @@
 
 			// Closure to capture the file information.
 			reader.onload = function(e) {
+				console.log(f);
 				let xmlStri = e.target.result;
 				let log = XesParser.parse(xmlStri);
 				let dfg = new Dfg(log);
@@ -58,12 +59,12 @@
 			visualization = new OcdfgVisualization(model, graph);
 			visualization.represent(0, 0.2, 0.2);
 			
-			$.get('http://localhost:8000/logs/log.xmlocel', function(data) {
+			/*$.get('logs/log.xmlocel', function(data) {
 				let ocel = XmlOcelImporter.importLog(data);
 				console.log(ocel);
 				let log = OcelFlattening.flatten(ocel, "DOCTYPE_Order");
 				console.log(log);
-			});
+			});*/
 			
 			//let xmlStri = XmlOcelExporter.exportLog(model.ocel);
 			//download(xmlStri, "prova.xmlocel", "text/xml");
@@ -71,10 +72,11 @@
 
 			//console.log(xmlStri);
 			//console.log(new Date().getTime());
-			//let log = null;
-			//$.get('http://localhost:8000/logs/receipt.xes', function(data) {
-			//	console.log("parsing");
-			//	log = XesParser.parse(data);
+			let log = null;
+			$.get('logs/receipt.xes', function(data) {
+				console.log("parsing");
+				log = XesParser.parse(data);
+				console.log(log);
 			//	let aa = (new Date()).getTime();
 			//	let sa = LogStatistics.getStartActivities(log);
 			//	let ea = LogStatistics.getEndActivities(log);
@@ -89,7 +91,7 @@
 			//	console.log((bb-aa)/1000.0);
 			//	console.log(pdfg);
 				//console.log(pdfg);
-			//});
+			});
 		</script>
 	</body>
 </html>
