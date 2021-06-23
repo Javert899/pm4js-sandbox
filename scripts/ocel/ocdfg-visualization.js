@@ -3,6 +3,8 @@ class OcdfgVisualization {
 		this.model = model;
 		this.graph = graph;
 		this.original = this;
+		this.ACTIVITY_FREQUENCY = 0.2;
+		this.PATHS_FREQUENCY = 0.2
 		this.MIN_INDIPENDENT_ACT_COUNT = 100000000000000;
 		this.MAX_INDIPENDENT_ACT_COUNT = 0;
 		this.MIN_EDGE_COUNT = 100000000000000;
@@ -52,7 +54,13 @@ class OcdfgVisualization {
 	  return colour;
 	}
 	
-	represent(idx, af, pf) {
+	represent(af = null, pf = null) {
+		if (af == null) {
+			af = this.ACTIVITY_FREQUENCY;
+		}
+		if (pf == null) {
+			pf = this.PATHS_FREQUENCY;
+		}
 		let minActiCount = (1 - af) * this.MAX_INDIPENDENT_ACT_COUNT;
 		let minEdgeCount = (1 - pf) * this.MAX_EDGE_COUNT;
 		var parent = this.graph.getDefaultParent();
