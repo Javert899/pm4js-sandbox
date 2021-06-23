@@ -76,7 +76,7 @@ class EventsView {
 	}
 	
 	satisfy(acti, idx, count) {
-		return getValue(acti, idx) >= count;
+		return this.getValue(acti, idx) >= count;
 	}
 	
 	getValue(acti, idx) {
@@ -93,16 +93,17 @@ class EventsView {
 	}
 	
 	toReducedString(acti, idx) {
+		let ret = acti+"\n"
 		if (idx == 0) {
-			return "EC="+this.activitiesCounters[acti]["events"];
+			ret += "EC="+this.activitiesCounters[acti]["events"];
 		}
 		else if (idx == 1) {
-			return "UO="+this.activitiesCounters[acti]["unique_objects"];
+			ret += "UO="+this.activitiesCounters[acti]["unique_objects"];
 		}
 		else if (idx == 2) {
-			return "TO="+this.activitiesCounters[acti]["total_objects"];
+			ret += "TO="+this.activitiesCounters[acti]["total_objects"];
 		}
-		return "";
+		return ret;
 	}
 	
 	toCompleteString(acti) {

@@ -44,7 +44,7 @@ class EdgesView {
 	}
 	
 	satisfy(actCouple, idx, count) {
-		return getValue(actCouple, idx) >= count;
+		return this.getValue(actCouple, idx) >= count;
 	}
 	
 	getValue(actCouple, idx) {
