@@ -51,21 +51,21 @@ class ObjectsView {
 		}
 	}
 	
-	filteredSa(count) {
+	filteredSa(count, activitiesList) {
 		let ret = {};
 		for (let sa in this.startActivities) {
-			if (this.startActivities[sa] >= count) {
-				ret[sa] = count;
+			if (this.startActivities[sa] >= count && sa in activitiesList) {
+				ret[sa] = this.startActivities[sa];
 			}
 		}
 		return ret;
 	}
 	
-	filteredEa(count) {
+	filteredEa(count, activitiesList) {
 		let ret = {};
 		for (let ea in this.endActivities) {
-			if (this.endActivities[ea] >= count) {
-				ret[ea] = count;
+			if (this.endActivities[ea] >= count && ea in activitiesList) {
+				ret[ea] = this.endActivities[ea];
 			}
 		}
 		return ret;
