@@ -16,6 +16,8 @@
 		<script src="scripts/ocel/ocdfg-visualization.js"></script>
 		<script src="scripts/ocel/xmlocel-exporter.js"></script>
 		<script src="scripts/ocel/xmlocel-importer.js"></script>
+		<script src="scripts/ocel/jsonocel-exporter.js"></script>
+		<script src="scripts/ocel/jsonocel-importer.js"></script>
 		<script src="scripts/ocel/ocel-flattening.js"></script>
 	</head>
 	<body>
@@ -29,10 +31,16 @@
 			% act.: <input id="af_slider" type="range" min="0" max="100" value="70" class="slider">
 			% paths: <input id="pf_slider" type="range" min="0" max="100" value="70" class="slider">
 			<button id="apply_changes" onclick="doVisualization()">Apply Changes</button>
-			<button id="reset_filters" onclick="resetFilters()">Reset Filters</button>
+			<button id="reset_filters" onclick="resetFilters()">Reset Filters</button><br />
 			Select the object types: <select id="objectTypes" multiple style="height: 40px">
 			</select>
-			<button id="filterObjectTypes" onclick="filterObjectTypes()">Filter on Obj Types</button><br />
+			<button id="filterObjectTypes" onclick="filterObjectTypes()">Filter on Obj Types</button>
+			<button id="downloadJsonOcel" onclick="downloadJsonOcel()">Download JSON Ocel</button>
+			<button id="downloadXmlOcel" onclick="downloadXmlOcel()">Download XML Ocel</button>
+			Flattening OT: <select id="flatteningOt">
+			</select>
+			<button id="flattenEventLog" onclick="flattenEventLog()">Flatten (XES)</button>
+			<br />
 			Selected activity: <span id="selectedActivity"></span>
 			<button id="filterRelatedObjectsActivity" onclick="filterRelatedObjectsActivity()" disabled>Filter Rel.Obj</button>
 			<button id="filterNonRelatedObjectsActivity" onclick="filterNonRelatedObjectsActivity()" disabled>Filter Non Rel.Obj</button>
@@ -65,6 +73,23 @@
 			function resetFilters() {
 				visualization.resetFilters();
 				doVisualization();
+			}
+			
+			function downloadJsonOcel() {
+				let jsonStri = JsonOcelExporter.exportLog(visualization.model.ocel);
+				download(jsonStri, "obj-centr-log.jsonocel", "text/json");
+			}
+			
+			function downloadXmlOcel() {
+				let xmlStri = XmlOcelExporter.exportLog(visualization.model.ocel);
+				download(xmlStri, "obj-centr-log.xmlocel", "text/xml");
+			}
+			
+			function flattenEventLog() {
+				let ot = document.getElementById("flatteningOt").value;
+				let eventLog = OcelFlattening.flatten(visualization.model.ocel, ot);
+				let xmlStri = XesExporter.exportLog(eventLog);
+				download(xmlStri, "flattened.xes", "text/xml");
 			}
 			
 			function filterObjectTypes() {

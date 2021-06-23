@@ -6,12 +6,11 @@ class OcelFlattening {
 			let eve = ocel["ocel:events"][eveId];
 			for (let objId of eve["ocel:omap"]) {
 				let obj = ocel["ocel:objects"][objId];
-				//console.log(obj["ocel:type"]);
 				if (obj["ocel:type"] == objType) {
 					let trace = null;
 					if (!(objId in objTraces)) {
 						trace = new Trace();
-						trace.attributes["concept:name"] = objId;
+						trace.attributes["concept:name"] = new Attribute(objId);
 						log.traces.push(trace);
 						objTraces[objId] = trace;
 					}

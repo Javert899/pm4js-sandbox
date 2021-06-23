@@ -46,7 +46,7 @@ class OcdfgVisualization {
 		this.represent();
 	}
 	
-	populateObjectTypes(target_select="objectTypes") {
+	populateObjectTypes(target_select="objectTypes", target_select_2="flatteningOt") {
 		try {
 			let objectTypes = document.getElementById(target_select);
 			objectTypes.innerHTML = "";
@@ -55,6 +55,20 @@ class OcdfgVisualization {
 				opt.innerHTML = ot;
 				opt.value = ot;
 				opt.selected = true;
+				objectTypes.appendChild(opt);
+			}
+		}
+		catch (err) {
+			console.log(err);
+		}
+		
+		try {
+			let objectTypes = document.getElementById(target_select_2);
+			objectTypes.innerHTML = "";
+			for (let ot of this.model.ocel["ocel:global-log"]["ocel:object-types"]) {
+				let opt = document.createElement("option");
+				opt.innerHTML = ot;
+				opt.value = ot;
 				objectTypes.appendChild(opt);
 			}
 		}
