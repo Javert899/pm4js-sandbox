@@ -4,12 +4,8 @@ class OcdfgVisualization {
 		document.getElementById(targetContainer).innerHTML = "";
 		this.graph = new mxGraph(document.getElementById(targetContainer));
 		this.original = this;
-		this.ACTIVITY_FREQUENCY = 0.2;
-		this.PATHS_FREQUENCY = 0.2
-		this.MIN_INDIPENDENT_ACT_COUNT = 100000000000000;
-		this.MAX_INDIPENDENT_ACT_COUNT = 0;
-		this.MIN_EDGE_COUNT = 100000000000000;
-		this.MAX_EDGE_COUNT = 0;
+		this.ACTIVITY_FREQUENCY = 0.7;
+		this.PATHS_FREQUENCY = 0.7;
 		this.IDX = 0;
 		this.expandedActivities = {};
 		this.expandedEdges = {};
@@ -69,6 +65,11 @@ class OcdfgVisualization {
 	}
 	
 	calculatePre() {
+		this.MIN_INDIPENDENT_ACT_COUNT = 100000000000000;
+		this.MAX_INDIPENDENT_ACT_COUNT = 0;
+		this.MIN_EDGE_COUNT = 100000000000000;
+		this.MAX_EDGE_COUNT = 0;
+		
 		for (let act in this.model.overallEventsView.activitiesCounters) {
 			let act_count = this.model.overallEventsView.getValue(act, this.IDX);
 			this.MIN_INDIPENDENT_ACT_COUNT = Math.min(this.MIN_INDIPENDENT_ACT_COUNT, act_count);

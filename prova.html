@@ -19,20 +19,34 @@
 		<script src="scripts/ocel/ocel-flattening.js"></script>
 	</head>
 	<body>
+		<div id="header">
+			Annotation:
+			<select id="annotationSelector">
+				<option id="events" value="0">Events</option>
+				<option id="unique_objects" value="1" selected>Unique Objects</option>
+				<option id="total_objects" value="2">Total Objects</option>
+			</select>
+			% act.: <input id="af_slider" type="range" min="0" max="100" value="70" class="slider">
+			% paths: <input id="pf_slider" type="range" min="0" max="100" value="70" class="slider">
+			<button id="apply_changes" onclick="applyChanges()">Apply Changes</button>
+		</div>
 		<div id="graphContainer">
 		</div>
 		<script type="text/javascript">
-			//function update(stru) {
-			//	var parent = graph.getDefaultParent();
-			//	graph.getModel().beginUpdate();
-			//	var v1 = graph.insertVertex(parent, null, stru, 60, 60, 90, 40);
-			//	graph.getModel().endUpdate();
-			//	console.log("Ciao");
-			//}
-			model = new OcdfgModel(eventLog);
-			console.log(model.ocel);
-			visualization = new OcdfgVisualization(model, "graphContainer");
-			visualization.represent(0.7, 0.7);
+			let model = new OcdfgModel(eventLog);
+			let visualization = new OcdfgVisualization(model, "graphContainer");
+			
+			function applyChanges() {
+				let af = document.getElementById("af_slider").value / 100.0;
+				let pf = document.getElementById("pf_slider").value / 100.0;
+				let annotation = parseInt(document.getElementById("annotationSelector").value);
+				visualization.ACTIVITY_FREQUENCY = af;
+				visualization.PATHS_FREQUENCY = pf;
+				visualization.IDX = annotation;
+				visualization.represent();
+			}
+			
+			applyChanges();
 			
 			/*$.get('logs/log.xmlocel', function(data) {
 				let ocel = XmlOcelImporter.importLog(data);
