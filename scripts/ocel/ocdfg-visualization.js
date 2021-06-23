@@ -3,7 +3,7 @@ class OcdfgVisualization {
 		this.model = model;
 		document.getElementById(targetContainer).innerHTML = "";
 		this.graph = new mxGraph(document.getElementById(targetContainer));
-		this.original = this;
+		this.original = model;
 		this.ACTIVITY_FREQUENCY = 0.7;
 		this.PATHS_FREQUENCY = 0.7;
 		this.IDX = 0;
@@ -28,6 +28,31 @@ class OcdfgVisualization {
 		this.invSaNodes = {};
 		this.eaNodes = {};
 		this.invEaNodes = {};
+	}
+	
+	resetFilters() {
+		this.expandedActivities = {};
+		this.expandedEdges = {};
+		this.model = this.original;
+	}
+	
+	populateObjectTypes(target_select="objectTypes") {
+		try {
+			let objectTypes = document.getElementById(target_select);
+			objectTypes.innerHTML = "";
+			console.log(objectTypes);
+			for (let ot of this.model.ocel["ocel:global-log"]["ocel:object-types"]) {
+				console.log(ot);
+				let opt = document.createElement("option");
+				opt.innerHTML = ot;
+				opt.value = ot;
+				opt.selected = true;
+				objectTypes.appendChild(opt);
+			}
+		}
+		catch (err) {
+			console.log(err);
+		}
 	}
 	
 	addListeners() {

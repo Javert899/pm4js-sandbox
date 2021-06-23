@@ -28,7 +28,11 @@
 			</select>
 			% act.: <input id="af_slider" type="range" min="0" max="100" value="70" class="slider">
 			% paths: <input id="pf_slider" type="range" min="0" max="100" value="70" class="slider">
-			<button id="apply_changes" onclick="applyChanges()">Apply Changes</button>
+			<button id="apply_changes" onclick="doVisualization()">Apply Changes</button>
+			<button id="reset_filters" onclick="resetFilters()">Reset Filters</button>
+			Select the object types: <select id="objectTypes" multiple style="height: 40px">
+			</select>
+			<button id="filterObjectTypes">Filter on Obj Types</button><br />
 		</div>
 		<div id="graphContainer">
 		</div>
@@ -36,7 +40,7 @@
 			let model = new OcdfgModel(eventLog);
 			let visualization = new OcdfgVisualization(model, "graphContainer");
 			
-			function applyChanges() {
+			function doVisualization() {
 				let af = document.getElementById("af_slider").value / 100.0;
 				let pf = document.getElementById("pf_slider").value / 100.0;
 				let annotation = parseInt(document.getElementById("annotationSelector").value);
@@ -46,7 +50,13 @@
 				visualization.represent();
 			}
 			
-			applyChanges();
+			function resetFilters() {
+				visualization.resetFilters();
+				doVisualization();
+			}
+			
+			doVisualization();
+			visualization.populateObjectTypes();
 			
 			/*$.get('logs/log.xmlocel', function(data) {
 				let ocel = XmlOcelImporter.importLog(data);
