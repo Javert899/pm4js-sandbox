@@ -170,8 +170,16 @@
 				document.getElementById("seeRelatedObjEdge").disabled = false;
 			}
 			
+			function callbackStatistics(events, uo, to) {
+				console.log(events);
+				console.log(uo);
+				console.log(to);
+			}
+			
 			visualization.callbackActivity = callbackActivity;
 			visualization.callbackEdge = callbackEdge;
+			visualization.callbackStatistics = callbackStatistics;
+			visualization.populateStatistics();
 			doVisualization();
 			/*$.get('logs/log.xmlocel', function(data) {
 				let ocel = XmlOcelImporter.importLog(data);

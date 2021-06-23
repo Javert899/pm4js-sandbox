@@ -14,6 +14,7 @@ class OcdfgVisualization {
 		this.populateObjectTypes();
 		this.callbackActivity = null;
 		this.callbackEdge = null;
+		this.callbackStatistics = null;
 	}
 	
 	removeElements() {
@@ -38,12 +39,20 @@ class OcdfgVisualization {
 		this.expandedEdges = {};
 		this.model = this.original;
 		this.populateObjectTypes();
+		this.populateStatistics();
 	}
 	
 	setFilteredModel(model) {
 		this.model = model;
 		this.populateObjectTypes();
+		this.populateStatistics();
 		this.represent();
+	}
+	
+	populateStatistics() {
+		if (this.callbackStatistics != null) {
+			this.callbackStatistics(this.model.getNumEvents(), this.model.getNumUniqueObjects(), this.model.getNumTotalObjects());
+		}
 	}
 	
 	populateObjectTypes(target_select="objectTypes", target_select_2="flatteningOt") {

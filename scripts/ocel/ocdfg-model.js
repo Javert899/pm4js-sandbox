@@ -123,4 +123,20 @@ class OcdfgModel {
 	getRelObjEdge(edge, ot) {
 		return this.otEdges[ot].getRelObjEdge(edge);
 	}
+	
+	getNumEvents() {
+		return Object.keys(this.ocel["ocel:events"]).length;
+	}
+	
+	getNumUniqueObjects() {
+		return Object.keys(this.ocel["ocel:objects"]).length;
+	}
+	
+	getNumTotalObjects() {
+		let ret = 0;
+		for (let evId in this.ocel["ocel:events"]) {
+			ret+=this.ocel["ocel:events"][evId]["ocel:omap"].length;
+		}
+		return ret;
+	}
 }
