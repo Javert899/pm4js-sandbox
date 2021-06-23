@@ -69,7 +69,16 @@
 			}
 			
 			function filterObjectTypes() {
-			
+				let selectedOptions = [];
+				for (let option of document.getElementById("objectTypes").children) {
+					if (option.selected) {
+						selectedOptions.push(option.value);
+					}
+				}
+				console.log(selectedOptions);
+				let filteredModel = model.filterObjectTypes(selectedOptions);
+				console.log(filteredModel.ocel);
+				visualization.setFilteredModel(filteredModel);
 			}
 			
 			function filterRelatedObjectsActivity() {

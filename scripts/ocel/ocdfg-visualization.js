@@ -37,6 +37,13 @@ class OcdfgVisualization {
 		this.expandedActivities = {};
 		this.expandedEdges = {};
 		this.model = this.original;
+		this.populateObjectTypes();
+	}
+	
+	setFilteredModel(model) {
+		this.model = model;
+		this.populateObjectTypes();
+		this.represent();
 	}
 	
 	populateObjectTypes(target_select="objectTypes") {
