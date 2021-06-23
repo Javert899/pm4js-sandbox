@@ -11,6 +11,8 @@ class OcdfgVisualization {
 		this.MIN_EDGE_COUNT = 100000000000000;
 		this.MAX_EDGE_COUNT = 0;
 		this.IDX = 0;
+		this.expandedActivities = {};
+		this.expandedEdges = {};
 		this.resetVariables();
 		this.addListeners();
 	}
@@ -20,8 +22,6 @@ class OcdfgVisualization {
 	}
 	
 	resetVariables() {
-		this.expandedActivities = [];
-		this.expandedEdges = [];
 		this.activitiesIndipendent = {};
 		this.invActivitiesIndipendent = {};
 		this.activitiesDependent = {};
@@ -41,12 +41,22 @@ class OcdfgVisualization {
 			try {
 				if (cell.id in self.invActivitiesIndipendent) {
 					let act = self.invActivitiesIndipendent[cell.id];
-					self.expandedActivities.push(act);
+					if (!(act in self.expandedActivities)) {
+						self.expandedActivities[act] = 0;
+					}
+					else {
+						delete self.expandedActivities[act];
+					}
 					self.represent();
 				}
 				else if (cell.id in self.invGraphEdges) {
 					let edgeVect = self.invGraphEdges[cell.id];
-					self.expandedEdges.push(edgeVect);
+					if (!(edgeVect in self.expandedEdges)) {
+						self.expandedEdges[edgeVect] = 0;
+					}
+					else {
+						delete self.expandedEdges[edgeVect];
+					}
 					self.represent();
 				}
 			}
@@ -115,6 +125,18 @@ class OcdfgVisualization {
 				let activityObject = this.graph.insertVertex(parent, act, label, 150, 150, width, height, "fontSize=18;fillColor="+hex);
 				this.activitiesIndipendent[act] = activityObject;
 				this.invActivitiesIndipendent[activityObject.id] = act;
+				if (act in this.expandedActivities) {
+					for (let ot in this.model.otEventsView) {
+						let otView = this.model.otEventsView[ot];
+						if (act in otView.activities) {
+							if (otView.satisfy(act, this.IDX, minEdgeCount)) {
+								let color = this.stringToColour(ot);
+								let intermediateNode = this.graph.insertVertex(parent, act+" "+ot, otView.toCompleteString(act), 150, 150, 275, 250, "fontSize=13;fillColor="+color+";fontColor=white;shape=hexagon");
+								let arc1 = this.graph.insertEdge(parent, act+" "+ot+" -> "+act, "", intermediateNode, activityObject, "fontSize=16;strokeColor="+color+";fontColor="+color);
+							}
+						}
+					}
+				}
 			}
 		}
 		for (let ot in this.model.otEdges) {
