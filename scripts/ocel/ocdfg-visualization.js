@@ -59,6 +59,9 @@ class OcdfgVisualization {
 					}
 					self.represent();
 				}
+				else if (cell.id in self.invActivitiesDependent) {
+					let actOt = self.invActivitiesDependent[cell.id];
+				}
 			}
 			catch (err) {
 			}
@@ -133,6 +136,8 @@ class OcdfgVisualization {
 								let color = this.stringToColour(ot);
 								let intermediateNode = this.graph.insertVertex(parent, act+" "+ot, otView.toCompleteString(act), 150, 150, 275, 250, "fontSize=13;fillColor="+color+";fontColor=white;shape=hexagon");
 								let arc1 = this.graph.insertEdge(parent, act+" "+ot+" -> "+act, "", intermediateNode, activityObject, "fontSize=16;strokeColor="+color+";fontColor="+color);
+								this.activitiesDependent[[act, ot]] = intermediateNode;
+								this.invActivitiesDependent[intermediateNode.id] = [act, ot];
 							}
 						}
 					}
@@ -147,14 +152,20 @@ class OcdfgVisualization {
 					if (otEdges.satisfy(edge, this.IDX, minEdgeCount)) {
 						let value = otEdges.getValue(edge, this.IDX);
 						let edgeVect = [activities[0], activities[1], ot];
+						let color = this.stringToColour(ot);
+						let obj1 = this.activitiesIndipendent[activities[0]];
+						let obj2 = this.activitiesIndipendent[activities[1]];
 						if (edgeVect in this.expandedEdges) {
-							
+							let intermediateNode = this.graph.insertVertex(parent, "", otEdges.toCompleteString(edge), 150, 150, 275, 250, "fontSize=11;shape=doubleEllipse;fillColor="+color+";fontColor=white");
+							let arc1 = this.graph.insertEdge(parent, null, "", obj1, intermediateNode, "fontSize=16;strokeColor="+color+";fontColor="+color);
+							let arc2 = this.graph.insertEdge(parent, null, "", intermediateNode, obj2, "fontSize=16;strokeColor="+color+";fontColor="+color);
+							this.graphEdges[edgeVect] = intermediateNode;
+							this.invGraphEdges[intermediateNode.id] = edgeVect;
 						}
 						else {
 							let penwidth = Math.floor(1 + Math.log(1 + value)/2);
 							let label = otEdges.toReducedString(edge, this.IDX);
-							let color = this.stringToColour(ot);
-							let arc = this.graph.insertEdge(parent, edgeVect.toString(), label, this.activitiesIndipendent[activities[0]], this.activitiesIndipendent[activities[1]], "fontSize=16;strokeWidth="+penwidth+";strokeColor="+color+";fontColor="+color);
+							let arc = this.graph.insertEdge(parent, edgeVect.toString(), label, obj1, obj2, "fontSize=16;strokeWidth="+penwidth+";strokeColor="+color+";fontColor="+color);
 							this.graphEdges[edgeVect] = arc;
 							this.invGraphEdges[arc.id] = edgeVect;
 						}

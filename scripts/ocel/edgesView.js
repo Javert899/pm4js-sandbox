@@ -62,7 +62,7 @@ class EdgesView {
 	
 	toReducedString(actCouple, idx) {
 		if (idx == 0) {
-			return "E="+this.edgesStatistics[actCouple]["events"];
+			return "EC="+this.edgesStatistics[actCouple]["events"];
 		}
 		else if (idx == 1) {
 			return "UO="+this.edgesStatistics[actCouple]["unique_objects"];
@@ -74,7 +74,7 @@ class EdgesView {
 	}
 	
 	toCompleteString(actCouple) {
-		let ret = actCouple+"\n";
+		let ret = actCouple.split(",")[0]+"->\n"+actCouple.split(",")[1]+"\n";
 		ret += "(" + this.objectsView.objectType+")\n";
 		ret += "event couples = "+this.edgesStatistics[actCouple]["events"]+"\n";
 		ret += "unique objects = "+this.edgesStatistics[actCouple]["unique_objects"]+"\n";
