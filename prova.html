@@ -47,8 +47,7 @@
 		<div id="graphContainer">
 		</div>
 		<script type="text/javascript">
-			let model = new OcdfgModel(eventLog);
-			let visualization = new OcdfgVisualization(model, "graphContainer");
+			let visualization = new OcdfgVisualization(new OcdfgModel(eventLog), "graphContainer");
 			let selectedActivity = null;
 			let selectedOt = null;
 			let selectedEdge = null;
@@ -75,14 +74,14 @@
 						selectedOptions.push(option.value);
 					}
 				}
-				console.log(selectedOptions);
-				let filteredModel = model.filterObjectTypes(selectedOptions);
-				console.log(filteredModel.ocel);
+				let filteredModel = visualization.model.filterObjectTypes(selectedOptions);
 				visualization.setFilteredModel(filteredModel);
 			}
 			
 			function filterRelatedObjectsActivity() {
-			
+				let relObj = visualization.model.getRelObjActivity(selectedActivity, selectedOt);
+				let filteredModel = visualization.model.filterRelatedObjects(relObj);
+				visualization.setFilteredModel(filteredModel);
 			}
 			
 			function filterNonRelatedObjectsActivity() {
@@ -98,11 +97,14 @@
 			}
 			
 			function seeRelatedObjAct() {
-			
+				let relObj = visualization.model.getRelObjActivity(selectedActivity, selectedOt);
+				alert(relObj.toString());
 			}
 			
 			function filterRelatedObjectsEdge() {
-			
+				let relObj = visualization.model.getRelObjEdge([selectedEdge[0], selectedEdge[1]], selectedEdge[2]);
+				let filteredModel = visualization.model.filterRelatedObjects(relObj);
+				visualization.setFilteredModel(filteredModel);
 			}
 			
 			function filterNonRelatedObjectsEdge() {
@@ -110,7 +112,8 @@
 			}
 			
 			function seeRelatedObjEdge() {
-			
+				let relObj = visualization.model.getRelObjEdge([selectedEdge[0], selectedEdge[1]], selectedEdge[2]);
+				alert(relObj.toString());
 			}
 			
 			function callbackActivity(activity, ot) {

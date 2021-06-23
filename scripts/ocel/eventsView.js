@@ -123,4 +123,15 @@ class EventsView {
 		}
 		return ret;
 	}
+	
+	getRelObjActivity(acti) {
+		let relObj = {};
+		for (let evId in this.activities[acti]) {
+			let eve = this.ocel["ocel:events"][evId];
+			for (let obj of eve["ocel:omap"]) {
+				relObj[obj] = 0;
+			}
+		}
+		return Object.keys(relObj);
+	}
 }

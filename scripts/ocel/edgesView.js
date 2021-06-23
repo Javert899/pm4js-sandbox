@@ -83,4 +83,8 @@ class EdgesView {
 		ret += "perc target = "+this.edgesStatistics[actCouple]["perc_target"]+"\n";
 		return ret;
 	}
+	
+	getRelObjEdge(actCouple) {
+		return Object.keys(this.edgesRealizationsObjects[actCouple]);
+	}
 }

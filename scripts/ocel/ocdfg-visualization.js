@@ -50,9 +50,7 @@ class OcdfgVisualization {
 		try {
 			let objectTypes = document.getElementById(target_select);
 			objectTypes.innerHTML = "";
-			console.log(objectTypes);
 			for (let ot of this.model.ocel["ocel:global-log"]["ocel:object-types"]) {
-				console.log(ot);
 				let opt = document.createElement("option");
 				opt.innerHTML = ot;
 				opt.value = ot;
