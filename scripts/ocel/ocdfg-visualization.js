@@ -1,7 +1,8 @@
 class OcdfgVisualization {
-	constructor(model, graph) {
+	constructor(model, targetContainer) {
 		this.model = model;
-		this.graph = graph;
+		document.getElementById(targetContainer).innerHTML = "";
+		this.graph = new mxGraph(document.getElementById(targetContainer));
 		this.original = this;
 		this.ACTIVITY_FREQUENCY = 0.2;
 		this.PATHS_FREQUENCY = 0.2
@@ -10,6 +11,15 @@ class OcdfgVisualization {
 		this.MIN_EDGE_COUNT = 100000000000000;
 		this.MAX_EDGE_COUNT = 0;
 		this.IDX = 0;
+		this.resetVariables();
+		this.addListeners();
+	}
+	
+	removeElements() {
+		this.graph.removeCells(this.graph.getChildVertices(this.graph.getDefaultParent()));
+	}
+	
+	resetVariables() {
 		this.expandedActivities = [];
 		this.expandedEdges = [];
 		this.activitiesIndipendent = {};
@@ -22,19 +32,39 @@ class OcdfgVisualization {
 		this.invSaNodes = {};
 		this.eaNodes = {};
 		this.invEaNodes = {};
-		this.calculatePre(0);
 	}
 	
-	calculatePre(idx) {
+	addListeners() {
+		var self = this;
+		this.graph.addListener(mxEvent.CLICK, function (sender, evt) {
+			var cell = evt.getProperty("cell");
+			try {
+				if (cell.id in self.invActivitiesIndipendent) {
+					let act = self.invActivitiesIndipendent[cell.id];
+					self.expandedActivities.push(act);
+					self.represent();
+				}
+				else if (cell.id in self.invGraphEdges) {
+					let edgeVect = self.invGraphEdges[cell.id];
+					self.expandedEdges.push(edgeVect);
+					self.represent();
+				}
+			}
+			catch (err) {
+			}
+		});
+	}
+	
+	calculatePre() {
 		for (let act in this.model.overallEventsView.activitiesCounters) {
-			let act_count = this.model.overallEventsView.getValue(act, idx);
+			let act_count = this.model.overallEventsView.getValue(act, this.IDX);
 			this.MIN_INDIPENDENT_ACT_COUNT = Math.min(this.MIN_INDIPENDENT_ACT_COUNT, act_count);
 			this.MAX_INDIPENDENT_ACT_COUNT = Math.max(this.MAX_INDIPENDENT_ACT_COUNT, act_count);
 		}
 		for (let ot in this.model.otEdges) {
 			let ev = this.model.otEdges[ot];
 			for (let edge in ev.edgesStatistics) {
-				let edge_count = ev.getValue(edge, idx);
+				let edge_count = ev.getValue(edge, this.IDX);
 				this.MIN_EDGE_COUNT = Math.min(this.MIN_EDGE_COUNT, edge_count);
 				this.MAX_EDGE_COUNT = Math.max(this.MAX_EDGE_COUNT, edge_count);
 			}
@@ -55,12 +85,17 @@ class OcdfgVisualization {
 	}
 	
 	represent(af = null, pf = null) {
+		this.resetVariables();
+		this.removeElements();
+		this.calculatePre();
 		if (af == null) {
 			af = this.ACTIVITY_FREQUENCY;
 		}
 		if (pf == null) {
 			pf = this.PATHS_FREQUENCY;
 		}
+		this.ACTIVITY_FREQUENCY = af;
+		this.PATHS_FREQUENCY = pf;
 		let minActiCount = (1 - af) * this.MAX_INDIPENDENT_ACT_COUNT;
 		let minEdgeCount = (1 - pf) * this.MAX_EDGE_COUNT;
 		var parent = this.graph.getDefaultParent();
@@ -110,31 +145,31 @@ class OcdfgVisualization {
 			let otObjects = this.model.otObjectsView[ot];
 			let otSa = otObjects.filteredSa(minEdgeCount, this.activitiesIndipendent);
 			if (Object.keys(otSa).length > 0) {
-				let saNode = graph.insertVertex(this.parent, "SA_"+ot, ot, 150, 150, 275, 60, "shape=ellipse;fontColor=white;fillColor="+color);
+				let saNode = this.graph.insertVertex(this.parent, "SA_"+ot, ot, 150, 150, 275, 60, "shape=ellipse;fontColor=white;fillColor="+color);
 				this.saNodes[ot] = saNode;
 				this.invSaNodes[saNode.id] = ot;
 				for (let act in otSa) {
 					let value = otSa[act];
 					let penwidth = Math.floor(1 + Math.log(1 + value)/2);
-					let arc = graph.insertEdge(parent, null, "UO="+value, saNode, this.activitiesIndipendent[act], "fontSize=16;strokeColor="+color+";fontColor="+color+";strokeWidth="+penwidth);
+					let arc = this.graph.insertEdge(parent, null, "UO="+value, saNode, this.activitiesIndipendent[act], "fontSize=16;strokeColor="+color+";fontColor="+color+";strokeWidth="+penwidth);
 				}
 			}
 			let otEa = otObjects.filteredEa(minEdgeCount, this.activitiesIndipendent);
 			if (Object.keys(otEa).length > 0) {
-				let eaNode = graph.insertVertex(this.parent, "EA_"+ot, "", 150, 150, 60, 60, "shape=ellipse;fillColor="+color);
+				let eaNode = this.graph.insertVertex(this.parent, "EA_"+ot, "", 150, 150, 60, 60, "shape=ellipse;fillColor="+color);
 				this.eaNodes[ot] = eaNode;
 				this.invEaNodes[eaNode.id] = ot;
 				for (let act in otEa) {
 					let value = otEa[act];
 					let penwidth = Math.floor(1 + Math.log(1 + value)/2);
-					let arc = graph.insertEdge(parent, null, "UO="+value, this.activitiesIndipendent[act], eaNode, "fontSize=16;strokeColor="+color+";fontColor="+color+";strokeWidth="+penwidth);
+					let arc = this.graph.insertEdge(parent, null, "UO="+value, this.activitiesIndipendent[act], eaNode, "fontSize=16;strokeColor="+color+";fontColor="+color+";strokeWidth="+penwidth);
 				}
 			}
 		}
-		var layout = new mxHierarchicalLayout(graph, mxConstants.DIRECTION_WEST);
-		graph.getModel().beginUpdate();
+		
+		var layout = new mxHierarchicalLayout(this.graph, mxConstants.DIRECTION_WEST);
+		this.graph.getModel().beginUpdate();
 		layout.execute(parent);
-		graph.getModel().endUpdate();
-		console.log("end representation");
+		this.graph.getModel().endUpdate();
 	}
 }

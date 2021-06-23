@@ -22,7 +22,6 @@
 		<div id="graphContainer">
 		</div>
 		<script type="text/javascript">
-			var graph = new mxGraph(document.getElementById("graphContainer"));
 			//function update(stru) {
 			//	var parent = graph.getDefaultParent();
 			//	graph.getModel().beginUpdate();
@@ -32,7 +31,7 @@
 			//}
 			model = new OcdfgModel(eventLog);
 			console.log(model.ocel);
-			visualization = new OcdfgVisualization(model, graph);
+			visualization = new OcdfgVisualization(model, "graphContainer");
 			visualization.represent(0.7, 0.7);
 			
 			/*$.get('logs/log.xmlocel', function(data) {
