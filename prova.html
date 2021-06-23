@@ -32,13 +32,26 @@
 			<button id="reset_filters" onclick="resetFilters()">Reset Filters</button>
 			Select the object types: <select id="objectTypes" multiple style="height: 40px">
 			</select>
-			<button id="filterObjectTypes">Filter on Obj Types</button><br />
+			<button id="filterObjectTypes" onclick="filterObjectTypes()">Filter on Obj Types</button><br />
+			Selected activity: <span id="selectedActivity"></span>
+			<button id="filterRelatedObjectsActivity" onclick="filterRelatedObjectsActivity()" disabled>Filter Rel.Obj</button>
+			<button id="filterNonRelatedObjectsActivity" onclick="filterNonRelatedObjectsActivity()" disabled>Filter Non Rel.Obj</button>
+			<button id="filterNonStartingWith" onclick="filterNonStartingWith()" disabled>Filter Non Starting With</button>
+			<button id="filterNonEndingWith" onclick="filterNonEndingWith()" disabled>Filter Non Ending With</button>
+			<button id="seeRelatedObjAct" onclick="seeRelatedObjAct()" disabled>See Rel.Obj.</button><br />
+			Selected edge: <span id="selectedEdge"></span>
+			<button id="filterRelatedObjectsEdge" onclick="filterRelatedObjectsEdge()" disabled>Filter Rel.Obj</button>
+			<button id="filterNonRelatedObjectsEdge" onclick="filterNonRelatedObjectsEdge()" disabled>Filter Non Rel.Obj</button>
+			<button id="seeRelatedObjEdge" onclick="seeRelatedObjEdge()" disabled>See Rel.Obj. Edge</button><br />
 		</div>
 		<div id="graphContainer">
 		</div>
 		<script type="text/javascript">
 			let model = new OcdfgModel(eventLog);
 			let visualization = new OcdfgVisualization(model, "graphContainer");
+			let selectedActivity = null;
+			let selectedOt = null;
+			let selectedEdge = null;
 			
 			function doVisualization() {
 				let af = document.getElementById("af_slider").value / 100.0;
@@ -55,9 +68,74 @@
 				doVisualization();
 			}
 			
-			doVisualization();
-			visualization.populateObjectTypes();
+			function filterObjectTypes() {
 			
+			}
+			
+			function filterRelatedObjectsActivity() {
+			
+			}
+			
+			function filterNonRelatedObjectsActivity() {
+			
+			}
+			
+			function filterNonStartingWith() {
+			
+			}
+			
+			function filterNonEndingWith() {
+			
+			}
+			
+			function seeRelatedObjAct() {
+			
+			}
+			
+			function filterRelatedObjectsEdge() {
+			
+			}
+			
+			function filterNonRelatedObjectsEdge() {
+			
+			}
+			
+			function seeRelatedObjEdge() {
+			
+			}
+			
+			function callbackActivity(activity, ot) {
+				selectedActivity = activity;
+				selectedOt = ot;
+				if (selectedActivity != null) {
+					document.getElementById("filterRelatedObjectsActivity").disabled = false;
+					document.getElementById("seeRelatedObjAct").disabled = false;
+					if (selectedOt != null) {
+						document.getElementById("selectedActivity").innerHTML = selectedActivity+" ("+selectedOt+")";
+						document.getElementById("filterNonRelatedObjectsActivity").disabled = false;
+						document.getElementById("filterNonStartingWith").disabled = false;
+						document.getElementById("filterNonEndingWith").disabled = false;
+					}
+					else {
+						document.getElementById("selectedActivity").innerHTML = selectedActivity;
+						document.getElementById("filterNonRelatedObjectsActivity").disabled = true;
+						document.getElementById("filterNonStartingWith").disabled = true;
+						document.getElementById("filterNonEndingWith").disabled = true;
+					}
+				}
+			}
+			
+			function callbackEdge(edge) {
+				selectedEdge = edge;
+				document.getElementById("selectedEdge").innerHTML = selectedEdge.toString();
+				document.getElementById("filterRelatedObjectsEdge").disabled = false;
+				document.getElementById("filterNonRelatedObjectsEdge").disabled = false;
+				document.getElementById("seeRelatedObjEdge").disabled = false;
+			}
+			
+			visualization.callbackActivity = callbackActivity;
+			visualization.callbackEdge = callbackEdge;
+			doVisualization();
 			/*$.get('logs/log.xmlocel', function(data) {
 				let ocel = XmlOcelImporter.importLog(data);
 				console.log(ocel);

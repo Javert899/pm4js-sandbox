@@ -11,6 +11,9 @@ class OcdfgVisualization {
 		this.expandedEdges = {};
 		this.resetVariables();
 		this.addListeners();
+		this.populateObjectTypes();
+		this.callbackActivity = null;
+		this.callbackEdge = null;
 	}
 	
 	removeElements() {
@@ -68,6 +71,9 @@ class OcdfgVisualization {
 					else {
 						delete self.expandedActivities[act];
 					}
+					if (self.callbackActivity != null) {
+						self.callbackActivity(act, null);
+					}
 					self.represent();
 				}
 				else if (cell.id in self.invGraphEdges) {
@@ -78,10 +84,16 @@ class OcdfgVisualization {
 					else {
 						delete self.expandedEdges[edgeVect];
 					}
+					if (self.callbackEdge != null) {
+						self.callbackEdge(edgeVect);
+					}
 					self.represent();
 				}
 				else if (cell.id in self.invActivitiesDependent) {
 					let actOt = self.invActivitiesDependent[cell.id];
+					if (self.callbackActivity != null) {
+						self.callbackActivity(actOt[0], actOt[1]);
+					}
 				}
 			}
 			catch (err) {
