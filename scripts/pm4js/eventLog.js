@@ -21,7 +21,7 @@ class Event {
 	}
 }
 
-class Global {
+class LogGlobal {
 	constructor() {
 		this.attributes = {};
 	}
@@ -36,7 +36,7 @@ class Attribute {
 
 
 try {
-	module.exports = {EventLog: EventLog, Trace: Trace, Event: Event, Global: Global, Attribute: Attribute};	
+	module.exports = {EventLog: EventLog, Trace: Trace, Event: Event, LogGlobal: LogGlobal, Attribute: Attribute};	
 }
 catch (err) {
 	// not in node

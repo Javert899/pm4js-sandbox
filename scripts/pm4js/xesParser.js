@@ -1,6 +1,8 @@
 class XesParser {
-	static parse(xmlString) {
-		var parser = new DOMParser();
+	static parse(xmlString, parser=null) {
+		if (parser == null) {
+			parser = new DOMParser();
+		}
 		var xmlDoc = parser.parseFromString(xmlString, "text/xml");
 		let xmlLog = xmlDoc.getElementsByTagName("log")[0];
 		let eventLog = new EventLog();
@@ -9,7 +11,8 @@ class XesParser {
 	}
 	
 	static parseXmlObj(xmlObj, target) {
-		for (let child of xmlObj.children) {
+		for (let childId in xmlObj.childNodes) {
+			let child = xmlObj.childNodes[childId];
 			if (child.tagName == "string") {
 				let xmlAttr = new Attribute(child.getAttribute("value"));
 				target.attributes[child.getAttribute("key")] = xmlAttr;
@@ -39,7 +42,7 @@ class XesParser {
 				target.extensions[child.getAttribute("name")] = [child.getAttribute("prefix"), child.getAttribute("uri")];
 			}
 			else if (child.tagName == "global") {
-				let targetObj = new Global();
+				let targetObj = new LogGlobal();
 				target.globals[child.getAttribute("scope")] = targetObj;
 				XesParser.parseXmlObj(child, targetObj);
 			}
