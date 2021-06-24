@@ -41,6 +41,10 @@
 			</select>
 			<button id="flattenEventLog" onclick="flattenEventLog()">Flatten (XES)</button>
 			<br />
+			N. Events: <span id="numEvents">0</span>
+			N. Uniq. Objects: <span id="numUniqObjects">0</span>
+			N. Total Objects: <span id="numTotalObjects">0</span>
+			<br />
 			Selected activity: <span id="selectedActivity"></span>
 			<button id="filterRelatedObjectsActivity" onclick="filterRelatedObjectsActivity()" disabled>Filter Rel.Obj</button>
 			<button id="filterNonRelatedObjectsActivity" onclick="filterNonRelatedObjectsActivity()" disabled>Filter Non Rel.Obj</button>
@@ -171,9 +175,9 @@
 			}
 			
 			function callbackStatistics(events, uo, to) {
-				console.log(events);
-				console.log(uo);
-				console.log(to);
+				document.getElementById("numEvents").innerHTML = events;
+				document.getElementById("numUniqObjects").innerHTML = uo;
+				document.getElementById("numTotalObjects").innerHTML = to;
 			}
 			
 			visualization.callbackActivity = callbackActivity;
