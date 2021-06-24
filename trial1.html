@@ -1,0 +1,22 @@
+<html>
+	<head>
+		<script src="scripts/generic/jquery.min.js"></script>
+		<script src="scripts/pm4js/eventLog.js"></script>
+		<script src="scripts/pm4js/log-statistics.js"></script>
+		<script src="scripts/generic/csv.js"></script>
+	</head>
+	<body>
+		<script type="text/javascript">
+			$.get("/logs/receipt.csv", function(data) {
+				let aa = new Date();
+				let eventLog = CSVManager.CSVtoEventLog(data);
+				let bb = new Date();
+				console.log(bb.getTime() - aa.getTime());
+				console.log(eventLog);
+				console.log(LogStatistics.getEndActivities(eventLog));
+				let csvStri = CSVManager.EventLogToCSVstring(eventLog);
+				console.log(csvStri);
+			});
+		</script>
+	</body>
+</html>

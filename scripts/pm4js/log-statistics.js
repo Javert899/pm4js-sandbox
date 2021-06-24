@@ -69,4 +69,26 @@ class LogStatistics {
 		}
 		return ret;
 	}
+	
+	static getEventAttributesList(log) {
+		let ret = {};
+		for (let trace of log.traces) {
+			for (let eve of trace.events) {
+				for (let attr in eve.attributes) {
+					ret[attr] = 0;
+				}
+			}
+		}
+		return Object.keys(ret);
+	}
+	
+	static getCaseAttributesList(log) {
+		let ret = {};
+		for (let trace of log.traces) {
+			for (let attr in trace.attributes) {
+				ret[attr] = 0;
+			}
+		}
+		return Object.keys(ret);
+	}
 }
