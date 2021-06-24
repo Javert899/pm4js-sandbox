@@ -30,19 +30,6 @@
 		<script src="scripts/pm4js/eventLog.js"></script>
 		<div id="mainApplication">
 			<div id="header">
-				Annotation:
-				<select id="annotationSelector">
-					<option id="events" value="0">Events</option>
-					<option id="unique_objects" value="1" selected>Unique Objects</option>
-					<option id="total_objects" value="2">Total Objects</option>
-				</select>
-				% act.: <input id="af_slider" type="range" min="0" max="100" value="70" class="slider">
-				% paths: <input id="pf_slider" type="range" min="0" max="100" value="70" class="slider">
-				<button id="apply_changes" onclick="doVisualization()">Apply Changes</button>
-				<button id="reset_filters" onclick="resetFilters()">Reset Filters</button><br />
-				Select the object types: <select id="objectTypes" multiple style="height: 40px">
-				</select>
-				<button id="filterObjectTypes" onclick="filterObjectTypes()">Filter on Obj Types</button>
 				<button id="downloadJsonOcel" onclick="downloadJsonOcel()">Download JSON Ocel</button>
 				<button id="downloadXmlOcel" onclick="downloadXmlOcel()">Download XML Ocel</button>
 				Flattening OT: <select id="flatteningOt">
@@ -55,6 +42,16 @@
 			</div>
 			<div id="processModelPage" style="display: ">
 				<div id="header2">
+					Annotation:
+					<select id="annotationSelector">
+						<option id="events" value="0">Events</option>
+						<option id="unique_objects" value="1" selected>Unique Objects</option>
+						<option id="total_objects" value="2">Total Objects</option>
+					</select>
+					% act.: <input id="af_slider" type="range" min="0" max="100" value="70" class="slider">
+					% paths: <input id="pf_slider" type="range" min="0" max="100" value="70" class="slider">
+					<button id="apply_changes" onclick="doVisualization()">Apply Changes</button>
+					<button id="reset_filters" onclick="resetFilters()">Reset Filters</button><br />
 					Selected activity: <span id="selectedActivity"></span>
 					<button id="filterRelatedObjectsActivity" onclick="filterRelatedObjectsActivity()" disabled>Filter Rel.Obj</button>
 					<button id="filterNonRelatedObjectsActivity" onclick="filterNonRelatedObjectsActivity()" disabled>Filter Non Rel.Obj</button>
@@ -64,7 +61,10 @@
 					Selected edge: <span id="selectedEdge"></span>
 					<button id="filterRelatedObjectsEdge" onclick="filterRelatedObjectsEdge()" disabled>Filter Rel.Obj</button>
 					<button id="filterNonRelatedObjectsEdge" onclick="filterNonRelatedObjectsEdge()" disabled>Filter Non Rel.Obj</button>
-					<button id="seeRelatedObjEdge" onclick="seeRelatedObjEdge()" disabled>See Rel.Obj. Edge</button><br />
+					<button id="seeRelatedObjEdge" onclick="seeRelatedObjEdge()" disabled>See Rel.Obj. Edge</button>
+					Select the object types: <select id="objectTypes" multiple style="height: 40px">
+					</select>
+					<button id="filterObjectTypes" onclick="filterObjectTypes()">Filter on Obj Types</button>
 				</div>
 				<div id="graphContainer">
 				</div>
