@@ -2,7 +2,6 @@
 	<head>
 		<script src="scripts/generic/jquery.min.js"></script>
 		<script src="scripts/generic/download-utility.js"></script>
-		<script src="scripts/pm4js/eventLog.js"></script>
 		<script src="scripts/pm4js/xesParser.js"></script>
 		<script src="scripts/pm4js/xesExporter.js"></script>
 		<script src="scripts/pm4js/log-statistics.js"></script>
@@ -21,219 +20,195 @@
 		<script src="scripts/ocel/ocel-flattening.js"></script>
 	</head>
 	<body>
-		<div id="header">
-			Annotation:
-			<select id="annotationSelector">
-				<option id="events" value="0">Events</option>
-				<option id="unique_objects" value="1" selected>Unique Objects</option>
-				<option id="total_objects" value="2">Total Objects</option>
-			</select>
-			% act.: <input id="af_slider" type="range" min="0" max="100" value="70" class="slider">
-			% paths: <input id="pf_slider" type="range" min="0" max="100" value="70" class="slider">
-			<button id="apply_changes" onclick="doVisualization()">Apply Changes</button>
-			<button id="reset_filters" onclick="resetFilters()">Reset Filters</button><br />
-			Select the object types: <select id="objectTypes" multiple style="height: 40px">
-			</select>
-			<button id="filterObjectTypes" onclick="filterObjectTypes()">Filter on Obj Types</button>
-			<button id="downloadJsonOcel" onclick="downloadJsonOcel()">Download JSON Ocel</button>
-			<button id="downloadXmlOcel" onclick="downloadXmlOcel()">Download XML Ocel</button>
-			Flattening OT: <select id="flatteningOt">
-			</select>
-			<button id="flattenEventLog" onclick="flattenEventLog()">Flatten (XES)</button>
-			<br />
-			N. Events: <span id="numEvents">0</span>
-			N. Uniq. Objects: <span id="numUniqObjects">0</span>
-			N. Total Objects: <span id="numTotalObjects">0</span>
-			<br />
-			Selected activity: <span id="selectedActivity"></span>
-			<button id="filterRelatedObjectsActivity" onclick="filterRelatedObjectsActivity()" disabled>Filter Rel.Obj</button>
-			<button id="filterNonRelatedObjectsActivity" onclick="filterNonRelatedObjectsActivity()" disabled>Filter Non Rel.Obj</button>
-			<button id="filterNonStartingWith" onclick="filterNonStartingWith()" disabled>Filter Non Starting With</button>
-			<button id="filterNonEndingWith" onclick="filterNonEndingWith()" disabled>Filter Non Ending With</button>
-			<button id="seeRelatedObjAct" onclick="seeRelatedObjAct()" disabled>See Rel.Obj.</button><br />
-			Selected edge: <span id="selectedEdge"></span>
-			<button id="filterRelatedObjectsEdge" onclick="filterRelatedObjectsEdge()" disabled>Filter Rel.Obj</button>
-			<button id="filterNonRelatedObjectsEdge" onclick="filterNonRelatedObjectsEdge()" disabled>Filter Non Rel.Obj</button>
-			<button id="seeRelatedObjEdge" onclick="seeRelatedObjEdge()" disabled>See Rel.Obj. Edge</button><br />
-		</div>
-		<div id="graphContainer">
-		</div>
 		<script type="text/javascript">
-			let visualization = new OcdfgVisualization(new OcdfgModel(eventLog), "graphContainer");
 			let selectedActivity = null;
 			let selectedOt = null;
 			let selectedEdge = null;
-			
-			function doVisualization() {
-				let af = document.getElementById("af_slider").value / 100.0;
-				let pf = document.getElementById("pf_slider").value / 100.0;
-				let annotation = parseInt(document.getElementById("annotationSelector").value);
-				visualization.ACTIVITY_FREQUENCY = af;
-				visualization.PATHS_FREQUENCY = pf;
-				visualization.IDX = annotation;
-				visualization.represent();
-			}
-			
-			function resetFilters() {
-				visualization.resetFilters();
-				doVisualization();
-			}
-			
-			function downloadJsonOcel() {
-				let jsonStri = JsonOcelExporter.exportLog(visualization.model.ocel);
-				download(jsonStri, "obj-centr-log.jsonocel", "text/json");
-			}
-			
-			function downloadXmlOcel() {
-				let xmlStri = XmlOcelExporter.exportLog(visualization.model.ocel);
-				download(xmlStri, "obj-centr-log.xmlocel", "text/xml");
-			}
-			
-			function flattenEventLog() {
-				let ot = document.getElementById("flatteningOt").value;
-				let eventLog = OcelFlattening.flatten(visualization.model.ocel, ot);
-				let xmlStri = XesExporter.exportLog(eventLog);
-				download(xmlStri, "flattened.xes", "text/xml");
-			}
-			
-			function filterObjectTypes() {
-				let selectedOptions = [];
-				for (let option of document.getElementById("objectTypes").children) {
-					if (option.selected) {
-						selectedOptions.push(option.value);
-					}
-				}
-				let filteredModel = visualization.model.filterObjectTypes(selectedOptions);
-				visualization.setFilteredModel(filteredModel);
-			}
-			
-			function filterRelatedObjectsActivity() {
-				let relObj = visualization.model.getRelObjActivity(selectedActivity, selectedOt);
-				let filteredModel = visualization.model.filterRelatedObjects(relObj);
-				visualization.setFilteredModel(filteredModel);
-			}
-			
-			function filterNonRelatedObjectsActivity() {
-				let relObj = visualization.model.getRelObjActivity(selectedActivity, selectedOt);
-				let allObjOt = Object.keys(visualization.model.otObjectsView[selectedOt].objectsIds);
-				let difference = allObjOt.filter(x => !relObj.includes(x));
-				let filteredModel = visualization.model.filterNonRelatedObjects(difference, relObj);
-				visualization.setFilteredModel(filteredModel);
-			}
-			
-			function filterNonStartingWith() {
-				let startingWith = visualization.model.otObjectsView[selectedOt].getStartingWith(selectedActivity);
-				let allObjOt = Object.keys(visualization.model.otObjectsView[selectedOt].objectsIds);
-				let difference = allObjOt.filter(x => !startingWith.includes(x));
-				let filteredModel = visualization.model.filterNonRelatedObjects(difference, startingWith);
-				visualization.setFilteredModel(filteredModel);
-			}
-			
-			function filterNonEndingWith() {
-				let endingWith = visualization.model.otObjectsView[selectedOt].getEndingWith(selectedActivity);
-				let allObjOt = Object.keys(visualization.model.otObjectsView[selectedOt].objectsIds);
-				let difference = allObjOt.filter(x => !endingWith.includes(x));
-				let filteredModel = visualization.model.filterNonRelatedObjects(difference, endingWith);
-				visualization.setFilteredModel(filteredModel);
-			}
-			
-			function seeRelatedObjAct() {
-				let relObj = visualization.model.getRelObjActivity(selectedActivity, selectedOt);
-				alert(relObj.toString());
-			}
-			
-			function filterRelatedObjectsEdge() {
-				let relObj = visualization.model.getRelObjEdge([selectedEdge[0], selectedEdge[1]], selectedEdge[2]);
-				let filteredModel = visualization.model.filterRelatedObjects(relObj);
-				visualization.setFilteredModel(filteredModel);
-			}
-			
-			function filterNonRelatedObjectsEdge() {
-				let relObj = visualization.model.getRelObjEdge([selectedEdge[0], selectedEdge[1]], selectedEdge[2]);
-				let allObjOt = Object.keys(visualization.model.otObjectsView[selectedEdge[2]].objectsIds);
-				let difference = allObjOt.filter(x => !relObj.includes(x));
-				let filteredModel = visualization.model.filterNonRelatedObjects(difference, relObj);
-				visualization.setFilteredModel(filteredModel);
-			}
-			
-			function seeRelatedObjEdge() {
-				let relObj = visualization.model.getRelObjEdge([selectedEdge[0], selectedEdge[1]], selectedEdge[2]);
-				alert(relObj.toString());
-			}
-			
-			function callbackActivity(activity, ot) {
-				selectedActivity = activity;
-				selectedOt = ot;
-				if (selectedActivity != null) {
-					document.getElementById("filterRelatedObjectsActivity").disabled = false;
-					document.getElementById("seeRelatedObjAct").disabled = false;
-					if (selectedOt != null) {
-						document.getElementById("selectedActivity").innerHTML = selectedActivity+" ("+selectedOt+")";
-						document.getElementById("filterNonRelatedObjectsActivity").disabled = false;
-						document.getElementById("filterNonStartingWith").disabled = false;
-						document.getElementById("filterNonEndingWith").disabled = false;
-					}
-					else {
-						document.getElementById("selectedActivity").innerHTML = selectedActivity;
-						document.getElementById("filterNonRelatedObjectsActivity").disabled = true;
-						document.getElementById("filterNonStartingWith").disabled = true;
-						document.getElementById("filterNonEndingWith").disabled = true;
-					}
-				}
-			}
-			
-			function callbackEdge(edge) {
-				selectedEdge = edge;
-				document.getElementById("selectedEdge").innerHTML = selectedEdge.toString();
-				document.getElementById("filterRelatedObjectsEdge").disabled = false;
-				document.getElementById("filterNonRelatedObjectsEdge").disabled = false;
-				document.getElementById("seeRelatedObjEdge").disabled = false;
-			}
-			
-			function callbackStatistics(events, uo, to) {
-				document.getElementById("numEvents").innerHTML = events;
-				document.getElementById("numUniqObjects").innerHTML = uo;
-				document.getElementById("numTotalObjects").innerHTML = to;
-			}
-			
-			visualization.callbackActivity = callbackActivity;
-			visualization.callbackEdge = callbackEdge;
-			visualization.callbackStatistics = callbackStatistics;
-			visualization.populateStatistics();
-			doVisualization();
-			/*$.get('logs/log.xmlocel', function(data) {
-				let ocel = XmlOcelImporter.importLog(data);
-				console.log(ocel);
-				let log = OcelFlattening.flatten(ocel, "DOCTYPE_Order");
-				console.log(log);
-			});*/
-			
-			//let xmlStri = XmlOcelExporter.exportLog(model.ocel);
-			//download(xmlStri, "prova.xmlocel", "text/xml");
-			
-
-			//console.log(xmlStri);
-			//console.log(new Date().getTime());
-			//let log = null;
-			//$.get('logs/receipt.xes', function(data) {
-			//	console.log("parsing");
-			//	log = XesParser.parse(data);
-			//	console.log(log);
-			//	let aa = (new Date()).getTime();
-			//	let sa = LogStatistics.getStartActivities(log);
-			//	let ea = LogStatistics.getEndActivities(log);
-			//	let att = LogStatistics.getAttributeValues(log, "concept:name");
-			//	let vars = LogStatistics.getVariants(log);
-			//	let bb = (new Date()).getTime();
-			//	let aa = (new Date()).getTime();
-			//	let dfg = new Dfg(log);
-				//let fdfg = dfg.calculateFrequencyDfg();
-			//	let pdfg = dfg.calculatePerformanceDfg();
-			//	let bb = (new Date()).getTime();
-			//	console.log((bb-aa)/1000.0);
-			//	console.log(pdfg);
-				//console.log(pdfg);
-			//});
+			let visualization = null;
+			let eventLog = null;
 		</script>
+		<script src="scripts/pm4js/eventLog.js"></script>
+		<div id="mainApplication">
+			<div id="header">
+				Annotation:
+				<select id="annotationSelector">
+					<option id="events" value="0">Events</option>
+					<option id="unique_objects" value="1" selected>Unique Objects</option>
+					<option id="total_objects" value="2">Total Objects</option>
+				</select>
+				% act.: <input id="af_slider" type="range" min="0" max="100" value="70" class="slider">
+				% paths: <input id="pf_slider" type="range" min="0" max="100" value="70" class="slider">
+				<button id="apply_changes" onclick="doVisualization()">Apply Changes</button>
+				<button id="reset_filters" onclick="resetFilters()">Reset Filters</button><br />
+				Select the object types: <select id="objectTypes" multiple style="height: 40px">
+				</select>
+				<button id="filterObjectTypes" onclick="filterObjectTypes()">Filter on Obj Types</button>
+				<button id="downloadJsonOcel" onclick="downloadJsonOcel()">Download JSON Ocel</button>
+				<button id="downloadXmlOcel" onclick="downloadXmlOcel()">Download XML Ocel</button>
+				Flattening OT: <select id="flatteningOt">
+				</select>
+				<button id="flattenEventLog" onclick="flattenEventLog()">Flatten (XES)</button>
+				<br />
+				N. Events: <span id="numEvents">0</span>
+				N. Uniq. Objects: <span id="numUniqObjects">0</span>
+				N. Total Objects: <span id="numTotalObjects">0</span>
+			</div>
+			<div id="processModelPage" style="display: ">
+				<div id="header2">
+					Selected activity: <span id="selectedActivity"></span>
+					<button id="filterRelatedObjectsActivity" onclick="filterRelatedObjectsActivity()" disabled>Filter Rel.Obj</button>
+					<button id="filterNonRelatedObjectsActivity" onclick="filterNonRelatedObjectsActivity()" disabled>Filter Non Rel.Obj</button>
+					<button id="filterNonStartingWith" onclick="filterNonStartingWith()" disabled>Filter Non Starting With</button>
+					<button id="filterNonEndingWith" onclick="filterNonEndingWith()" disabled>Filter Non Ending With</button>
+					<button id="seeRelatedObjAct" onclick="seeRelatedObjAct()" disabled>See Rel.Obj.</button><br />
+					Selected edge: <span id="selectedEdge"></span>
+					<button id="filterRelatedObjectsEdge" onclick="filterRelatedObjectsEdge()" disabled>Filter Rel.Obj</button>
+					<button id="filterNonRelatedObjectsEdge" onclick="filterNonRelatedObjectsEdge()" disabled>Filter Non Rel.Obj</button>
+					<button id="seeRelatedObjEdge" onclick="seeRelatedObjEdge()" disabled>See Rel.Obj. Edge</button><br />
+				</div>
+				<div id="graphContainer">
+				</div>
+				<script type="text/javascript">			
+					function doVisualization() {
+						let af = document.getElementById("af_slider").value / 100.0;
+						let pf = document.getElementById("pf_slider").value / 100.0;
+						let annotation = parseInt(document.getElementById("annotationSelector").value);
+						visualization.ACTIVITY_FREQUENCY = af;
+						visualization.PATHS_FREQUENCY = pf;
+						visualization.IDX = annotation;
+						visualization.represent();
+					}
+					
+					function resetFilters() {
+						visualization.resetFilters();
+						doVisualization();
+					}
+					
+					function downloadJsonOcel() {
+						let jsonStri = JsonOcelExporter.exportLog(visualization.model.ocel);
+						download(jsonStri, "obj-centr-log.jsonocel", "text/json");
+					}
+					
+					function downloadXmlOcel() {
+						let xmlStri = XmlOcelExporter.exportLog(visualization.model.ocel);
+						download(xmlStri, "obj-centr-log.xmlocel", "text/xml");
+					}
+					
+					function flattenEventLog() {
+						let ot = document.getElementById("flatteningOt").value;
+						let eventLog = OcelFlattening.flatten(visualization.model.ocel, ot);
+						let xmlStri = XesExporter.exportLog(eventLog);
+						download(xmlStri, "flattened.xes", "text/xml");
+					}
+					
+					function filterObjectTypes() {
+						let selectedOptions = [];
+						for (let option of document.getElementById("objectTypes").children) {
+							if (option.selected) {
+								selectedOptions.push(option.value);
+							}
+						}
+						let filteredModel = visualization.model.filterObjectTypes(selectedOptions);
+						visualization.setFilteredModel(filteredModel);
+					}
+					
+					function filterRelatedObjectsActivity() {
+						let relObj = visualization.model.getRelObjActivity(selectedActivity, selectedOt);
+						let filteredModel = visualization.model.filterRelatedObjects(relObj);
+						visualization.setFilteredModel(filteredModel);
+					}
+					
+					function filterNonRelatedObjectsActivity() {
+						let relObj = visualization.model.getRelObjActivity(selectedActivity, selectedOt);
+						let allObjOt = Object.keys(visualization.model.otObjectsView[selectedOt].objectsIds);
+						let difference = allObjOt.filter(x => !relObj.includes(x));
+						let filteredModel = visualization.model.filterNonRelatedObjects(difference, relObj);
+						visualization.setFilteredModel(filteredModel);
+					}
+					
+					function filterNonStartingWith() {
+						let startingWith = visualization.model.otObjectsView[selectedOt].getStartingWith(selectedActivity);
+						let allObjOt = Object.keys(visualization.model.otObjectsView[selectedOt].objectsIds);
+						let difference = allObjOt.filter(x => !startingWith.includes(x));
+						let filteredModel = visualization.model.filterNonRelatedObjects(difference, startingWith);
+						visualization.setFilteredModel(filteredModel);
+					}
+					
+					function filterNonEndingWith() {
+						let endingWith = visualization.model.otObjectsView[selectedOt].getEndingWith(selectedActivity);
+						let allObjOt = Object.keys(visualization.model.otObjectsView[selectedOt].objectsIds);
+						let difference = allObjOt.filter(x => !endingWith.includes(x));
+						let filteredModel = visualization.model.filterNonRelatedObjects(difference, endingWith);
+						visualization.setFilteredModel(filteredModel);
+					}
+					
+					function seeRelatedObjAct() {
+						let relObj = visualization.model.getRelObjActivity(selectedActivity, selectedOt);
+						alert(relObj.toString());
+					}
+					
+					function filterRelatedObjectsEdge() {
+						let relObj = visualization.model.getRelObjEdge([selectedEdge[0], selectedEdge[1]], selectedEdge[2]);
+						let filteredModel = visualization.model.filterRelatedObjects(relObj);
+						visualization.setFilteredModel(filteredModel);
+					}
+					
+					function filterNonRelatedObjectsEdge() {
+						let relObj = visualization.model.getRelObjEdge([selectedEdge[0], selectedEdge[1]], selectedEdge[2]);
+						let allObjOt = Object.keys(visualization.model.otObjectsView[selectedEdge[2]].objectsIds);
+						let difference = allObjOt.filter(x => !relObj.includes(x));
+						let filteredModel = visualization.model.filterNonRelatedObjects(difference, relObj);
+						visualization.setFilteredModel(filteredModel);
+					}
+					
+					function seeRelatedObjEdge() {
+						let relObj = visualization.model.getRelObjEdge([selectedEdge[0], selectedEdge[1]], selectedEdge[2]);
+						alert(relObj.toString());
+					}
+					
+					function callbackActivity(activity, ot) {
+						selectedActivity = activity;
+						selectedOt = ot;
+						if (selectedActivity != null) {
+							document.getElementById("filterRelatedObjectsActivity").disabled = false;
+							document.getElementById("seeRelatedObjAct").disabled = false;
+							if (selectedOt != null) {
+								document.getElementById("selectedActivity").innerHTML = selectedActivity+" ("+selectedOt+")";
+								document.getElementById("filterNonRelatedObjectsActivity").disabled = false;
+								document.getElementById("filterNonStartingWith").disabled = false;
+								document.getElementById("filterNonEndingWith").disabled = false;
+							}
+							else {
+								document.getElementById("selectedActivity").innerHTML = selectedActivity;
+								document.getElementById("filterNonRelatedObjectsActivity").disabled = true;
+								document.getElementById("filterNonStartingWith").disabled = true;
+								document.getElementById("filterNonEndingWith").disabled = true;
+							}
+						}
+					}
+					
+					function callbackEdge(edge) {
+						selectedEdge = edge;
+						document.getElementById("selectedEdge").innerHTML = selectedEdge.toString();
+						document.getElementById("filterRelatedObjectsEdge").disabled = false;
+						document.getElementById("filterNonRelatedObjectsEdge").disabled = false;
+						document.getElementById("seeRelatedObjEdge").disabled = false;
+					}
+					
+					function callbackStatistics(events, uo, to) {
+						document.getElementById("numEvents").innerHTML = events;
+						document.getElementById("numUniqObjects").innerHTML = uo;
+						document.getElementById("numTotalObjects").innerHTML = to;
+					}
+					
+					visualization = new OcdfgVisualization(new OcdfgModel(eventLog), "graphContainer");
+					visualization.callbackActivity = callbackActivity;
+					visualization.callbackEdge = callbackEdge;
+					visualization.callbackStatistics = callbackStatistics;
+					visualization.populateStatistics();
+					doVisualization();
+				</script>
+			</div>
+		</div>
 	</body>
 </html>
