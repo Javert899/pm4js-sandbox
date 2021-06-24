@@ -111,6 +111,39 @@ class OcdfgModel {
 		return new OcdfgModel(filteredOcel);
 	}
 	
+	filterNonRelatedObjects(positive, negative) {
+		let filteredOcel = {};
+		filteredOcel["ocel:global-event"] = this.ocel["ocel:global-event"];
+		filteredOcel["ocel:global-object"] = this.ocel["ocel:global-object"];
+		filteredOcel["ocel:global-log"] = {};
+		filteredOcel["ocel:global-log"]["ocel:attribute-names"] = this.ocel["ocel:global-log"]["ocel:attribute-names"];
+		filteredOcel["ocel:global-log"]["ocel:object-types"] = this.ocel["ocel:global-log"]["ocel:object-types"];
+		filteredOcel["ocel:objects"] = {};
+		filteredOcel["ocel:events"] = {};
+		for (let eveId in this.ocel["ocel:events"]) {
+			let eve = this.ocel["ocel:events"][eveId];
+			let inte = [];
+			let inte2 = [];
+			for (let objId of eve["ocel:omap"]) {
+				if (positive.includes(objId)) {
+					inte.push(objId);
+				}
+				if (negative.includes(objId)) {
+					inte2.push(objId);
+				}
+			}
+			if (inte.length > 0 && inte2.length == 0) {
+				for (let objId of eve["ocel:omap"]) {
+					if (!(objId in filteredOcel["ocel:objects"])) {
+						filteredOcel["ocel:objects"][objId] = this.ocel["ocel:objects"][objId];
+					}
+				}
+				filteredOcel["ocel:events"][eveId] = eve;
+			}
+		}
+		return new OcdfgModel(filteredOcel);
+	}
+	
 	getRelObjActivity(acti, ot) {
 		if (ot == null) {
 			return this.overallEventsView.getRelObjActivity(acti);

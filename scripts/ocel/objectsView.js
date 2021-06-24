@@ -70,4 +70,30 @@ class ObjectsView {
 		}
 		return ret;
 	}
+	
+	getStartingWith(act) {
+		let ret = [];
+		for (let objId in this.objectsIds) {
+			if (this.objectsIdsSorted[objId].length > 0) {
+				let sa = this.objectsIdsSorted[objId][0][1];
+				if (sa == act) {
+					ret.push(objId);
+				}
+			}
+		}
+		return ret;
+	}
+	
+	getEndingWith(act) {
+		let ret = [];
+		for (let objId in this.objectsIds) {
+			if (this.objectsIdsSorted[objId].length > 0) {
+				let ea = this.objectsIdsSorted[objId][this.objectsIdsSorted[objId].length - 1][1];
+				if (ea == act) {
+					ret.push(objId);
+				}
+			}
+		}
+		return ret;
+	}
 }
