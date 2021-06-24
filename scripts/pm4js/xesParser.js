@@ -49,3 +49,9 @@ class XesParser {
 		}
 	}
 }
+
+try {
+	module.exports = {XesParser: XesParser};
+}
+catch (err) {
+}

@@ -33,3 +33,11 @@ class Attribute {
 		this.attributes = [];
 	}
 }
+
+
+try {
+	module.exports = {EventLog: EventLog, Trace: Trace, Event: Event, Global: Global, Attribute: Attribute};	
+}
+catch (err) {
+	// not in node
+}
