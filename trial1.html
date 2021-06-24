@@ -4,6 +4,7 @@
 		<script src="scripts/pm4js/eventLog.js"></script>
 		<script src="scripts/pm4js/log-statistics.js"></script>
 		<script src="scripts/generic/csv.js"></script>
+		<script src="scripts/generic/download-utility.js"></script>
 	</head>
 	<body>
 		<script type="text/javascript">
@@ -12,10 +13,10 @@
 				let eventLog = CSVManager.CSVtoEventLog(data);
 				let bb = new Date();
 				console.log(bb.getTime() - aa.getTime());
-				console.log(eventLog);
-				console.log(LogStatistics.getEndActivities(eventLog));
 				let csvStri = CSVManager.EventLogToCSVstring(eventLog);
-				console.log(csvStri);
+				let cc = new Date();
+				console.log(cc.getTime() - bb.getTime());
+				download(csvStri, "rec.csv", "text/csv");
 			});
 		</script>
 	</body>

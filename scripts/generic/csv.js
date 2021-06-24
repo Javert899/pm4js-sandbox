@@ -37,7 +37,6 @@ class CSVManager {
 
 	static CSVtoEventLog(str, sep=CSVManager.DEFAULT_SEPARATOR, quotechar=CSVManager.DEFAULT_QUOTECHAR, caseId=CSVManager.DEFAULT_CASE_ID, activity=CSVManager.DEFAULT_ACTIVITY, timestamp=CSVManager.DEFAULT_TIMESTAMP) {
 		let csvArray = CSVManager.parseCSV(str, sep=sep, quotechar=quotechar);
-		console.log(csvArray);
 		let traces = {};
 		let i = 1;
 		let j = 0;
