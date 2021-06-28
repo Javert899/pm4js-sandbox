@@ -18,6 +18,9 @@
 		<script src="scripts/ocel/jsonocel-exporter.js"></script>
 		<script src="scripts/ocel/jsonocel-importer.js"></script>
 		<script src="scripts/ocel/ocel-flattening.js"></script>
+		<script src="scripts/generic/sorttable.js"></script>
+		<script src="scripts/ocel/eventsList.js"></script>
+		<script src="scripts/ocel/objectsList.js"></script>
 	</head>
 	<body>
 		<script type="text/javascript">
@@ -246,10 +249,12 @@
 				</script>
 			</div>
 			<div id="eventsListPage" style="display: none">
-			
+				<table id="eventsListTable" border="1">
+				</table>
 			</div>
 			<div id="objectsListPage" style="display: none">
-			
+				<table id="objectsListTable" border="1">
+				</table>
 			</div>
 		</div>
 		<script src="logs/example-jsonocel.js"></script>
@@ -268,11 +273,21 @@
 			function showEventsList() {
 				hideAllDivsPages();
 				document.getElementById("eventsListPage").style.display = "";
+				eventsListFactory = new EventsListFactory(visualization.model);
+				eventsListFactory.buildEventsTable(document.getElementById("eventsListTable"));
+				console.log("ciao1");
 			}
 			
 			function showObjectsList() {
 				hideAllDivsPages();
 				document.getElementById("objectsListPage").style.display = "";
+				objectsListFactory = new ObjectsListFactory(visualization.model);
+				objectsListFactory.buildObjectsTable(document.getElementById("objectsListTable"));
+				console.log("ciao2")
+			}
+			
+			function clickedObjectInEveTable(obj) {
+				alert(obj);
 			}
 			
 			createVisualization();
