@@ -274,6 +274,9 @@
 				<div id="plotlyOtGraph">
 					
 				</div>
+				<div id="plotlyActGraph">
+					
+				</div>
 			</div>
 			<div class="hover_bkgr_fricc">
 				<span class="helper"></span>
@@ -293,6 +296,7 @@
 				document.getElementById("processModelPage").style.display = "none";
 				document.getElementById("eventsListPage").style.display = "none";
 				document.getElementById("objectsListPage").style.display = "none";
+				document.getElementById("plotlyGraphsPage").style.display = "none";
 			}
 			
 			function showProcessModelPage() {
@@ -317,6 +321,7 @@
 				document.getElementById("plotlyGraphsPage").style.display = "";
 				plotlyOcelGraphs = new PlotlyOcelGraphs(visualization.model);
 				plotlyOcelGraphs.buildOtGraph();
+				plotlyOcelGraphs.buildActivitiesGraph();
 			}
 			
 			function clickedObjectInEveTable(obj) {
