@@ -1,5 +1,6 @@
 <html>
 	<head>
+		<link rel="stylesheet" href="ocel.css">
 		<script src="scripts/pm4js/eventLog.js"></script>
 		<script src="scripts/generic/jquery.min.js"></script>
 		<script src="scripts/generic/download-utility.js"></script>
@@ -249,6 +250,20 @@
 				</script>
 			</div>
 			<div id="eventsListPage" style="display: none">
+				<p>The page shows the list of events of the log. Each event is distinguished by its fundamental properties (ID, activity and timestamp),
+				a list of related objects for each type, and values for some attributes. Clicking an object, it is possible to see the lifecycle
+				of the object.</p>
+				<div class="hover_bkgr_fricc">
+					<span class="helper"></span>
+					<div>
+						<div class="popupCloseButton">&times;</div>
+						<h4><b>Lifecycle of the Object:</b> <span id="popupObjId"></h4>
+						<div style="width: 100%; height: 85%; overflow: scroll">
+							<table id="customEventsListTable" border="1">
+							</table>
+						</div>
+					</div>
+				</div>
 				<table id="eventsListTable" border="1">
 				</table>
 			</div>
@@ -275,7 +290,6 @@
 				document.getElementById("eventsListPage").style.display = "";
 				eventsListFactory = new EventsListFactory(visualization.model);
 				eventsListFactory.buildEventsTable(document.getElementById("eventsListTable"));
-				console.log("ciao1");
 			}
 			
 			function showObjectsList() {
@@ -283,12 +297,29 @@
 				document.getElementById("objectsListPage").style.display = "";
 				objectsListFactory = new ObjectsListFactory(visualization.model);
 				objectsListFactory.buildObjectsTable(document.getElementById("objectsListTable"));
-				console.log("ciao2")
 			}
 			
 			function clickedObjectInEveTable(obj) {
-				alert(obj);
+				let relTuples = visualization.model.overallObjectsView.objectsIdsSorted[obj];
+				let relEvs = {};
+				for (let tup of relTuples) {
+					relEvs[tup[0]] = 0;
+				}
+				let eventsListFactory = new EventsListFactory(visualization.model);
+				eventsListFactory.buildEventsTable(document.getElementById("customEventsListTable"), events=relEvs, enable_click=false, target_obj=obj);
+				$('.hover_bkgr_fricc').show();
+				document.getElementById("popupObjId").innerHTML = obj;
 			}
+			
+			/*$(".trigger_popup_fricc").click(function(){
+			   $('.hover_bkgr_fricc').show();
+			});*/
+			$('.hover_bkgr_fricc').click(function(){
+				$('.hover_bkgr_fricc').hide();
+			});
+			$('.popupCloseButton').click(function(){
+				$('.hover_bkgr_fricc').hide();
+			});
 			
 			createVisualization();
 		</script>

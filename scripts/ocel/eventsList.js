@@ -3,7 +3,7 @@ class EventsListFactory {
 		this.model = model;
 	}
 	
-	buildEventsTable(container, events=null, enable_click=true) {
+	buildEventsTable(container, events=null, enable_click=true, target_obj=null) {
 		container.innerHTML = "";
 		let otypes = this.model.ocel["ocel:global-log"]["ocel:object-types"];
 		let attributes = this.model.ocel["ocel:global-log"]["ocel:attribute-names"];
@@ -14,6 +14,7 @@ class EventsListFactory {
 		if (events == null) {
 			events = this.model.ocel["ocel:events"];
 		}
+		let logEvents = this.model.ocel["ocel:events"];
 		let objects = this.model.ocel["ocel:objects"];
 		let header = document.createElement("tr");
 		thead.appendChild(header);
@@ -44,7 +45,7 @@ class EventsListFactory {
 		for (let eveId in events) {
 			let evTr = document.createElement("tr");
 			tbody.appendChild(evTr);
-			let eve = events[eveId];
+			let eve = logEvents[eveId];
 			let evId = document.createElement("td");
 			evId.innerHTML = eveId;
 			evTr.appendChild(evId);
@@ -78,7 +79,12 @@ class EventsListFactory {
 						tdLi.innerHTML = "<a href=\"javascript:clickedObjectInEveTable('"+obj+"')\">"+obj+"</a>";
 					}
 					else {
-						tdLi.innerHTML = obj;
+						if (obj == target_obj) {
+							tdLi.innerHTML = "<b>"+obj+"</b>";
+						}
+						else {
+							tdLi.innerHTML = obj;
+						}
 					}
 					
 				}
