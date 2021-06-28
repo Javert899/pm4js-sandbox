@@ -4,6 +4,7 @@
 		<script src="scripts/pm4js/eventLog.js"></script>
 		<script src="scripts/generic/jquery.min.js"></script>
 		<script src="scripts/generic/download-utility.js"></script>
+		<script src="scripts/generic/plotly-2.1.0.min.js"></script>
 		<script src="scripts/pm4js/xesParser.js"></script>
 		<script src="scripts/pm4js/xesExporter.js"></script>
 		<script src="scripts/pm4js/log-statistics.js"></script>
@@ -22,6 +23,7 @@
 		<script src="scripts/generic/sorttable.js"></script>
 		<script src="scripts/ocel/eventsList.js"></script>
 		<script src="scripts/ocel/objectsList.js"></script>
+		<script src="scripts/ocel/plotly-graphs.js"></script>
 	</head>
 	<body>
 		<script type="text/javascript">
@@ -53,6 +55,7 @@
 				<button id="show_process_model" onclick="showProcessModelPage()" style="background-color: blue; color: white">Show Process Model</button>
 				<button id="show_events_list" onclick="showEventsList()" style="background-color: blue; color: white">Show Events List</button>
 				<button id="show_objects_list" onclick="showObjectsList()" style="background-color: blue; color: white">Show Objects List</button>
+				<button id="show_graphs" onclick="showGraphs()" style="background-color: blue; color: white">Show Graphs</button>
 			</div>
 			<div id="processModelPage" style="display: ">
 				<div id="header2">
@@ -267,6 +270,11 @@
 				<table id="objectsListTable" border="1">
 				</table>
 			</div>
+			<div id="plotlyGraphsPage" style="display: none">
+				<div id="plotlyOtGraph">
+					
+				</div>
+			</div>
 			<div class="hover_bkgr_fricc">
 				<span class="helper"></span>
 				<div>
@@ -302,6 +310,13 @@
 			function showObjectsList() {
 				hideAllDivsPages();
 				document.getElementById("objectsListPage").style.display = "";
+			}
+			
+			function showGraphs() {
+				hideAllDivsPages();
+				document.getElementById("plotlyGraphsPage").style.display = "";
+				plotlyOcelGraphs = new PlotlyOcelGraphs(visualization.model);
+				plotlyOcelGraphs.buildOtGraph();
 			}
 			
 			function clickedObjectInEveTable(obj) {
