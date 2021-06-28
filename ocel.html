@@ -268,6 +268,13 @@
 				</table>
 			</div>
 			<div id="objectsListPage" style="display: none">
+				<p>The page shows the properties of the objects, after the selection of an object type. Each object is distinguished by the timestamp of the first
+				event of its lifecycle, the timestamp of the last event of its lifecycle, and the difference between them.</p>
+				<p>To start, please select an object type:
+				<select id="otObjListSelection">
+				</select>
+				<button id="showObjListOt">Show the list of Objects</button>
+				</p>
 				<table id="objectsListTable" border="1">
 				</table>
 			</div>
@@ -295,8 +302,6 @@
 			function showObjectsList() {
 				hideAllDivsPages();
 				document.getElementById("objectsListPage").style.display = "";
-				objectsListFactory = new ObjectsListFactory(visualization.model);
-				objectsListFactory.buildObjectsTable(document.getElementById("objectsListTable"));
 			}
 			
 			function clickedObjectInEveTable(obj) {
@@ -311,9 +316,12 @@
 				document.getElementById("popupObjId").innerHTML = obj;
 			}
 			
-			/*$(".trigger_popup_fricc").click(function(){
-			   $('.hover_bkgr_fricc').show();
-			});*/
+			function showObjListOt() {
+				let selectedOt = document.getElementById("otObjListSelection").value;
+				objectsListFactory = new ObjectsListFactory(visualization.model);
+				objectsListFactory.buildObjectsTable(document.getElementById("objectsListTable"), selectedOt);
+			}
+
 			$('.hover_bkgr_fricc').click(function(){
 				$('.hover_bkgr_fricc').hide();
 			});

@@ -3,6 +3,6 @@ class ObjectsListFactory {
 		this.model = model;
 	}
 	
-	buildObjectsTable(container) {
+	buildObjectsTable(container, targetOt) {
 	}
 }
