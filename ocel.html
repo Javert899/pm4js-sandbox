@@ -8,7 +8,6 @@
 		<script src="scripts/pm4js/log-statistics.js"></script>
 		<script src="scripts/pm4js/dfg.js"></script>
 		<script src="scripts/generic/mxClient.min.js"></script>
-		<!--<script src="logs/example-jsonocel.js"></script>-->
 		<script src="scripts/ocel/eventsView.js"></script>
 		<script src="scripts/ocel/objectsView.js"></script>
 		<script src="scripts/ocel/edgesView.js"></script>
@@ -26,7 +25,7 @@
 			let selectedOt = null;
 			let selectedEdge = null;
 			let visualization = null;
-			let eventLog = null;
+			//let eventLog = null;
 		</script>
 		<div id="uploadPart" style="display: ">
 			<img src="static/pads_rwth.png" /><br />
@@ -38,15 +37,18 @@
 		</div>
 		<div id="mainApplication" style="display: none">
 			<div id="header">
-				<button id="downloadJsonOcel" onclick="downloadJsonOcel()">Download JSON Ocel</button>
-				<button id="downloadXmlOcel" onclick="downloadXmlOcel()">Download XML Ocel</button>
+				<button id="downloadJsonOcel" onclick="downloadJsonOcel()" style="background-color: red; color: white">Download JSON Ocel</button>
+				<button id="downloadXmlOcel" onclick="downloadXmlOcel()" style="background-color: red; color: white">Download XML Ocel</button>
 				Flattening OT: <select id="flatteningOt">
 				</select>
-				<button id="flattenEventLog" onclick="flattenEventLog()">Flatten (XES)</button>
+				<button id="flattenEventLog" onclick="flattenEventLog()" style="background-color: red; color: white">Flatten (XES)</button>
 				<br />
 				N. Events: <span id="numEvents">0</span>
 				N. Uniq. Objects: <span id="numUniqObjects">0</span>
 				N. Total Objects: <span id="numTotalObjects">0</span>
+				<button id="show_process_model" onclick="showProcessModelPage()" style="background-color: blue; color: white">Show Process Model</button>
+				<button id="show_events_list" onclick="showEventsList()" style="background-color: blue; color: white">Show Events List</button>
+				<button id="show_objects_list" onclick="showObjectsList()" style="background-color: blue; color: white">Show Objects List</button>
 			</div>
 			<div id="processModelPage" style="display: ">
 				<div id="header2">
@@ -243,6 +245,37 @@
 					document.getElementById('upload').addEventListener('change', handleFileSelect, false);
 				</script>
 			</div>
+			<div id="eventsListPage" style="display: none">
+			
+			</div>
+			<div id="objectsListPage" style="display: none">
+			
+			</div>
 		</div>
+		<script src="logs/example-jsonocel.js"></script>
+		<script type="text/javascript">
+			function hideAllDivsPages() {
+				document.getElementById("processModelPage").style.display = "none";
+				document.getElementById("eventsListPage").style.display = "none";
+				document.getElementById("objectsListPage").style.display = "none";
+			}
+			
+			function showProcessModelPage() {
+				hideAllDivsPages();
+				document.getElementById("processModelPage").style.display = "";
+			}
+			
+			function showEventsList() {
+				hideAllDivsPages();
+				document.getElementById("eventsListPage").style.display = "";
+			}
+			
+			function showObjectsList() {
+				hideAllDivsPages();
+				document.getElementById("objectsListPage").style.display = "";
+			}
+			
+			createVisualization();
+		</script>
 	</body>
 </html>
