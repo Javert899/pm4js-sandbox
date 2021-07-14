@@ -125,12 +125,19 @@ class OcdfgVisualization {
 				}
 				else if (cell.id in self.invGraphEdges) {
 					let edgeVect = self.invGraphEdges[cell.id];
-					if (!(edgeVect in self.expandedEdges)) {
+					/*if (!(edgeVect in self.expandedEdges)) {
 						self.expandedEdges[edgeVect] = 0;
 					}
 					else {
 						delete self.expandedEdges[edgeVect];
-					}
+					}*/
+					console.log(self.model.otEdges[edgeVect[2]].toCompleteString(edgeVect[0]+","+edgeVect[1]));
+					Swal.fire({
+					  title: 'Edge Dashboard',
+					  confirmButtonText: 'Ok',
+					  html: self.model.otEdges[edgeVect[2]].toCompleteString(edgeVect[0]+","+edgeVect[1])
+					})
+
 					if (self.callbackEdge != null) {
 						self.callbackEdge(edgeVect);
 					}
@@ -144,6 +151,7 @@ class OcdfgVisualization {
 				}
 			}
 			catch (err) {
+				console.log(err);
 			}
 		});
 	}

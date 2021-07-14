@@ -74,13 +74,13 @@ class EdgesView {
 	}
 	
 	toCompleteString(actCouple) {
-		let ret = actCouple.split(",")[0]+"->\n"+actCouple.split(",")[1]+"\n";
-		ret += "(" + this.objectsView.objectType+")\n";
-		ret += "event couples = "+this.edgesStatistics[actCouple]["events"]+"\n";
-		ret += "unique objects = "+this.edgesStatistics[actCouple]["unique_objects"]+"\n";
-		ret += "total objects = "+this.edgesStatistics[actCouple]["total_objects"]+"\n";
-		ret += "perc source = "+this.edgesStatistics[actCouple]["perc_source"]+"\n";
-		ret += "perc target = "+this.edgesStatistics[actCouple]["perc_target"]+"\n";
+		let ret = "<b>"+actCouple.split(",")[0]+"->"+actCouple.split(",")[1]+"<br />";
+		ret += "(" + this.objectsView.objectType+")</b><br /><br />";
+		ret += "event couples = "+this.edgesStatistics[actCouple]["events"]+"<br />";
+		ret += "unique objects = "+this.edgesStatistics[actCouple]["unique_objects"]+"<br />";
+		ret += "total objects = "+this.edgesStatistics[actCouple]["total_objects"]+"<br />";
+		ret += "perc source = "+this.edgesStatistics[actCouple]["perc_source"]+"<br />";
+		ret += "perc target = "+this.edgesStatistics[actCouple]["perc_target"]+"<br />";
 		return ret;
 	}
 	
