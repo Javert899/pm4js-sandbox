@@ -26,15 +26,6 @@ class OcdfgModel {
 			this.otObjectsView[ot].objectType = ot;
 			let classicLog = OcelFlattening.flatten(this.ocel, ot);
 			this.otEventLogs[ot] = classicLog;
-			this.otInductiveModels[ot] = ProcessTreeToPetriNetConverter.apply(InductiveMiner.apply(classicLog));
-			this.otReplayedTraces[ot] = TokenBasedReplay.apply(this.otEventLogs[ot], this.otInductiveModels[ot]);
-			this.otTransMap[ot] = {};
-			for (let tid in this.otInductiveModels[ot].net.transitions) {
-				let t = this.otInductiveModels[ot].net.transitions[tid];
-				if (t.label != null) {
-					this.otTransMap[ot][t.label] = t
-				}
-			}
 		}
 		for (let objId in this.ocel["ocel:objects"]) {
 			let obj = this.ocel["ocel:objects"][objId];
