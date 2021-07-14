@@ -319,7 +319,7 @@ class OcdfgVisualization {
 				let activities = Object.keys(this.activitiesIndipendent);
 				let consideredLog = LogGeneralFiltering.filterEventsHavingEventAttributeValues(this.model.otEventLogs[ot], activities);
 				if (consideredLog.traces.length > 0) {
-					this.model.otInductiveModels[ot] = ProcessTreeToPetriNetConverter.apply(InductiveMiner.apply(consideredLog));
+					this.model.otInductiveModels[ot] = ProcessTreeToPetriNetConverter.apply(InductiveMiner.apply(consideredLog, "concept:name", this.PATHS_FREQUENCY));
 					this.model.otReplayedTraces[ot] = TokenBasedReplay.apply(consideredLog, this.model.otInductiveModels[ot]);
 					this.model.otTransMap[ot] = {};
 					for (let tid in this.model.otInductiveModels[ot].net.transitions) {
@@ -333,7 +333,7 @@ class OcdfgVisualization {
 					let replayResult = this.model.otReplayedTraces[ot];
 					for (let placeId in acceptingPetriNet.net.places) {
 						let place = acceptingPetriNet.net.places[placeId];
-						let placeLabel = "p="+replayResult.totalProducedPerPlace[place]+";r="+replayResult.totalRemainingPerPlace[place]+"\nc="+replayResult.totalConsumedPerPlace[place]+";m="+replayResult.totalMissingPerPlace[place];
+						let placeLabel = "p="+replayResult.totalProducedPerPlace[place]+";m="+replayResult.totalMissingPerPlace[place]+"\nc="+replayResult.totalConsumedPerPlace[place]+";r="+replayResult.totalRemainingPerPlace[place];
 						let placeSizeX = 90;
 						let placeSizeY = 90;
 						if (place in acceptingPetriNet.im.tokens) {
