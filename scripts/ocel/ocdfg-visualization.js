@@ -15,7 +15,7 @@ class OcdfgVisualization {
 		this.callbackActivity = null;
 		this.callbackEdge = null;
 		this.callbackStatistics = null;
-		this.displayType = "petriNet";
+		this.displayType = "dfg";
 	}
 	
 	removeElements() {
@@ -312,7 +312,14 @@ class OcdfgVisualization {
 					for (let placeId in acceptingPetriNet.net.places) {
 						let place = acceptingPetriNet.net.places[placeId];
 						let placeLabel = "p="+replayResult.totalProducedPerPlace[place]+";r="+replayResult.totalRemainingPerPlace[place]+"\nc="+replayResult.totalConsumedPerPlace[place]+";m="+replayResult.totalMissingPerPlace[place];
-						let placeNode = this.graph.insertVertex(parent, "netPlace@@"+place.name, placeLabel, 150, 150, 90, 90, "fontSize=11;shape=ellipse;fillColor="+color+";fontColor=white");
+						let placeSizeX = 90;
+						let placeSizeY = 90;
+						if (place in acceptingPetriNet.im.tokens) {
+							placeLabel = ot;
+							placeSizeX = 160;
+							placeSizeY = 40;
+						}
+						let placeNode = this.graph.insertVertex(parent, "netPlace@@"+place.name, placeLabel, 150, 150, placeSizeX, placeSizeY, "fontSize=11;shape=ellipse;fillColor="+color+";fontColor=white");
 						this.placesDict[place] = placeNode;
 						this.invPlacesDict[placeNode] = place;
 					}
@@ -339,7 +346,6 @@ class OcdfgVisualization {
 							if (arc.target.label != null) {
 								let numEvents = this.model.otEventsView[ot].getValue(arc.target.label, 0);
 								let numObjects = this.model.otEventsView[ot].getValue(arc.target.label, 1);
-								console.log(arc.target.label+" "+ot+" "+numEvents+" "+numObjects);
 								if (numObjects > numEvents) {
 									isDouble = true;
 								}
@@ -351,19 +357,17 @@ class OcdfgVisualization {
 							if (arc.source.label != null) {
 								let numEvents = this.model.otEventsView[ot].getValue(arc.source.label, 0);
 								let numObjects = this.model.otEventsView[ot].getValue(arc.source.label, 1);
-								console.log(arc.source.label+" "+ot+" "+numEvents+" "+numObjects);
 								if (numObjects > numEvents) {
 									isDouble = true;
 								}
 							}
 						}
-						let edgeLabel = "";
+						let edgeLabel = "TO="+replayResult.arcExecutions[arc];
 						let strokeWidth = "1";
 						if (isDouble) {
-							edgeLabel = "D";
 							strokeWidth = "3";
 						}
-						this.graph.insertEdge(parent, arc.toString(), edgeLabel, source, target, "fontSize=16;strokeColor="+color+";fontColor="+color+";strokeWidth="+strokeWidth);
+						this.graph.insertEdge(parent, arc.toString(), edgeLabel, source, target, "fontSize=10;strokeColor="+color+";fontColor="+color+";strokeWidth="+strokeWidth);
 					}
 				}
 			}

@@ -56,6 +56,11 @@
 			</div>
 			<div id="processModelPage" style="display: ">
 				<div id="header2">
+					Visualization:
+					<select id="visualizationType">
+						<option value="dfg" selected>DFG</option>
+						<option value="petriNet">Petri Net</option>
+					</select>
 					Annotation:
 					<select id="annotationSelector">
 						<option id="events" value="0">Events</option>
@@ -90,6 +95,7 @@
 						visualization.ACTIVITY_FREQUENCY = af;
 						visualization.PATHS_FREQUENCY = pf;
 						visualization.IDX = annotation;
+						visualization.displayType = document.getElementById("visualizationType").value;
 						visualization.represent();
 					}
 					
