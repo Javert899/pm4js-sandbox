@@ -125,23 +125,19 @@ class OcdfgVisualization {
 				}
 				else if (cell.id in self.invGraphEdges) {
 					let edgeVect = self.invGraphEdges[cell.id];
-					/*if (!(edgeVect in self.expandedEdges)) {
-						self.expandedEdges[edgeVect] = 0;
-					}
-					else {
-						delete self.expandedEdges[edgeVect];
-					}*/
-					console.log(self.model.otEdges[edgeVect[2]].toCompleteString(edgeVect[0]+","+edgeVect[1]));
-					Swal.fire({
-					  title: 'Edge Dashboard',
-					  confirmButtonText: 'Ok',
-					  html: self.model.otEdges[edgeVect[2]].toCompleteString(edgeVect[0]+","+edgeVect[1])
-					})
-
 					if (self.callbackEdge != null) {
 						self.callbackEdge(edgeVect);
 					}
-					self.represent();
+					let htmlStri = self.model.otEdges[edgeVect[2]].toCompleteString(edgeVect[0]+","+edgeVect[1]);
+					htmlStri += "<br /><br /><a href=\"javascript:filterRelatedObjectsEdge()\">Filter Rel. Obj.</a>";
+					htmlStri += "<br /><br /><a href=\"javascript:filterNonRelatedObjectsEdge()\">Filter Non Rel.Obj</a>";
+					htmlStri += "<br /><br /><a href=\"javascript:seeRelatedObjEdge()\">See Rel.Obj. Edge</a>";
+
+					Swal.fire({
+					  title: 'Edge Dashboard',
+					  confirmButtonText: 'Ok',
+					  html: htmlStri
+					})
 				}
 				else if (cell.id in self.invActivitiesDependent) {
 					let actOt = self.invActivitiesDependent[cell.id];
