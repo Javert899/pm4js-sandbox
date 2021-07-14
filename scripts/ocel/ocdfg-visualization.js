@@ -332,15 +332,38 @@ class OcdfgVisualization {
 						let arc = acceptingPetriNet.net.arcs[arcId];
 						let source = null;
 						let target = null;
+						let isDouble = false;
 						if (arc.source in this.placesDict) {
 							source = this.placesDict[arc.source];
 							target = this.transDict[arc.target];
+							if (arc.target.label != null) {
+								let numEvents = this.model.otEventsView[ot].getValue(arc.target.label, 0);
+								let numObjects = this.model.otEventsView[ot].getValue(arc.target.label, 1);
+								console.log(arc.target.label+" "+ot+" "+numEvents+" "+numObjects);
+								if (numObjects > numEvents) {
+									isDouble = true;
+								}
+							}
 						}
 						else {
 							source = this.transDict[arc.source];
 							target = this.placesDict[arc.target];
+							if (arc.source.label != null) {
+								let numEvents = this.model.otEventsView[ot].getValue(arc.source.label, 0);
+								let numObjects = this.model.otEventsView[ot].getValue(arc.source.label, 1);
+								console.log(arc.source.label+" "+ot+" "+numEvents+" "+numObjects);
+								if (numObjects > numEvents) {
+									isDouble = true;
+								}
+							}
 						}
-						this.graph.insertEdge(parent, arc.toString(), "", source, target, "fontSize=16;strokeColor="+color+";fontColor="+color);
+						let edgeLabel = "";
+						let strokeWidth = "1";
+						if (isDouble) {
+							edgeLabel = "D";
+							strokeWidth = "3";
+						}
+						this.graph.insertEdge(parent, arc.toString(), edgeLabel, source, target, "fontSize=16;strokeColor="+color+";fontColor="+color+";strokeWidth="+strokeWidth);
 					}
 				}
 			}
