@@ -149,7 +149,10 @@ class OcdfgVisualization {
 					}
 					let htmlStri = self.model.otEventsView[actOt[1]].toCompleteString(actOt[0]);
 					htmlStri += "<br /><br /><a href=\"javascript:filterRelatedObjectsActivity()\">Filter Rel.Obj</a>";
-					htmlStri += "<br /><br /><a href=\"javascript:seeRelatedObjAct()\">See Rel.Obj.</a>";
+					htmlStri += "<br /><br /><a href=\"javascript:seeRelatedObjAct()\">See Rel.Obj</a>";
+					htmlStri += "<br /><br /><a href=\"javascript:filterNonRelatedObjectsActivity()\">Filter Non Rel.Obj</a>";
+					htmlStri += "<br /><br /><a href=\"javascript:filterNonStartingWith()\">Filter Non Starting With</a>";
+					htmlStri += "<br /><br /><a href=\"javascript:filterNonEndingWith()\">Filter Non Ending With</a>";
 					Swal.fire({
 					  title: 'Activity-Object Type',
 					  confirmButtonText: 'Ok',

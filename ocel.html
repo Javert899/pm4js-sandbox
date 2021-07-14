@@ -72,12 +72,12 @@
 					% paths: <input id="pf_slider" type="range" min="0" max="100" value="70" class="slider">
 					<button id="apply_changes" onclick="doVisualization()">Apply Changes</button>
 					<button id="reset_filters" onclick="resetFilters()">Reset Filters</button><br />
-					Selected activity: <span id="selectedActivity"></span>
+					<span style="display: none">Selected activity: <span id="selectedActivity"></span>
 					<button id="filterRelatedObjectsActivity" onclick="filterRelatedObjectsActivity()" disabled>Filter Rel.Obj</button>
 					<button id="filterNonRelatedObjectsActivity" onclick="filterNonRelatedObjectsActivity()" disabled>Filter Non Rel.Obj</button>
 					<button id="filterNonStartingWith" onclick="filterNonStartingWith()" disabled>Filter Non Starting With</button>
 					<button id="filterNonEndingWith" onclick="filterNonEndingWith()" disabled>Filter Non Ending With</button>
-					<button id="seeRelatedObjAct" onclick="seeRelatedObjAct()" disabled>See Rel.Obj.</button><br />
+					<button id="seeRelatedObjAct" onclick="seeRelatedObjAct()" disabled>See Rel.Obj.</button></span><br />
 					<span style="display: none">Selected edge: <span id="selectedEdge"></span>
 					<button id="filterRelatedObjectsEdge" onclick="filterRelatedObjectsEdge()" disabled>Filter Rel.Obj</button>
 					<button id="filterNonRelatedObjectsEdge" onclick="filterNonRelatedObjectsEdge()" disabled>Filter Non Rel.Obj</button>
