@@ -147,6 +147,12 @@
 						visualization.setFilteredModel(filteredModel);
 					}
 					
+					function expandActivity() {
+						console.log(selectedActivity);
+						visualization.doExpandActivity(selectedActivity);
+						visualization.represent();
+					}
+					
 					function filterNonStartingWith() {
 						let startingWith = visualization.model.otObjectsView[selectedOt].getStartingWith(selectedActivity);
 						let allObjOt = Object.keys(visualization.model.otObjectsView[selectedOt].objectsIds);

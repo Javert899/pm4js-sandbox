@@ -112,16 +112,19 @@ class OcdfgVisualization {
 			try {
 				if (cell.id in self.invActivitiesIndipendent) {
 					let act = self.invActivitiesIndipendent[cell.id];
-					if (!(act in self.expandedActivities)) {
-						self.expandedActivities[act] = 0;
-					}
-					else {
-						delete self.expandedActivities[act];
-					}
 					if (self.callbackActivity != null) {
 						self.callbackActivity(act, null);
 					}
-					self.represent();
+					let htmlStri = self.model.overallEventsView.toCompleteString(act);
+					htmlStri += "<br /><br /><a href=\"javascript:filterRelatedObjectsActivity()\">Filter Rel.Obj</a>";
+					htmlStri += "<br /><br /><a href=\"javascript:seeRelatedObjAct()\">See Rel.Obj.</a>";
+					htmlStri += "<br /><br /><a href=\"javascript:expandActivity()\">Expand Activity</a>";
+
+					Swal.fire({
+					  title: 'Activity Dashboard',
+					  confirmButtonText: 'Ok',
+					  html: htmlStri
+					})
 				}
 				else if (cell.id in self.invGraphEdges) {
 					let edgeVect = self.invGraphEdges[cell.id];
@@ -139,11 +142,19 @@ class OcdfgVisualization {
 					  html: htmlStri
 					})
 				}
-				else if (cell.id in self.invActivitiesDependent) {
+				else if (cell.id in self.invActivitiesDependent) {					
 					let actOt = self.invActivitiesDependent[cell.id];
 					if (self.callbackActivity != null) {
 						self.callbackActivity(actOt[0], actOt[1]);
 					}
+					let htmlStri = self.model.otEventsView[actOt[1]].toCompleteString(actOt[0]);
+					htmlStri += "<br /><br /><a href=\"javascript:filterRelatedObjectsActivity()\">Filter Rel.Obj</a>";
+					htmlStri += "<br /><br /><a href=\"javascript:seeRelatedObjAct()\">See Rel.Obj.</a>";
+					Swal.fire({
+					  title: 'Activity-Object Type',
+					  confirmButtonText: 'Ok',
+					  html: htmlStri
+					})
 				}
 			}
 			catch (err) {
@@ -186,6 +197,10 @@ class OcdfgVisualization {
 	  return colour;
 	}
 	
+	doExpandActivity(act) {
+		this.expandedActivities[act] = 0;
+	}
+	
 	represent(af = null, pf = null) {
 		this.resetVariables();
 		this.removeElements();
@@ -209,7 +224,7 @@ class OcdfgVisualization {
 				let label = this.model.overallEventsView.toReducedString(act, this.IDX);
 				if (act in this.expandedActivities) {
 					height = 250;
-					label = this.model.overallEventsView.toCompleteString(act);
+					label = this.model.overallEventsView.toCompleteString(act).replaceAll("<br />", "\n").replaceAll("<br/>", "\n").replaceAll("<b>","").replaceAll("</b>","");
 				}
 				let cc = Math.floor(125 + 125 * (this.MAX_INDIPENDENT_ACT_COUNT - count)/(this.MAX_INDIPENDENT_ACT_COUNT - this.MIN_INDIPENDENT_ACT_COUNT + 0.000001));
 				cc = cc + 256 * cc + 256*256 * cc;
@@ -223,7 +238,7 @@ class OcdfgVisualization {
 						if (act in otView.activities) {
 							if (otView.satisfy(act, this.IDX, minEdgeCount)) {
 								let color = this.stringToColour(ot);
-								let intermediateNode = this.graph.insertVertex(parent, act+" "+ot, otView.toCompleteString(act), 150, 150, 275, 250, "fontSize=13;fillColor="+color+";fontColor=white;shape=hexagon");
+								let intermediateNode = this.graph.insertVertex(parent, act+" "+ot, otView.toCompleteString(act).replaceAll("<br />", "\n").replaceAll("<br/>", "\n").replaceAll("<b>","").replaceAll("</b>",""), 150, 150, 275, 250, "fontSize=13;fillColor="+color+";fontColor=white;shape=hexagon");
 								let arc1 = this.graph.insertEdge(parent, act+" "+ot+" -> "+act, "", intermediateNode, activityObject, "fontSize=16;strokeColor="+color+";fontColor="+color);
 								this.activitiesDependent[[act, ot]] = intermediateNode;
 								this.invActivitiesDependent[intermediateNode.id] = [act, ot];

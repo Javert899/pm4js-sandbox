@@ -109,17 +109,17 @@ class EventsView {
 	toCompleteString(acti) {
 		let ret = "";
 		if (this.objectType != null) {
-			ret += acti+" ("+this.objectType+")\n\n"
+			ret += "<b>"+acti+" ("+this.objectType+")</b><br /><br />"
 		}
 		else {
-			ret += acti+"\n\n";
+			ret += "<b>"+acti+"</b><br /><br />";
 		}
-		ret += "events = "+this.activitiesCounters[acti]["events"]+"\n";
-		ret += "unique objects = "+this.activitiesCounters[acti]["unique_objects"]+"\n";
-		ret += "total objects = "+this.activitiesCounters[acti]["total_objects"]+"\n";
+		ret += "events = "+this.activitiesCounters[acti]["events"]+"<br />";
+		ret += "unique objects = "+this.activitiesCounters[acti]["unique_objects"]+"<br />";
+		ret += "total objects = "+this.activitiesCounters[acti]["total_objects"]+"<br />";
 		if (this.objectType != null) {
-			ret += "min rel. obj = "+this.activitiesCounters[acti]["min_related_objects"]+"\n";
-			ret += "max rel. obj = "+this.activitiesCounters[acti]["max_related_objects"]+"\n";
+			ret += "min rel. obj = "+this.activitiesCounters[acti]["min_related_objects"]+"<br />";
+			ret += "max rel. obj = "+this.activitiesCounters[acti]["max_related_objects"]+"<br />";
 		}
 		return ret;
 	}
