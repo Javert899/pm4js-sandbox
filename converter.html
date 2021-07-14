@@ -2,8 +2,7 @@
 	<head>
 		<script src="scripts/generic/jquery.min.js"></script>
 		<script src="scripts/generic/download-utility.js"></script>
-		<script src="scripts/pm4js/eventLog.js"></script>
-		<script src="scripts/pm4js/xesExporter.js"></script>
+		<script src="scripts/pm4js_latest.js"></script>
 		<script src="scripts/ocel/xmlocel-exporter.js"></script>
 		<script src="scripts/ocel/xmlocel-importer.js"></script>
 		<script src="scripts/ocel/jsonocel-exporter.js"></script>
@@ -71,7 +70,7 @@
 				let value = document.getElementById("objectTypeSelection").value;
 				let log = OcelFlattening.flatten(ocel, value);
 				console.log(log);
-				let xmlString = XesExporter.exportLog(log);
+				let xmlString = XesExporter.apply(log);
 				download(xmlString, "flattened.xes", "text/xml");
 			}
 			
