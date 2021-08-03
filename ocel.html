@@ -7,6 +7,7 @@
 		<script src="scripts/generic/plotly-2.1.0.min.js"></script>
 		<script src="scripts/generic/sweetalert2.all.min.js"></script>
 		<script src="scripts/generic/bootstrap.min.js"></script>
+		<script src="scripts/generic/navigation.min.js"></script>
 		<script src="scripts/pm4js_latest.js"></script>
 		<script src="scripts/generic/mxClient.min.js"></script>
 		<script src="scripts/ocel/eventsView.js"></script>
@@ -26,6 +27,8 @@
 		<link rel="stylesheet" href="static/bootstrap.min.css"></link>
 		<link rel="stylesheet" href="static/bootstrap-grid.min.css"></link>
 		<link rel="stylesheet" href="static/bootstrap-reboot.min.css"></link>
+		<link rel="stylesheet" href="static/navx-navigation.min.css"></link>
+		<link rel="stylesheet" href="static/navx-styles.min.css"></link>
 	</head>
 	<body>
 		<script type="text/javascript">
@@ -43,8 +46,8 @@
 				<input type="file" id="upload" />
 			</div>
 		</div>
-		<div id="mainApplication" style="display: none">
-			<div id="header" style="background-color: yellow">
+		<div id="mainApplication" style="display: none" class="container-fluid">
+			<div id="header" style="background-color:">
 				<button id="downloadJsonOcel" onclick="downloadJsonOcel()" style="background-color: red; color: white">Download JSON Ocel</button>
 				<button id="downloadXmlOcel" onclick="downloadXmlOcel()" style="background-color: red; color: white">Download XML Ocel</button>
 				Flattening OT: <select id="flatteningOt">
@@ -77,7 +80,7 @@
 					</select>
 					<button id="filterObjectTypes" onclick="filterObjectTypes()">Filter on Obj Types</button>
 				</div>
-				<div class="row container-fluid h-75" style="background-color: yellow">
+				<div class="row mh-75 flex-fill">
 					<div class="col-2">
 						<div>N. Events:</div>
 						<div id="numEvents">0</div>
@@ -86,12 +89,37 @@
 						<div>N. Total Objects:</div>
 						<div id="numTotalObjects">0</div>
 						<div>% act.:</div>
-						<input id="af_slider" type="range" min="0" max="100" value="70" class="slider">
+						<div><input id="af_slider" type="range" min="0" max="100" value="70" class="slider"></div>
 						<div>% paths:</div>
-						<input id="pf_slider" type="range" min="0" max="100" value="70" class="slider">
-						<button id="apply_changes" onclick="doVisualization()">Apply Changes</button>
+						<div><input id="pf_slider" type="range" min="0" max="100" value="70" class="slider"></div>
+						<div><button id="apply_changes" onclick="doVisualization()">Apply Changes</button></div>
 					</div>
-					<div class="col-10" id="graphContainer" style="background-color: red; overflow-y: hidden; overflow-x: hidden">
+					<div class="col-10">
+						<div id="graphContainerHeader">
+							<nav id="navigation" class="navigation navigation-justified">
+								<div class="navigation-header">
+
+								</div>
+								<div class="navigation-body">		
+									<ul class="navigation-menu">
+										<li class="navigation-item is-active">
+											<a class="navigation-link" href="#">Home</a>
+										</li>
+										<li class="navigation-item">
+											<a class="navigation-link" href="#">News</a>
+											<div class="navigation-megamenu">
+												<div class="navigation-megamenu-container">
+													<div class="navigation-row">
+														aaaaaa :))
+													</div>
+												</div>
+											</div>
+										</li>
+									</ul>
+								</div>
+							</nav>
+						</div>
+						<div id="graphContainer"></div>
 					</div>
 				</div>
 				<script type="text/javascript">			
@@ -345,6 +373,9 @@
 			});
 			
 			createVisualization();
+		</script>
+		<script type="text/javascript">
+			var navigation = new Navigation(document.getElementById("navigation"));
 		</script>
 	</body>
 </html>
