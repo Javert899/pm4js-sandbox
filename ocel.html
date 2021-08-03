@@ -49,7 +49,7 @@
 			</div>
 		</div>
 		<div id="mainApplication" style="display: none" class="container-fluid">
-			<div id="header" style="background-color:">
+			<div id="header" style="background-color:" class="border-bottom">
 				<nav id="navigationHeader" class="navigation navigation-justified">
 					<div class="navigation-header">
 
@@ -105,23 +105,22 @@
 				</nav>
 			</div>
 			<div id="processModelPage" style="display:; overflow: hidden">
-				<div class="row mh-75 flex-fill">
+				<div class="row" style="height: 85%">
 					<div class="col-2 align-self-center text-center">
 						<div class="panel panel-default">
-							<div class="panel-heading"><b>Log Statistics</b></div>
+							<div class="panel-heading"><h4>Statistics</h4></div>
 							<div class="panel-body">
 								<div>N. Events:</div>
-								<div id="numEvents">0</div>
+								<div id="numEvents" style="font-family: geneva; font-weight: bold; font-size: 18pt">0</div>
 								<div>N. Unique Objects:</div>
-								<div id="numUniqObjects">0</div>
+								<div id="numUniqObjects" style="font-family: geneva; font-weight: bold; font-size: 18pt">0</div>
 								<div>N. Total Objects:</div>
-								<div id="numTotalObjects">0</div>
+								<div id="numTotalObjects" style="font-family: geneva; font-weight: bold; font-size: 18pt">0</div>
 							</div>
 						</div>
 						<div>&nbsp;</div>
-						<div>&nbsp;</div>
 						<div class="panel panel-default">
-							<div class="panel-heading"><b>Sliders</b></div>
+							<div class="panel-heading"><h4>Sliders</h4></div>
 							<div class="panel-body">
 								<div>% of Activities:</div>
 								<div><input id="af_slider" type="range" min="0" max="100" value="70" class="slider"></div>
@@ -132,7 +131,7 @@
 							</div>
 						</div>
 					</div>
-					<div class="col-10">
+					<div class="col-10 border-left">
 						<div id="graphContainerHeader">
 							<nav id="navigationGraph" class="navigation navigation-justified">
 								<div class="navigation-header">
