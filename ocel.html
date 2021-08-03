@@ -186,6 +186,8 @@
 						</div>
 						<div id="graphContainer"></div>
 					</div>
+					<ul id="menu" style="display: none">
+					</ul>
 				</div>
 				<script type="text/javascript">
 					var navigationGraph = null;
@@ -274,7 +276,11 @@
 					
 					function seeRelatedObjAct() {
 						let relObj = visualization.model.getRelObjActivity(selectedActivity, selectedOt);
-						alert(relObj.toString());
+						let stru = relObj.toString();
+						if (stru.length > 1000) {
+							stru = stru.substring(0, 999) + "...";
+						}
+						Swal.fire({title: "Related Objects", confirmButton: "ok", html: stru});
 					}
 					
 					function filterRelatedObjectsEdge() {
@@ -293,7 +299,11 @@
 					
 					function seeRelatedObjEdge() {
 						let relObj = visualization.model.getRelObjEdge([selectedEdge[0], selectedEdge[1]], selectedEdge[2]);
-						alert(relObj.toString());
+						let stru = relObj.toString();
+						if (stru.length > 1000) {
+							stru = stru.substring(0, 999) + "...";
+						}
+						Swal.fire({title: "Related Objects", confirmButton: "ok", html: stru});
 					}
 					
 					function callbackActivity(activity, ot) {
@@ -445,6 +455,17 @@
 			createVisualization();
 		</script>
 		<script type="text/javascript">
+const menu = document.querySelector('#menu');
+// hide the menu
+//window.addEventListener('click', event => menu.style.display = 'none')
+// show the menu when right-clicked
+window.addEventListener('contextmenu', event => {
+  event.preventDefault()
+  menu.style.setProperty('--mouse-x', event.clientX + 'px')
+  menu.style.setProperty('--mouse-y', event.clientY + 'px')
+  menu.style.display = 'block'
+});
+
 			var navigationHeader = new Navigation(document.getElementById("navigationHeader"));
 		</script>
 	</body>

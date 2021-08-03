@@ -54,3 +54,17 @@
     display: inline-block;
     font-weight: bold;
 }
+
+#menu {
+  --mouse-x: 0;
+  --mouse-y: 0;
+  display: none;
+  position: fixed;
+  margin: 0;
+  left: 0;
+  top: 0;
+  background-color: #fafafa;
+  /* The following line is responsible for all the magic */
+  transform: translateX(min(var(--mouse-x), calc(100vw - 100%)))
+             translateY(min(var(--mouse-y), calc(100vh - 100%)));
+}

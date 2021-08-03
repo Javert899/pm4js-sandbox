@@ -111,6 +111,9 @@ class OcdfgVisualization {
 		var self = this;
 		this.graph.addListener(mxEvent.CLICK, function (sender, evt) {
 			var cell = evt.getProperty("cell");
+			const menu = document.getElementById("menu");
+			menu.style.display = 'none';
+
 			try {
 				if (cell.id in self.invActivitiesIndipendent) {
 					let act = self.invActivitiesIndipendent[cell.id];
@@ -118,15 +121,24 @@ class OcdfgVisualization {
 						self.callbackActivity(act, null);
 					}
 					let htmlStri = self.model.overallEventsView.toCompleteString(act);
-					htmlStri += "<br /><br /><a href=\"javascript:filterRelatedObjectsActivity()\">Filter Rel.Obj</a>";
-					htmlStri += "<br /><br /><a href=\"javascript:seeRelatedObjAct()\">See Rel.Obj.</a>";
-					htmlStri += "<br /><br /><a href=\"javascript:expandActivity()\">Expand Activity</a>";
-
-					Swal.fire({
-					  title: 'Activity Dashboard',
-					  confirmButtonText: 'Ok',
-					  html: htmlStri
-					})
+					
+					menu.innerHTML = "";
+					
+					let li1 = document.createElement("li");
+					menu.appendChild(li1);
+					li1.innerHTML = "<a href=\"javascript:filterRelatedObjectsActivity()\"><i class='fas fa-filter'></i>Filter Rel.Obj</a>";
+					let li2 = document.createElement("li");
+					li2.innerHTML = "<a href=\"javascript:seeRelatedObjAct()\"><i class='fab fa-connectdevelop'></i>See Rel.Obj.</a>";
+					menu.appendChild(li2);
+					let li3 = document.createElement("li");
+					li3.innerHTML = "<a href=\"javascript:expandActivity()\"><i class='fas fa-expand'></i>&nbsp;Expand Activity</a>";
+					menu.appendChild(li3);
+					let li4 = document.createElement("li");
+					li4.innerHTML = "<a href=\"javascript:Swal.fire({title: 'Activity Statistics', confirmButton: 'Ok', html: '"+htmlStri+"'})\"><i class='fas fa-chart-pie'></i>&nbsp;Statistics</a>";
+					menu.appendChild(li4);
+					menu.style.setProperty('--mouse-x', evt.properties.event.clientX + 'px');
+					menu.style.setProperty('--mouse-y', evt.properties.event.clientY + 'px');
+					menu.style.display = 'block';
 				}
 				else if (cell.id in self.invGraphEdges) {
 					let edgeVect = self.invGraphEdges[cell.id];
@@ -134,32 +146,59 @@ class OcdfgVisualization {
 						self.callbackEdge(edgeVect);
 					}
 					let htmlStri = self.model.otEdges[edgeVect[2]].toCompleteString(edgeVect[0]+","+edgeVect[1]);
-					htmlStri += "<br /><br /><a href=\"javascript:filterRelatedObjectsEdge()\">Filter Rel. Obj.</a>";
-					htmlStri += "<br /><br /><a href=\"javascript:filterNonRelatedObjectsEdge()\">Filter Non Rel.Obj</a>";
-					htmlStri += "<br /><br /><a href=\"javascript:seeRelatedObjEdge()\">See Rel.Obj. Edge</a>";
-
-					Swal.fire({
-					  title: 'Edge Dashboard',
-					  confirmButtonText: 'Ok',
-					  html: htmlStri
-					})
+					
+					menu.innerHTML = "";
+					
+					let li1 = document.createElement("li");
+					menu.appendChild(li1);
+					li1.innerHTML = "<a href=\"javascript:filterRelatedObjectsEdge()\"><i class='fas fa-filter'></i>&nbsp;Filter Rel. Obj.</a>";
+					let li2 = document.createElement("li");
+					li2.innerHTML = "<a href=\"javascript:filterNonRelatedObjectsEdge()\"><i class='fas fa-filter'></i>&nbsp;Filter Non Rel.Obj</a>";
+					menu.appendChild(li2);
+					let li3 = document.createElement("li");
+					li3.innerHTML = "<a href=\"javascript:seeRelatedObjEdge()\"><i class='fab fa-connectdevelop'></i>&nbsp;See Rel.Obj. Edge</a>";
+					menu.appendChild(li3);
+					let li4 = document.createElement("li");
+					li4.innerHTML = "<a href=\"javascript:Swal.fire({title: 'Edge Statistics', confirmButton: 'Ok', html: '"+htmlStri+"'})\"><i class='fas fa-chart-pie'></i>&nbsp;Statistics</a>";
+					menu.appendChild(li4);
+					menu.style.setProperty('--mouse-x', evt.properties.event.clientX + 'px');
+					menu.style.setProperty('--mouse-y', evt.properties.event.clientY + 'px');
+					menu.style.display = 'block';
 				}
 				else if (cell.id in self.invActivitiesDependent) {					
 					let actOt = self.invActivitiesDependent[cell.id];
 					if (self.callbackActivity != null) {
 						self.callbackActivity(actOt[0], actOt[1]);
 					}
+					
+					menu.innerHTML = "";
 					let htmlStri = self.model.otEventsView[actOt[1]].toCompleteString(actOt[0]);
-					htmlStri += "<br /><br /><a href=\"javascript:filterRelatedObjectsActivity()\">Filter Rel.Obj</a>";
-					htmlStri += "<br /><br /><a href=\"javascript:seeRelatedObjAct()\">See Rel.Obj</a>";
-					htmlStri += "<br /><br /><a href=\"javascript:filterNonRelatedObjectsActivity()\">Filter Non Rel.Obj</a>";
-					htmlStri += "<br /><br /><a href=\"javascript:filterNonStartingWith()\">Filter Non Starting With</a>";
-					htmlStri += "<br /><br /><a href=\"javascript:filterNonEndingWith()\">Filter Non Ending With</a>";
-					Swal.fire({
-					  title: 'Activity-Object Type',
-					  confirmButtonText: 'Ok',
-					  html: htmlStri
-					})
+					
+					let li1 = document.createElement("li");
+					menu.appendChild(li1);
+					li1.innerHTML = "<a href=\"javascript:filterRelatedObjectsActivity()\"><i class='fas fa-filter'></i>&nbsp;Filter Rel.Obj</a>";
+					let li2 = document.createElement("li");
+					li2.innerHTML = "<a href=\"javascript:filterNonRelatedObjectsActivity()\"><i class='fas fa-filter'></i>&nbsp;Filter Non Rel.Obj</a>";
+					menu.appendChild(li2);
+					let li3 = document.createElement("li");
+					li3.innerHTML = "<a href=\"javascript:filterNonStartingWith()\"><i class='fas fa-filter'></i>&nbsp;Filter Non Starting With</a>";
+					menu.appendChild(li3);
+					let li4 = document.createElement("li");
+					li4.innerHTML = "<a href=\"javascript:filterNonEndingWith()\"><i class='fas fa-filter'></i>&nbsp;Filter Non Ending With</a>";
+					menu.appendChild(li4);
+					/*let divider1 = document.createElement("li");
+					divider1.classList.add("divider");
+					divider1.innerHTML = "&nbsp;";
+					menu.appendChild(divider1);*/
+					let li5 = document.createElement("li");
+					li5.innerHTML = "<a href=\"javascript:seeRelatedObjAct()\"><i class='fab fa-connectdevelop'></i>&nbsp;See Rel.Obj.</a>";
+					menu.appendChild(li5);
+					let li6 = document.createElement("li");
+					li6.innerHTML = "<a href=\"javascript:Swal.fire({title: 'Activity-Object Type', confirmButton: 'Ok', html: '"+htmlStri+"'})\"><i class='fas fa-chart-pie'></i>&nbsp;Statistics</a>";
+					menu.appendChild(li6);
+					menu.style.setProperty('--mouse-x', evt.properties.event.clientX + 'px');
+					menu.style.setProperty('--mouse-y', evt.properties.event.clientY + 'px');
+					menu.style.display = 'block';
 				}
 			}
 			catch (err) {
