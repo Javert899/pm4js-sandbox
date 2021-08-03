@@ -52,7 +52,7 @@ class PlotlyOcelGraphs {
 				dictio[eveOmapLength] += 1;
 			}
 		}
-		let eventsKeys = Object.keys(dictio).sort();
+		let eventsKeys = Object.keys(dictio).sort((a, b) => a - b); 
 		let x = [];
 		let y = [];
 		for (let key of eventsKeys) {
@@ -76,7 +76,7 @@ class PlotlyOcelGraphs {
 				dictio[relEve] += 1;
 			}
 		}
-		let dictioKeys = Object.keys(dictio).sort();
+		let dictioKeys = Object.keys(dictio).sort((a, b) => a - b); 
 		let x = [];
 		let y = [];
 		for (let key of dictioKeys) {
@@ -86,5 +86,31 @@ class PlotlyOcelGraphs {
 		var data = [{x: x, y: y, type: 'bar'}];
 		var layout = {title: "Length of Object Lifecycle"};
 		Plotly.newPlot('plotlyLifecycleLengthGraph', data, layout, {responsive: true});
+	}
+	
+	buildObjectDuration() {
+		let serie = [];
+		let objectsIds = this.model.overallObjectsView.objectsIdsSorted;
+		for (let objId in objectsIds) {
+			let relEve = objectsIds[objId];
+			try {
+			let duration = relEve[relEve.length - 1][2] - relEve[0][2];
+			serie.push(Math.log10(1 + duration));
+			}
+			catch (err) {
+			}
+		}
+		serie = serie.sort((a, b) => a - b);
+		console.log(serie);
+		console.log(serie[serie.length - 1]);
+		var y0 = [];
+		var y1 = [];
+		for (var i = 0; i < 50; i ++) {
+			y0[i] = Math.random();
+			y1[i] = Math.random() + 1;
+		}
+		var data = [{y: serie, type: "box"}];
+		var layout = {title: "Lifecycle Duration (logarithmic)"};
+		Plotly.newPlot('plotlyLifecycleDurationGraph', data, layout, {responsive: true});
 	}
 }

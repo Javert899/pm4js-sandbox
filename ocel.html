@@ -383,6 +383,7 @@
 						<div><i class="fas fa-chart-bar"></i>&nbsp;<a href="javascript:showSpecificGraph('plotlyActGraph')">Events per Activity</a></div>
 						<div><i class="fas fa-chart-bar"></i>&nbsp;<a href="javascript:showSpecificGraph('plotlyObjPerEveGraph')">N. Objects per Event</a></div>
 						<div><i class="fas fa-chart-bar"></i>&nbsp;<a href="javascript:showSpecificGraph('plotlyLifecycleLengthGraph')">Length of Object Lifecycle</a></div>				
+						<div><i class="fas fa-box"></i>&nbsp;<a href="javascript:showSpecificGraph('plotlyLifecycleDurationGraph')">Lifecycle Duration (logarithmic)</a></div>
 					</div>
 					<div class="col-10">
 						<div id="plotlyOtGraph" style="width: 100%; height: 100%; display: none">
@@ -395,6 +396,9 @@
 							
 						</div>
 						<div id="plotlyLifecycleLengthGraph" style="width: 100%; height: 100%; display: none">
+							
+						</div>
+						<div id="plotlyLifecycleDurationGraph" style="width: 100%; height: 100%; display: none">
 							
 						</div>
 					</div>
@@ -450,6 +454,7 @@
 				document.getElementById("plotlyActGraph").style.display = "none";
 				document.getElementById("plotlyObjPerEveGraph").style.display = "none";
 				document.getElementById("plotlyLifecycleLengthGraph").style.display = "none";
+				document.getElementById("plotlyLifecycleDurationGraph").style.display = "none";
 
 				document.getElementById(divName).style.display = "";
 				if (divName == "plotlyOtGraph") {
@@ -463,6 +468,9 @@
 				}
 				else if (divName == "plotlyLifecycleLengthGraph") {
 					plotlyOcelGraphs.buildLifecycleLength();
+				}
+				else if (divName == "plotlyLifecycleDurationGraph") {
+					plotlyOcelGraphs.buildObjectDuration();
 				}
 			}
 			
