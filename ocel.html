@@ -51,9 +51,6 @@
 				</select>
 				<button id="flattenEventLog" onclick="flattenEventLog()" style="background-color: red; color: white">Flatten (XES)</button>
 				<br />
-				N. Events: <span id="numEvents">0</span>
-				N. Uniq. Objects: <span id="numUniqObjects">0</span>
-				N. Total Objects: <span id="numTotalObjects">0</span>
 				<button id="show_process_model" onclick="showProcessModelPage()" style="background-color: blue; color: white">Show Process Model</button>
 				<button id="show_events_list" onclick="showEventsList()" style="background-color: blue; color: white">Show Events List</button>
 				<button id="show_objects_list" onclick="showObjectsList()" style="background-color: blue; color: white">Show Objects List</button>
@@ -72,16 +69,28 @@
 						<option id="unique_objects" value="1" selected>Unique Objects</option>
 						<option id="total_objects" value="2">Total Objects</option>
 					</select>
-					% act.: <input id="af_slider" type="range" min="0" max="100" value="70" class="slider">
-					% paths: <input id="pf_slider" type="range" min="0" max="100" value="70" class="slider">
-					<button id="apply_changes" onclick="doVisualization()">Apply Changes</button>
+					 
+					 
+					
 					<button id="reset_filters" onclick="resetFilters()">Reset Filters</button><br />
 					Select the object types: <select id="objectTypes" multiple style="height: 40px">
 					</select>
 					<button id="filterObjectTypes" onclick="filterObjectTypes()">Filter on Obj Types</button>
 				</div>
 				<div class="row container-fluid h-75" style="background-color: yellow">
-					<div class="col-2"></div>
+					<div class="col-2">
+						<div>N. Events:</div>
+						<div id="numEvents">0</div>
+						<div>N. Uniq. Objects:</div>
+						<div id="numUniqObjects">0</div>
+						<div>N. Total Objects:</div>
+						<div id="numTotalObjects">0</div>
+						<div>% act.:</div>
+						<input id="af_slider" type="range" min="0" max="100" value="70" class="slider">
+						<div>% paths:</div>
+						<input id="pf_slider" type="range" min="0" max="100" value="70" class="slider">
+						<button id="apply_changes" onclick="doVisualization()">Apply Changes</button>
+					</div>
 					<div class="col-10" id="graphContainer" style="background-color: red; overflow-y: hidden; overflow-x: hidden">
 					</div>
 				</div>
