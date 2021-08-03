@@ -21,11 +21,9 @@ class PlotlyOcelGraphs {
 
 		var layout = {
 			title: 'Objects per Type',
-		  height: 400,
-		  width: 500
 		};
 
-		Plotly.newPlot('plotlyOtGraph', data, layout);
+		Plotly.newPlot('plotlyOtGraph', data, layout, {responsive: true});
 	}
 	
 	buildActivitiesGraph() {
@@ -37,7 +35,7 @@ class PlotlyOcelGraphs {
 			y.push(Object.keys(actView).length);
 		}
 		var data = [{x: x, y: y, type: 'bar'}];
-		var layout = {title: "Events per Activity", width: 1200, height: 400};
-		Plotly.newPlot('plotlyActGraph', data, layout);
+		var layout = {title: "Events per Activity"};
+		Plotly.newPlot('plotlyActGraph', data, layout, {responsive: true});
 	}
 }
