@@ -380,13 +380,17 @@
 						<h6>Select the statistic:</h6>
 						<div><i class="fas fa-chart-pie"></i>&nbsp;<a href="javascript:showSpecificGraph('plotlyOtGraph')">Objects per Type</a></div>
 						<div><i class="fas fa-chart-bar"></i>&nbsp;<a href="javascript:showSpecificGraph('plotlyActGraph')">Events per Activity</a></div>
-						
+						<div><i class="fas fa-chart-bar"></i>&nbsp;<a href="javascript:showSpecificGraph('plotlyObjPerEveGraph')">N. Objects per Event</a></div>
+
 					</div>
 					<div class="col-10">
 						<div id="plotlyOtGraph" style="width: 100%; height: 100%; display: none">
 							
 						</div>
 						<div id="plotlyActGraph" style="width: 100%; height: 100%; display: none">
+							
+						</div>
+						<div id="plotlyObjPerEveGraph" style="width: 100%; height: 100%; display: none">
 							
 						</div>
 					</div>
@@ -440,12 +444,17 @@
 			function showSpecificGraph(divName) {
 				document.getElementById("plotlyOtGraph").style.display = "none";
 				document.getElementById("plotlyActGraph").style.display = "none";
+				document.getElementById("plotlyObjPerEveGraph").style.display = "none";
+				
 				document.getElementById(divName).style.display = "";
 				if (divName == "plotlyOtGraph") {
 					plotlyOcelGraphs.buildOtGraph();
 				}
 				else if (divName == "plotlyActGraph") {
 					plotlyOcelGraphs.buildActivitiesGraph();
+				}
+				else if (divName == "plotlyObjPerEveGraph") {
+					plotlyOcelGraphs.buildObjectsPerEventGraph();
 				}
 			}
 			

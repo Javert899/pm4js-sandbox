@@ -38,4 +38,30 @@ class PlotlyOcelGraphs {
 		var layout = {title: "Events per Activity"};
 		Plotly.newPlot('plotlyActGraph', data, layout, {responsive: true});
 	}
+	
+	buildObjectsPerEventGraph() {
+		let dictio = {}
+		let events = this.model.ocel["ocel:events"];
+		for (let eveId in events) {
+			let eve = events[eveId];
+			let eveOmapLength = eve["ocel:omap"].length;
+			if (!(eveOmapLength in dictio)) {
+				dictio[eveOmapLength] = 1;
+			}
+			else {
+				dictio[eveOmapLength] += 1;
+			}
+		}
+		let eventsKeys = Object.keys(dictio).sort();
+		let x = [];
+		let y = [];
+		for (let key of eventsKeys) {
+			x.push(key);
+			y.push(dictio[key]);
+		}
+		
+		var data = [{x: x, y: y, type: 'bar'}];
+		var layout = {title: "N. Objects per Event"};
+		Plotly.newPlot('plotlyObjPerEveGraph', data, layout, {responsive: true});
+	}
 }
