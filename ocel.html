@@ -61,24 +61,7 @@
 			</div>
 			<div id="processModelPage" style="display:; overflow: hidden">
 				<div id="header2">
-					Visualization:
-					<select id="visualizationType">
-						<option value="dfg" selected>DFG</option>
-						<option value="petriNet">Petri Net</option>
-					</select>
-					Annotation:
-					<select id="annotationSelector">
-						<option id="events" value="0">Events</option>
-						<option id="unique_objects" value="1" selected>Unique Objects</option>
-						<option id="total_objects" value="2">Total Objects</option>
-					</select>
-					 
-					 
-					
 					<button id="reset_filters" onclick="resetFilters()">Reset Filters</button><br />
-					Select the object types: <select id="objectTypes" multiple style="height: 40px">
-					</select>
-					<button id="filterObjectTypes" onclick="filterObjectTypes()">Filter on Obj Types</button>
 				</div>
 				<div class="row mh-75 flex-fill">
 					<div class="col-2">
@@ -102,19 +85,49 @@
 								</div>
 								<div class="navigation-body">		
 									<ul class="navigation-menu">
-										<li class="navigation-item is-active">
-											<a class="navigation-link" href="#">Home</a>
-										</li>
+
 										<li class="navigation-item">
-											<a class="navigation-link" href="#">News</a>
+											<a class="navigation-link" href="#">Options</a>
 											<div class="navigation-megamenu">
 												<div class="navigation-megamenu-container">
 													<div class="navigation-row">
-														aaaaaa :))
+														Visualization:
+														<select id="visualizationType">
+															<option value="dfg" selected>DFG</option>
+															<option value="petriNet">Petri Net</option>
+														</select>
+														Annotation:
+														<select id="annotationSelector">
+															<option id="events" value="0">Events</option>
+															<option id="unique_objects" value="1" selected>Unique Objects</option>
+															<option id="total_objects" value="2">Total Objects</option>
+														</select>
+														<button id="apply_changes2" onclick="doVisualization()">Apply Changes</button>
+														<br />
+														<br />
+														<br />
 													</div>
 												</div>
 											</div>
 										</li>
+									
+										<li class="navigation-item">
+											<a class="navigation-link" href="#">Object Types</a>
+											<div class="navigation-megamenu">
+												<div class="navigation-megamenu-container">
+													<div class="navigation-row">
+														Select the object types: <select id="objectTypes" multiple style="height: 40px">
+														</select>
+														<button id="filterObjectTypes" onclick="filterObjectTypes()">Filter on Obj Types</button>
+														<br />
+														<br />
+														<br />
+													</div>
+												</div>
+											</div>
+										</li>
+										
+										
 									</ul>
 								</div>
 							</nav>
