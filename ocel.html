@@ -48,21 +48,61 @@
 		</div>
 		<div id="mainApplication" style="display: none" class="container-fluid">
 			<div id="header" style="background-color:">
-				<button id="downloadJsonOcel" onclick="downloadJsonOcel()" style="background-color: red; color: white">Download JSON Ocel</button>
-				<button id="downloadXmlOcel" onclick="downloadXmlOcel()" style="background-color: red; color: white">Download XML Ocel</button>
-				Flattening OT: <select id="flatteningOt">
-				</select>
-				<button id="flattenEventLog" onclick="flattenEventLog()" style="background-color: red; color: white">Flatten (XES)</button>
-				<br />
-				<button id="show_process_model" onclick="showProcessModelPage()" style="background-color: blue; color: white">Show Process Model</button>
-				<button id="show_events_list" onclick="showEventsList()" style="background-color: blue; color: white">Show Events List</button>
-				<button id="show_objects_list" onclick="showObjectsList()" style="background-color: blue; color: white">Show Objects List</button>
-				<button id="show_graphs" onclick="showGraphs()" style="background-color: blue; color: white">Show Graphs</button>
+				<nav id="navigationHeader" class="navigation navigation-justified">
+					<div class="navigation-header">
+
+					</div>
+					<div class="navigation-body">		
+						<ul class="navigation-menu">
+
+							<li class="navigation-item">
+								<a class="navigation-link" href="javascript:showProcessModelPage()">Process Schema</a>
+							</li>
+							
+							<li class="navigation-item">
+								<a class="navigation-link" href="javascript:showEventsList()">Events</a>
+							</li>
+							
+							<li class="navigation-item">
+								<a class="navigation-link" href="javascript:showObjectsList()">Objects</a>
+							</li>
+							
+							<li class="navigation-item">
+								<a class="navigation-link" href="javascript:showGraphs()">Statistics</a>
+							</li>
+							
+							<li class="navigation-item">
+								<a class="navigation-link" href="#">Filters</a>
+								<div class="navigation-megamenu">
+									<div class="navigation-megamenu-container">
+										<div class="navigation-row">
+											<button id="reset_filters" onclick="resetFilters()">Reset Filters</button>
+										</div>
+									</div>
+								</div>
+							</li>
+						
+							<li class="navigation-item">
+								<a class="navigation-link" href="#">Download Log</a>
+								<div class="navigation-megamenu">
+									<div class="navigation-megamenu-container">
+										<div class="navigation-row">
+											<div><button id="downloadJsonOcel" onclick="downloadJsonOcel()">Download JSON Ocel</button></div>
+											<div><button id="downloadXmlOcel" onclick="downloadXmlOcel()">Download XML Ocel</button></div>
+											<div>
+												Flattening OT: <select id="flatteningOt">
+												</select>
+												<button id="flattenEventLog" onclick="flattenEventLog()">Flatten (XES)</button>
+											</div>
+										</div>
+									</div>
+								</div>
+							</li>
+						</ul>
+					</div>
+				</nav>
 			</div>
 			<div id="processModelPage" style="display:; overflow: hidden">
-				<div id="header2">
-					<button id="reset_filters" onclick="resetFilters()">Reset Filters</button><br />
-				</div>
 				<div class="row mh-75 flex-fill">
 					<div class="col-2">
 						<div>N. Events:</div>
@@ -79,7 +119,7 @@
 					</div>
 					<div class="col-10">
 						<div id="graphContainerHeader">
-							<nav id="navigation" class="navigation navigation-justified">
+							<nav id="navigationGraph" class="navigation navigation-justified">
 								<div class="navigation-header">
 
 								</div>
@@ -385,7 +425,8 @@
 			createVisualization();
 		</script>
 		<script type="text/javascript">
-			var navigation = new Navigation(document.getElementById("navigation"));
+			var navigationHeader = new Navigation(document.getElementById("navigationHeader"));
+			var navigationGraph = new Navigation(document.getElementById("navigationGraph"));
 		</script>
 	</body>
 </html>
