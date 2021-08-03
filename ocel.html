@@ -29,7 +29,7 @@
 		<link rel="stylesheet" href="static/bootstrap-grid.min.css"></link>
 		<link rel="stylesheet" href="static/bootstrap-reboot.min.css"></link>
 		<link rel="stylesheet" href="static/navx-navigation.min.css"></link>
-		<link rel="stylesheet" href="static/navx-styles.min.css"></link>
+		<link rel="stylesheet" href="static/navx-styles.css"></link>
 		<link rel="stylesheet" href="static/fontawesome-all.min.css"></link>
 	</head>
 	<body>
@@ -106,18 +106,28 @@
 			</div>
 			<div id="processModelPage" style="display:; overflow: hidden">
 				<div class="row mh-75 flex-fill">
-					<div class="col-2">
-						<div>N. Events:</div>
-						<div id="numEvents">0</div>
-						<div>N. Uniq. Objects:</div>
-						<div id="numUniqObjects">0</div>
-						<div>N. Total Objects:</div>
-						<div id="numTotalObjects">0</div>
-						<div>% act.:</div>
-						<div><input id="af_slider" type="range" min="0" max="100" value="70" class="slider"></div>
-						<div>% paths:</div>
-						<div><input id="pf_slider" type="range" min="0" max="100" value="70" class="slider"></div>
-						<div><button id="apply_changes" onclick="doVisualization()">Apply Changes</button></div>
+					<div class="col-2 align-self-center text-center">
+						<div class="panel panel-default">
+							<div class="panel-heading"><b>Log Statistics</b></div>
+							<div class="panel-body">
+								<div>N. Events:</div>
+								<div id="numEvents">0</div>
+								<div>N. Uniq. Objects:</div>
+								<div id="numUniqObjects">0</div>
+								<div>N. Total Objects:</div>
+								<div id="numTotalObjects">0</div>
+							</div>
+						</div>
+						<div class="panel panel-default">
+							<div class="panel-heading"><b>Sliders</b></div>
+							<div class="panel-body">
+								<div>% act.:</div>
+								<div><input id="af_slider" type="range" min="0" max="100" value="70" class="slider"></div>
+								<div>% paths:</div>
+								<div><input id="pf_slider" type="range" min="0" max="100" value="70" class="slider"></div>
+								<div><button id="apply_changes" onclick="doVisualization()">Apply Changes</button></div>
+							</div>
+						</div>
 					</div>
 					<div class="col-10">
 						<div id="graphContainerHeader">
