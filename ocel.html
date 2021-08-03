@@ -6,6 +6,7 @@
 		<script src="scripts/generic/download-utility.js"></script>
 		<script src="scripts/generic/plotly-2.1.0.min.js"></script>
 		<script src="scripts/generic/sweetalert2.all.min.js"></script>
+		<script src="scripts/generic/bootstrap.min.js"></script>
 		<script src="scripts/pm4js_latest.js"></script>
 		<script src="scripts/generic/mxClient.min.js"></script>
 		<script src="scripts/ocel/eventsView.js"></script>
@@ -22,6 +23,9 @@
 		<script src="scripts/ocel/eventsList.js"></script>
 		<script src="scripts/ocel/objectsList.js"></script>
 		<script src="scripts/ocel/plotly-graphs.js"></script>
+		<link rel="stylesheet" href="static/bootstrap.min.css"></link>
+		<link rel="stylesheet" href="static/bootstrap-grid.min.css"></link>
+		<link rel="stylesheet" href="static/bootstrap-reboot.min.css"></link>
 	</head>
 	<body>
 		<script type="text/javascript">
@@ -40,7 +44,7 @@
 			</div>
 		</div>
 		<div id="mainApplication" style="display: none">
-			<div id="header">
+			<div id="header" style="background-color: yellow">
 				<button id="downloadJsonOcel" onclick="downloadJsonOcel()" style="background-color: red; color: white">Download JSON Ocel</button>
 				<button id="downloadXmlOcel" onclick="downloadXmlOcel()" style="background-color: red; color: white">Download XML Ocel</button>
 				Flattening OT: <select id="flatteningOt">
@@ -55,7 +59,7 @@
 				<button id="show_objects_list" onclick="showObjectsList()" style="background-color: blue; color: white">Show Objects List</button>
 				<button id="show_graphs" onclick="showGraphs()" style="background-color: blue; color: white">Show Graphs</button>
 			</div>
-			<div id="processModelPage" style="display: ">
+			<div id="processModelPage" style="display:; overflow: hidden">
 				<div id="header2">
 					Visualization:
 					<select id="visualizationType">
@@ -72,21 +76,14 @@
 					% paths: <input id="pf_slider" type="range" min="0" max="100" value="70" class="slider">
 					<button id="apply_changes" onclick="doVisualization()">Apply Changes</button>
 					<button id="reset_filters" onclick="resetFilters()">Reset Filters</button><br />
-					<span style="display: none">Selected activity: <span id="selectedActivity"></span>
-					<button id="filterRelatedObjectsActivity" onclick="filterRelatedObjectsActivity()" disabled>Filter Rel.Obj</button>
-					<button id="filterNonRelatedObjectsActivity" onclick="filterNonRelatedObjectsActivity()" disabled>Filter Non Rel.Obj</button>
-					<button id="filterNonStartingWith" onclick="filterNonStartingWith()" disabled>Filter Non Starting With</button>
-					<button id="filterNonEndingWith" onclick="filterNonEndingWith()" disabled>Filter Non Ending With</button>
-					<button id="seeRelatedObjAct" onclick="seeRelatedObjAct()" disabled>See Rel.Obj.</button></span><br />
-					<span style="display: none">Selected edge: <span id="selectedEdge"></span>
-					<button id="filterRelatedObjectsEdge" onclick="filterRelatedObjectsEdge()" disabled>Filter Rel.Obj</button>
-					<button id="filterNonRelatedObjectsEdge" onclick="filterNonRelatedObjectsEdge()" disabled>Filter Non Rel.Obj</button>
-					<button id="seeRelatedObjEdge" onclick="seeRelatedObjEdge()" disabled>See Rel.Obj. Edge</button></span>
 					Select the object types: <select id="objectTypes" multiple style="height: 40px">
 					</select>
 					<button id="filterObjectTypes" onclick="filterObjectTypes()">Filter on Obj Types</button>
 				</div>
-				<div id="graphContainer">
+				<div class="row container-fluid h-75" style="background-color: yellow">
+					<div class="col-2"></div>
+					<div class="col-10" id="graphContainer" style="background-color: red; overflow-y: hidden; overflow-x: hidden">
+					</div>
 				</div>
 				<script type="text/javascript">			
 					function doVisualization() {
@@ -148,7 +145,6 @@
 					}
 					
 					function expandActivity() {
-						console.log(selectedActivity);
 						visualization.doExpandActivity(selectedActivity);
 						visualization.represent();
 					}
@@ -196,30 +192,10 @@
 					function callbackActivity(activity, ot) {
 						selectedActivity = activity;
 						selectedOt = ot;
-						if (selectedActivity != null) {
-							document.getElementById("filterRelatedObjectsActivity").disabled = false;
-							document.getElementById("seeRelatedObjAct").disabled = false;
-							if (selectedOt != null) {
-								document.getElementById("selectedActivity").innerHTML = selectedActivity+" ("+selectedOt+")";
-								document.getElementById("filterNonRelatedObjectsActivity").disabled = false;
-								document.getElementById("filterNonStartingWith").disabled = false;
-								document.getElementById("filterNonEndingWith").disabled = false;
-							}
-							else {
-								document.getElementById("selectedActivity").innerHTML = selectedActivity;
-								document.getElementById("filterNonRelatedObjectsActivity").disabled = true;
-								document.getElementById("filterNonStartingWith").disabled = true;
-								document.getElementById("filterNonEndingWith").disabled = true;
-							}
-						}
 					}
 					
 					function callbackEdge(edge) {
 						selectedEdge = edge;
-						document.getElementById("selectedEdge").innerHTML = selectedEdge.toString();
-						document.getElementById("filterRelatedObjectsEdge").disabled = false;
-						document.getElementById("filterNonRelatedObjectsEdge").disabled = false;
-						document.getElementById("seeRelatedObjEdge").disabled = false;
 					}
 					
 					function callbackStatistics(events, uo, to) {
