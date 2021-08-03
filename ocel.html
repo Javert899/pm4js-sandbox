@@ -382,7 +382,7 @@
 						<div><i class="fas fa-chart-pie"></i>&nbsp;<a href="javascript:showSpecificGraph('plotlyOtGraph')">Objects per Type</a></div>
 						<div><i class="fas fa-chart-bar"></i>&nbsp;<a href="javascript:showSpecificGraph('plotlyActGraph')">Events per Activity</a></div>
 						<div><i class="fas fa-chart-bar"></i>&nbsp;<a href="javascript:showSpecificGraph('plotlyObjPerEveGraph')">N. Objects per Event</a></div>
-
+						<div><i class="fas fa-chart-bar"></i>&nbsp;<a href="javascript:showSpecificGraph('plotlyLifecycleLengthGraph')">Length of Object Lifecycle</a></div>				
 					</div>
 					<div class="col-10">
 						<div id="plotlyOtGraph" style="width: 100%; height: 100%; display: none">
@@ -392,6 +392,9 @@
 							
 						</div>
 						<div id="plotlyObjPerEveGraph" style="width: 100%; height: 100%; display: none">
+							
+						</div>
+						<div id="plotlyLifecycleLengthGraph" style="width: 100%; height: 100%; display: none">
 							
 						</div>
 					</div>
@@ -456,6 +459,9 @@
 				}
 				else if (divName == "plotlyObjPerEveGraph") {
 					plotlyOcelGraphs.buildObjectsPerEventGraph();
+				}
+				else if (divName == "plotlyLifecycleLengthGraph") {
+					plotlyOcelGraphs.buildLifecycleLength();
 				}
 			}
 			

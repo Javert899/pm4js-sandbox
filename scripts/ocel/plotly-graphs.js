@@ -58,10 +58,33 @@ class PlotlyOcelGraphs {
 		for (let key of eventsKeys) {
 			x.push(key);
 			y.push(dictio[key]);
-		}
-		
+		}	
 		var data = [{x: x, y: y, type: 'bar'}];
 		var layout = {title: "N. Objects per Event"};
 		Plotly.newPlot('plotlyObjPerEveGraph', data, layout, {responsive: true});
+	}
+	
+	buildLifecycleLength() {
+		let dictio = {};
+		let objectsIds = this.model.overallObjectsView.objectsIds;
+		for (let objId in objectsIds) {
+			let relEve = Object.keys(objectsIds[objId]).length;
+			if (!(relEve in dictio)) {
+				dictio[relEve] = 1;
+			}
+			else {
+				dictio[relEve] += 1;
+			}
+		}
+		let dictioKeys = Object.keys(dictio).sort();
+		let x = [];
+		let y = [];
+		for (let key of dictioKeys) {
+			x.push(key);
+			y.push(dictio[key]);
+		}
+		var data = [{x: x, y: y, type: 'bar'}];
+		var layout = {title: "Length of Object Lifecycle"};
+		Plotly.newPlot('plotlyLifecycleLengthGraph', data, layout, {responsive: true});
 	}
 }
