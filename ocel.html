@@ -8,6 +8,7 @@
 		<script src="scripts/generic/sweetalert2.all.min.js"></script>
 		<script src="scripts/generic/bootstrap.min.js"></script>
 		<script src="scripts/generic/navigation.min.js"></script>
+		<script src="scripts/generic/fontawesome-all.min.js"></script>
 		<script src="scripts/pm4js_latest.js"></script>
 		<script src="scripts/generic/mxClient.min.js"></script>
 		<script src="scripts/ocel/eventsView.js"></script>
@@ -29,6 +30,7 @@
 		<link rel="stylesheet" href="static/bootstrap-reboot.min.css"></link>
 		<link rel="stylesheet" href="static/navx-navigation.min.css"></link>
 		<link rel="stylesheet" href="static/navx-styles.min.css"></link>
+		<link rel="stylesheet" href="static/fontawesome-all.min.css"></link>
 	</head>
 	<body>
 		<script type="text/javascript">
@@ -56,23 +58,23 @@
 						<ul class="navigation-menu">
 
 							<li class="navigation-item">
-								<a class="navigation-link" href="javascript:showProcessModelPage()">Process Schema</a>
+								<a class="navigation-link" href="javascript:showProcessModelPage()"><i class="fas fa-project-diagram"></i>&nbsp;Process Schema</a>
 							</li>
 							
 							<li class="navigation-item">
-								<a class="navigation-link" href="javascript:showEventsList()">Events</a>
+								<a class="navigation-link" href="javascript:showEventsList()"><i class="fas fa-atom"></i>Events</a>
 							</li>
 							
 							<li class="navigation-item">
-								<a class="navigation-link" href="javascript:showObjectsList()">Objects</a>
+								<a class="navigation-link" href="javascript:showObjectsList()"><i class="fas fa-database"></i>&nbsp;Objects</a>
 							</li>
 							
 							<li class="navigation-item">
-								<a class="navigation-link" href="javascript:showGraphs()">Statistics</a>
+								<a class="navigation-link" href="javascript:showGraphs()"><i class="fas fa-chart-pie"></i>&nbsp;Statistics</a>
 							</li>
 							
 							<li class="navigation-item">
-								<a class="navigation-link" href="#">Filters</a>
+								<a class="navigation-link" href="#"><i class="fas fa-filter"></i>&nbsp;Filters</a>
 								<div class="navigation-megamenu">
 									<div class="navigation-megamenu-container">
 										<div class="navigation-row">
@@ -83,7 +85,7 @@
 							</li>
 						
 							<li class="navigation-item">
-								<a class="navigation-link" href="#">Download Log</a>
+								<a class="navigation-link" href="#"><i class="fas fa-download"></i>&nbsp;Download Log</a>
 								<div class="navigation-megamenu">
 									<div class="navigation-megamenu-container">
 										<div class="navigation-row">
@@ -127,7 +129,7 @@
 									<ul class="navigation-menu">
 
 										<li class="navigation-item">
-											<a class="navigation-link" href="#">Options</a>
+											<a class="navigation-link" href="#"><i class="fas fa-cog"></i>&nbsp;Options</a>
 											<div class="navigation-megamenu">
 												<div class="navigation-megamenu-container">
 													<div class="navigation-row">
@@ -149,7 +151,7 @@
 										</li>
 									
 										<li class="navigation-item">
-											<a class="navigation-link" href="#">Object Types</a>
+											<a class="navigation-link" href="#"><i class="fab fa-superpowers"></i>Object Types</a>
 											<div class="navigation-megamenu">
 												<div class="navigation-megamenu-container">
 													<div class="navigation-row">
@@ -172,7 +174,9 @@
 						<div id="graphContainer"></div>
 					</div>
 				</div>
-				<script type="text/javascript">			
+				<script type="text/javascript">
+					var navigationGraph = null;
+					
 					function doVisualization() {
 						let af = document.getElementById("af_slider").value / 100.0;
 						let pf = document.getElementById("pf_slider").value / 100.0;
@@ -182,6 +186,9 @@
 						visualization.IDX = annotation;
 						visualization.displayType = document.getElementById("visualizationType").value;
 						visualization.represent();
+						if (navigationGraph == null) {
+							navigationGraph = new Navigation(document.getElementById("navigationGraph"));
+						}
 					}
 					
 					function resetFilters() {
@@ -426,7 +433,6 @@
 		</script>
 		<script type="text/javascript">
 			var navigationHeader = new Navigation(document.getElementById("navigationHeader"));
-			var navigationGraph = new Navigation(document.getElementById("navigationGraph"));
 		</script>
 	</body>
 </html>
