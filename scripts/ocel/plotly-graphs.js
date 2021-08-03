@@ -113,4 +113,44 @@ class PlotlyOcelGraphs {
 		var layout = {title: "Lifecycle Duration (logarithmic)"};
 		Plotly.newPlot('plotlyLifecycleDurationGraph', data, layout, {responsive: true});
 	}
+	
+	buildEventsPerTime() {
+		let events = this.model.ocel["ocel:events"];
+		let minTimestamp = 9999999999999;
+		let maxTimestamp = -9999999999999;
+		for (let eveId in events) {
+			let timest = (new Date(events[eveId]["ocel:timestamp"])).getTime();
+			if (timest < minTimestamp) {
+				minTimestamp = timest;
+			}
+			if (timest > maxTimestamp) {
+				maxTimestamp = timest;
+			}
+		}
+		let n = 20;
+		let step = (maxTimestamp - minTimestamp) / 20;
+		let stepsDictio = {};
+		for (let eveId in events) {
+			let timest = (new Date(events[eveId]["ocel:timestamp"])).getTime();
+			let thisStep = Math.floor((timest - minTimestamp)/step);
+			if (!(thisStep in stepsDictio)) {
+				stepsDictio[thisStep] = 1;
+			}
+			else {
+				stepsDictio[thisStep] += 1;
+			}
+		}
+		let dictioKeys = Object.keys(stepsDictio).sort((a, b) => a - b);
+		let x = [];
+		let y = [];
+		for (let key of dictioKeys) {
+			let d = new Date(minTimestamp + key*step);
+			let corr = d.getDate()  + "-" + (d.getMonth()+1) + "-" + d.getFullYear()
+			x.push(corr);
+			y.push(stepsDictio[key]);
+		}
+		var data = [{x: x, y: y, type: 'bar'}];
+		var layout = {title: "Events per Time"};
+		Plotly.newPlot('plotlyEventsPerTimeGraph', data, layout, {responsive: true});
+	}
 }
