@@ -92,7 +92,7 @@
 											<div><button id="downloadJsonOcel" onclick="downloadJsonOcel()" class="btn btn-primary">Download JSON Ocel</button>&nbsp;</div>
 											<div><button id="downloadXmlOcel" onclick="downloadXmlOcel()" class="btn btn-primary">Download XML Ocel</button>&nbsp;</div>
 											<div>
-												Flattening OT: <select id="flatteningOt">
+												Flattening OT: <select id="flatteningOt" class="form-select">
 												</select>
 												<button id="flattenEventLog" onclick="flattenEventLog()" class="btn btn-primary">Flatten (XES)&nbsp;</button>
 											</div>
@@ -124,9 +124,9 @@
 							<div class="panel-heading"><h4>Sliders</h4></div>
 							<div class="panel-body">
 								<div>% of Activities:</div>
-								<div><input id="af_slider" type="range" min="0" max="100" value="70" class="slider"></div>
+								<div><input id="af_slider" type="range" min="0" max="100" value="70" class="slider form-range"></div>
 								<div>% of Paths:</div>
-								<div><input id="pf_slider" type="range" min="0" max="100" value="70" class="slider"></div>
+								<div><input id="pf_slider" type="range" min="0" max="100" value="70" class="slider form-range"></div>
 								<div>&nbsp;</div>
 								<div><button id="apply_changes" onclick="doVisualization()" class="btn btn-primary">Apply Changes</button></div>
 							</div>
@@ -147,12 +147,12 @@
 												<div class="navigation-megamenu-container">
 													<div class="navigation-row">
 														<div>Visualization:
-														<select id="visualizationType">
+														<select id="visualizationType" class="form-select">
 															<option value="dfg" selected>DFG</option>
 															<option value="petriNet">Petri Net</option>
 														</select></div>
 														<div>Annotation:
-														<select id="annotationSelector">
+														<select id="annotationSelector" class="form-select">
 															<option id="events" value="0">Events</option>
 															<option id="unique_objects" value="1" selected>Unique Objects</option>
 															<option id="total_objects" value="2">Total Objects</option>
@@ -169,7 +169,7 @@
 												<div class="navigation-megamenu-container">
 													<div class="navigation-row">
 														<div>
-														Select the object types: <select id="objectTypes" multiple style="height: 40px">
+														Select the object types: <select id="objectTypes" multiple style="height: 40px" class="form-select">
 														</select></div>
 														<div>
 														<button id="filterObjectTypes" onclick="filterObjectTypes()" class="btn btn-primary">Filter on Obj Types</button></div>
@@ -356,7 +356,7 @@
 				<p>The page shows the properties of the objects, after the selection of an object type. Each object is distinguished by the timestamp of the first
 				event of its lifecycle, the timestamp of the last event of its lifecycle, and the difference between them.</p>
 				<p>To start, please select an object type:
-				<select id="otObjListSelection">
+				<select id="otObjListSelection" class="form-select">
 				</select>
 				<button id="showObjListOt" onclick="showObjListOt()" class="btn btn-primary">Show the list of Objects</button>
 				</p>
