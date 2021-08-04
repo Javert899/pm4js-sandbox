@@ -179,7 +179,7 @@
 										</li>
 									
 										<li class="navigation-item">
-											<a class="navigation-link" href="#"><i class="fab fa-superpowers"></i>Object Types</a>
+											<a class="navigation-link" href="#"><i class="fab fa-superpowers"></i>&nbsp;Object Types</a>
 											<div class="navigation-megamenu">
 												<div class="navigation-megamenu-container">
 													<div class="navigation-row">
@@ -303,27 +303,27 @@
 					}
 					
 					function filterRelatedObjectsActivity() {
-						return addFilter("Related objects ("+selectedActivity+";"+selectedOt+")", "filterRelatedObjectsActivitySpecific(\""+selectedActivity+"\", \""+selectedOt+"\")");
+						return addFilter("<i class=\"fas fa-plus-circle\"></i>Related objects ("+selectedActivity+";"+selectedOt+")&nbsp;&nbsp;&nbsp;", "filterRelatedObjectsActivitySpecific(\""+selectedActivity+"\", \""+selectedOt+"\")");
 					}
 					
 					function filterNonRelatedObjectsActivity() {
-						return addFilter("Non related objects ("+selectedActivity+";"+selectedOt+")", "filterNonRelatedObjectsActivitySpecific(\""+selectedActivity+"\", \""+selectedOt+"\")");
+						return addFilter("<i class=\"fas fa-minus-circle\"></i>&nbsp;Non related objects ("+selectedActivity+";"+selectedOt+")&nbsp;&nbsp;&nbsp;", "filterNonRelatedObjectsActivitySpecific(\""+selectedActivity+"\", \""+selectedOt+"\")");
 					}
 					
 					function filterNonStartingWith() {
-						return addFilter("Non starting with ("+selectedActivity+";"+selectedOt+")", "filterNonStartingWithSpecific(\""+selectedActivity+"\", \""+selectedOt+"\")");
+						return addFilter("<i class=\"fas fa-chevron-right\"></i>&nbsp;Non starting with ("+selectedActivity+";"+selectedOt+")&nbsp;&nbsp;&nbsp;", "filterNonStartingWithSpecific(\""+selectedActivity+"\", \""+selectedOt+"\")");
 					}
 					
 					function filterNonEndingWith() {
-						return addFilter("Non ending with ("+selectedActivity+";"+selectedOt+")", "filterNonEndingWithSpecific(\""+selectedActivity+"\", \""+selectedOt+"\")");
+						return addFilter("<i class=\"fas fa-chevron-left\"></i>&nbsp;Non ending with ("+selectedActivity+";"+selectedOt+")&nbsp;&nbsp;&nbsp;", "filterNonEndingWithSpecific(\""+selectedActivity+"\", \""+selectedOt+"\")");
 					}
 					
 					function filterRelatedObjectsEdge() {
-						return addFilter("Related objects to edge ("+selectedEdge[0]+"->"+selectedEdge[1]+"@"+selectedEdge[2]+")", "filterRelatedObjectsEdgeSpecific(\""+selectedEdge[0]+"\", \""+selectedEdge[1]+"\", \""+selectedEdge[2]+"\")");
+						return addFilter("<i class=\"fas fa-user-plus\"></i>&nbsp;Related objects to edge ("+selectedEdge[0]+"->"+selectedEdge[1]+"@"+selectedEdge[2]+")&nbsp;&nbsp;&nbsp;", "filterRelatedObjectsEdgeSpecific(\""+selectedEdge[0]+"\", \""+selectedEdge[1]+"\", \""+selectedEdge[2]+"\")");
 					}
 					
 					function filterNonRelatedObjectsEdge() {
-						return addFilter("Non related objects to edge ("+selectedEdge[0]+"->"+selectedEdge[1]+"@"+selectedEdge[2]+")", "filterNonRelatedObjectsEdgeSpecific(\""+selectedEdge[0]+"\", \""+selectedEdge[1]+"\", \""+selectedEdge[2]+"\")");
+						return addFilter("<i class=\"fas fa-user-minus\"></i>&nbsp;Non related objects to edge ("+selectedEdge[0]+"->"+selectedEdge[1]+"@"+selectedEdge[2]+")&nbsp;&nbsp;&nbsp;", "filterNonRelatedObjectsEdgeSpecific(\""+selectedEdge[0]+"\", \""+selectedEdge[1]+"\", \""+selectedEdge[2]+"\")");
 					}
 					
 					function filterObjectTypes() {
@@ -333,7 +333,7 @@
 								selectedOptions.push(option.value);
 							}
 						}
-						return addFilter("Object types filter", "filterObjectsTypesSpecific(\""+selectedOptions.toString()+"\")");
+						return addFilter("<i class=\"fab fa-superpowers\"></i>&nbsp;Object types filter", "filterObjectsTypesSpecific(\""+selectedOptions.toString()+"\")");
 					}
 					
 					function filterRelatedObjectsActivitySpecific(selectedActivity, selectedOt) {
