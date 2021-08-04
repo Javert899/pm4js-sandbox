@@ -248,6 +248,13 @@
 						let filtersContainer = document.getElementById("filtersList");
 						filtersContainer.innerHTML = "No filter is applied currently.&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;";
 					}
+					
+					function deleteFilter(index) {
+						allFilters.splice(index, 1);
+						visualization.resetFilters();
+						setFilters();
+						doVisualization(false);
+					}
 
 					function setFilters() {
 						visualization.resetFilters();
@@ -275,6 +282,10 @@
 								let filterLi = document.createElement("div");
 								filtersContainer.appendChild(filterLi);
 								filterLi.innerHTML = allFilters[filterId][0];
+								let cancelFilter = document.createElement("a");
+								cancelFilter.href = "javascript:deleteFilter("+filterId+")";
+								cancelFilter.innerHTML = "<i class=\"fas fa-trash\"></i>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;";
+								filterLi.appendChild(cancelFilter);
 							}
 						}
 					}
