@@ -153,4 +153,51 @@ class PlotlyOcelGraphs {
 		var layout = {title: "Events per Time"};
 		Plotly.newPlot('plotlyEventsPerTimeGraph', data, layout, {responsive: true});
 	}
+	
+	buildDottedChartActivities() {
+		let objectsIds = this.model.overallObjectsView.objectsIdsSorted;
+		let serie = [];
+		for (let objId in objectsIds) {
+			try {
+				let relEve = objectsIds[objId];
+				let firstTimestamp = relEve[0][2];
+				serie.push([objId, firstTimestamp]);
+			}
+			catch (err) {
+			}
+		}
+		serie.sort((a, b) => a[1] - b[1]);
+		let allColors = {};
+		for (let elCount in serie) {
+			let el = serie[elCount];
+			let objId = el[0];
+			let relEve = objectsIds[objId];
+			for (let eve of relEve) {
+				let timestamp = eve[2];
+				let activity = eve[1];
+				let timestampDate = new Date(timestamp*1000);
+				let timestampStru = timestampDate.getFullYear()  + "-" + (timestampDate.getMonth()+1) + "-" + timestampDate.getDate() + " " + timestampDate.getHours()+":"+timestampDate.getMinutes()+":"+timestampDate.getSeconds();
+				if (!(activity in allColors)) {
+					allColors[activity] = {x: [], y: [], type: "scatter", mode: "markers", name: activity};
+				}
+				allColors[activity].x.push(timestampStru);
+				allColors[activity].y.push(elCount);
+			}
+		}
+		let colors = Object.keys(allColors).sort();
+		var data = [];
+		for (let color of colors) {
+			data.push(allColors[color]);
+		}
+		var layout = {
+			title: "Dotted Chart (color: activity)",
+			xaxis: {
+				title: "Timestamp"
+			},
+			yaxis: {
+				title: "Object index"
+			}
+		};
+		Plotly.newPlot('plotlyDottedChartColorActivity', data, layout, {responsive: true});
+	}
 }
