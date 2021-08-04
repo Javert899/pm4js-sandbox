@@ -216,6 +216,7 @@
 				</div>
 				<script type="text/javascript">
 					var navigationGraph = null;
+					var allFilters = [];
 					
 					function doVisualization(initNavGraph=true) {
 						let af = document.getElementById("af_slider").value / 100.0;
@@ -233,8 +234,13 @@
 					}
 					
 					function resetFilters() {
+						resetPageFilters();
 						visualization.resetFilters();
 						doVisualization(false);
+					}
+					
+					function resetPageFilters() {
+						allFilters = [];
 					}
 					
 					function downloadJsonOcel() {
@@ -261,8 +267,7 @@
 								selectedOptions.push(option.value);
 							}
 						}
-						let filteredModel = visualization.model.filterObjectTypes(selectedOptions);
-						visualization.setFilteredModel(filteredModel);
+						return filterObjectsTypesSpecific(selectedOptions);
 					}
 					
 					function filterRelatedObjectsActivity() {
@@ -344,6 +349,11 @@
 						let allObjOt = Object.keys(visualization.model.otObjectsView[selectedEdge[2]].objectsIds);
 						let difference = allObjOt.filter(x => !relObj.includes(x));
 						let filteredModel = visualization.model.filterNonRelatedObjects(difference, relObj);
+						visualization.setFilteredModel(filteredModel);
+					}
+					
+					function filterObjectsTypesSpecific(selectedOptions) {
+						let filteredModel = visualization.model.filterObjectTypes(selectedOptions);
 						visualization.setFilteredModel(filteredModel);
 					}
 					
