@@ -534,7 +534,8 @@
 						<div><i class="fas fa-chart-bar"></i>&nbsp;<a href="javascript:showSpecificGraph('plotlyLifecycleLengthGraph')">Length of Object Lifecycle</a></div>
 						<div><i class="fas fa-chart-bar"></i>&nbsp;<a href="javascript:showSpecificGraph('plotlyEventsPerTimeGraph')">Events per Time</a></div>				
 						<div><i class="fas fa-box"></i>&nbsp;<a href="javascript:showSpecificGraph('plotlyLifecycleDurationGraph')">Lifecycle Duration (logarithmic)</a></div>
-						<div><i class="fas fa-chart-bar"></i>&nbsp;<a href="javascript:showSpecificGraph('plotlyDottedChartColorActivity')">Dotted Chart (color: activity)</a></div>				
+						<div><i class="fas fa-chart-bar"></i>&nbsp;<a href="javascript:showSpecificGraph('plotlyDottedChartColorActivity')">Dotted Chart (color: activity)</a></div>
+						<div><i class="fas fa-chart-bar"></i>&nbsp;<a href="javascript:showSpecificGraph('plotlyDottedChartColorObjType')">Dotted Chart (color: object type)</a></div>				
 					</div>
 					<div class="col-10">
 						<div id="plotlyOtGraph" style="width: 100%; height: 100%; display: none">
@@ -556,6 +557,9 @@
 							
 						</div>
 						<div id="plotlyDottedChartColorActivity" style="width: 100%; height: 100%; display: none">
+							
+						</div>
+						<div id="plotlyDottedChartColorObjType" style="width: 100%; height: 100%; display: none">
 							
 						</div>
 					</div>
@@ -614,9 +618,7 @@
 				document.getElementById("plotlyLifecycleDurationGraph").style.display = "none";
 				document.getElementById("plotlyEventsPerTimeGraph").style.display = "none";
 				document.getElementById("plotlyDottedChartColorActivity").style.display = "none";
-
-				plotlyOcelGraphs.buildDottedChartActivities();
-				
+				document.getElementById("plotlyDottedChartColorObjType").style.display = "none";				
 				
 				document.getElementById(divName).style.display = "";
 				if (divName == "plotlyOtGraph") {
@@ -639,6 +641,9 @@
 				}
 				else if (divName == "plotlyDottedChartColorActivity") {
 					plotlyOcelGraphs.buildDottedChartActivities();
+				}
+				else if (divName == "plotlyDottedChartColorObjType") {
+					plotlyOcelGraphs.buildDottedChartOtype();
 				}
 			}
 			
