@@ -251,16 +251,16 @@
 					
 					function deleteFilter(index) {
 						allFilters.splice(index, 1);
-						visualization.resetFilters();
 						setFilters();
 						doVisualization(false);
 					}
 
 					function setFilters() {
 						visualization.resetFilters();
-						for (let filter in allFilters) {
+						for (let filter of allFilters) {
 							addFilter(filter[0], filter[1], false);
 						}
+						setFiltersOnPage();
 					}
 					
 					function addFilter(filterDescription, filterMethod, addToPage=true) {
