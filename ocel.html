@@ -47,6 +47,11 @@
 			<div class=" h-100 d-flex justify-content-center align-items-center">
 				<div>
 					<img src="static/ocpm.png"></img>
+					
+					<div id="drop_zone" ondrop="handleFileSelect2(event)" ondragover="allowDrop(event)" style="background-color: yellow; height: 50%; width: 100%">
+					  <p>Drag one or more files to this Drop Zone ...</p>
+					</div>
+
 					<div id="initial_upload" style="display: ">
 						<input type="file" id="upload" />
 					</div>
@@ -327,24 +332,43 @@
 						document.getElementById("numTotalObjects").innerHTML = to;
 					}
 					
+					function allowDrop(ev) {
+					  ev.preventDefault();
+					}
+					
+					function handleFileSelect2(evt) {
+						console.log(evt);
+						evt.preventDefault();
+						var files = evt.dataTransfer.files;
+						f = files[0];
+						var reader = new FileReader();
+						reader.onload = function(e) {
+							loadFileCommon(e, f);
+						}
+						reader.readAsText(f);
+					}
+					
 					function handleFileSelect(evt) {
 						var files = evt.target.files; // FileList object
 						// use the 1st file from the list
 						f = files[0];
 						var reader = new FileReader();
 						reader.onload = function(e) {
-							console.log(f);
-							let contentStri = e.target.result;
-							if (f.name.endsWith(".xmlocel")) {
-								eventLog = XmlOcelImporter.importLog(contentStri);
-								createVisualization();
-							}
-							else {
-								eventLog = JsonOcelImporter.importLog(contentStri);
-								createVisualization();
-							}
+							loadFileCommon(e, f);
 						}
 						reader.readAsText(f);
+					}
+					
+					function loadFileCommon(e, f) {
+						let contentStri = e.target.result;
+						if (f.name.endsWith(".xmlocel")) {
+							eventLog = XmlOcelImporter.importLog(contentStri);
+							createVisualization();
+						}
+						else {
+							eventLog = JsonOcelImporter.importLog(contentStri);
+							createVisualization();
+						}
 					}
 					
 					function createVisualization() {
