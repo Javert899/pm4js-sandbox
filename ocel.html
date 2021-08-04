@@ -47,13 +47,21 @@
 			<div class=" h-100 d-flex justify-content-center align-items-center">
 				<div>
 					<img src="static/ocpm.png"></img>
+					<div style="height: 5%;">
+					</div>
+					<div style="text-align: center;">
+						<div>OC-PM is a novel application for object-centric process mining.</div>
+						<div>Logs in the JSON/XML-OCEL formats can be ingested,
+						and advanced visualizations/statistics are provided.</div>
+						<div>Please start by uploading an event log in the application.</div>
+					</div>
 					
-					<div id="drop_zone" ondrop="handleFileSelect2(event)" ondragover="allowDrop(event)" style="background-color: yellow; height: 50%; width: 100%">
-					  <p>Drag one or more files to this Drop Zone ...</p>
+					<div id="drop_zone" ondrop="handleFileSelect2(event)" ondragover="allowDrop(event)" style="height: 25%; width: 100%" class="d-flex justify-content-center align-items-center">
+					  <p>Drag an object-centric event log to this drop zone ...</p>
 					</div>
 
-					<div id="initial_upload" style="display: ">
-						<input type="file" id="upload" />
+					<div id="initial_upload" style="height: 20%; width: 100%; display: " class="d-flex justify-content-center align-items-center">
+						... Or upload it using the following button: &nbsp;&nbsp;&nbsp; <input type="file" id="upload" />
 					</div>
 				</div>
 			</div>
