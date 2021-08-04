@@ -326,12 +326,20 @@
 					}
 					
 					function filterRelatedObjectsEdge() {
-						let relObj = visualization.model.getRelObjEdge([selectedEdge[0], selectedEdge[1]], selectedEdge[2]);
+						return filterRelatedObjectsEdgeSpecific(selectedEdge[0], selectedEdge[1], selectedEdge[2]);
+					}
+					
+					function filterNonRelatedObjectsEdge() {
+						return filterNonRelatedObjectsEdgeSpecific(selectedEdge[0], selectedEdge[1], selectedEdge[2]);
+					}
+					
+					function filterRelatedObjectsEdgeSpecific(sourceActivity, targetActivity, objectType) {
+						let relObj = visualization.model.getRelObjEdge([sourceActivity, targetActivity], objectType);
 						let filteredModel = visualization.model.filterRelatedObjects(relObj);
 						visualization.setFilteredModel(filteredModel);
 					}
 					
-					function filterNonRelatedObjectsEdge() {
+					function filterNonRelatedObjectsEdgeSpecific(sourceActivity, targetActivity, objectType) {
 						let relObj = visualization.model.getRelObjEdge([selectedEdge[0], selectedEdge[1]], selectedEdge[2]);
 						let allObjOt = Object.keys(visualization.model.otObjectsView[selectedEdge[2]].objectsIds);
 						let difference = allObjOt.filter(x => !relObj.includes(x));
