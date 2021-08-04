@@ -55,7 +55,9 @@
 					</div>
 					<div class="navigation-body">		
 						<ul class="navigation-menu">
-
+							<li class="navigation-item">
+								<a href="ocel.html"><img src="static/ocpm_red.png"></img></a>&nbsp;&nbsp;&nbsp;&nbsp;
+							</li>
 							<li class="navigation-item">
 								<a class="navigation-link" href="javascript:showProcessModelPage()"><i class="fas fa-project-diagram"></i>&nbsp;Process Schema</a>
 							</li>
@@ -508,10 +510,6 @@
 				$('.hover_bkgr_fricc').hide();
 			});
 		</script>
-		<script src="scripts/pm4js/eventLog.js"></script>
-		<script type="text/javascript">
-			createVisualization();
-		</script>
 		<script type="text/javascript">
 const menu = document.querySelector('#menu');
 // hide the menu
@@ -583,5 +581,10 @@ window.addEventListener('contextmenu', event => {
 			
 			new ScrollZoom($('#graphContainer'), 4, 0.5);
 		</script>
+		
+		<!--<script src="scripts/pm4js/eventLog.js"></script>
+		<script type="text/javascript">
+			createVisualization();
+		</script>-->
 	</body>
 </html>
