@@ -201,6 +201,7 @@
 													<div class="navigation-row">
 														Filters:
 														<span id="filtersList" style="font-weight: bold">
+															No filter is applied currently.&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 														</span>
 														<button id="reset_filters" onclick="resetFilters()" class="btn btn-primary">Reset All Filters</button>
 													</div>
@@ -244,6 +245,8 @@
 					
 					function resetPageFilters() {
 						allFilters = [];
+						let filtersContainer = document.getElementById("filtersList");
+						filtersContainer.innerHTML = "No filter is applied currently.&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;";
 					}
 
 					function setFilters() {
@@ -263,11 +266,16 @@
 					
 					function setFiltersOnPage() {
 						let filtersContainer = document.getElementById("filtersList");
-						filtersContainer.innerHTML = "";
-						for (let filterId in allFilters) {
-							let filterLi = document.createElement("div");
-							filtersContainer.appendChild(filterLi);
-							filterLi.innerHTML = allFilters[filterId][0];
+						if (allFilters.length == 0) {
+							filtersContainer.innerHTML = "No filter is applied currently.&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;";
+						}
+						else {
+							filtersContainer.innerHTML = "";
+							for (let filterId in allFilters) {
+								let filterLi = document.createElement("div");
+								filtersContainer.appendChild(filterLi);
+								filterLi.innerHTML = allFilters[filterId][0];
+							}
 						}
 					}
 					
@@ -303,27 +311,27 @@
 					}
 					
 					function filterRelatedObjectsActivity() {
-						return addFilter("<i class=\"fas fa-plus-circle\"></i>Related objects ("+selectedActivity+";"+selectedOt+")&nbsp;&nbsp;&nbsp;", "filterRelatedObjectsActivitySpecific(\""+selectedActivity+"\", \""+selectedOt+"\")");
+						return addFilter("<i class=\"fas fa-plus-circle\"></i>Related objects ("+selectedActivity+";"+selectedOt+")&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;", "filterRelatedObjectsActivitySpecific(\""+selectedActivity+"\", \""+selectedOt+"\")");
 					}
 					
 					function filterNonRelatedObjectsActivity() {
-						return addFilter("<i class=\"fas fa-minus-circle\"></i>&nbsp;Non related objects ("+selectedActivity+";"+selectedOt+")&nbsp;&nbsp;&nbsp;", "filterNonRelatedObjectsActivitySpecific(\""+selectedActivity+"\", \""+selectedOt+"\")");
+						return addFilter("<i class=\"fas fa-minus-circle\"></i>&nbsp;Non related objects ("+selectedActivity+";"+selectedOt+")&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;", "filterNonRelatedObjectsActivitySpecific(\""+selectedActivity+"\", \""+selectedOt+"\")");
 					}
 					
 					function filterNonStartingWith() {
-						return addFilter("<i class=\"fas fa-chevron-right\"></i>&nbsp;Non starting with ("+selectedActivity+";"+selectedOt+")&nbsp;&nbsp;&nbsp;", "filterNonStartingWithSpecific(\""+selectedActivity+"\", \""+selectedOt+"\")");
+						return addFilter("<i class=\"fas fa-chevron-right\"></i>&nbsp;Non starting with ("+selectedActivity+";"+selectedOt+")&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;", "filterNonStartingWithSpecific(\""+selectedActivity+"\", \""+selectedOt+"\")");
 					}
 					
 					function filterNonEndingWith() {
-						return addFilter("<i class=\"fas fa-chevron-left\"></i>&nbsp;Non ending with ("+selectedActivity+";"+selectedOt+")&nbsp;&nbsp;&nbsp;", "filterNonEndingWithSpecific(\""+selectedActivity+"\", \""+selectedOt+"\")");
+						return addFilter("<i class=\"fas fa-chevron-left\"></i>&nbsp;Non ending with ("+selectedActivity+";"+selectedOt+")&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;", "filterNonEndingWithSpecific(\""+selectedActivity+"\", \""+selectedOt+"\")");
 					}
 					
 					function filterRelatedObjectsEdge() {
-						return addFilter("<i class=\"fas fa-user-plus\"></i>&nbsp;Related objects to edge ("+selectedEdge[0]+"->"+selectedEdge[1]+"@"+selectedEdge[2]+")&nbsp;&nbsp;&nbsp;", "filterRelatedObjectsEdgeSpecific(\""+selectedEdge[0]+"\", \""+selectedEdge[1]+"\", \""+selectedEdge[2]+"\")");
+						return addFilter("<i class=\"fas fa-user-plus\"></i>&nbsp;Related objects to edge ("+selectedEdge[0]+"->"+selectedEdge[1]+"@"+selectedEdge[2]+")&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;", "filterRelatedObjectsEdgeSpecific(\""+selectedEdge[0]+"\", \""+selectedEdge[1]+"\", \""+selectedEdge[2]+"\")");
 					}
 					
 					function filterNonRelatedObjectsEdge() {
-						return addFilter("<i class=\"fas fa-user-minus\"></i>&nbsp;Non related objects to edge ("+selectedEdge[0]+"->"+selectedEdge[1]+"@"+selectedEdge[2]+")&nbsp;&nbsp;&nbsp;", "filterNonRelatedObjectsEdgeSpecific(\""+selectedEdge[0]+"\", \""+selectedEdge[1]+"\", \""+selectedEdge[2]+"\")");
+						return addFilter("<i class=\"fas fa-user-minus\"></i>&nbsp;Non related objects to edge ("+selectedEdge[0]+"->"+selectedEdge[1]+"@"+selectedEdge[2]+")&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;", "filterNonRelatedObjectsEdgeSpecific(\""+selectedEdge[0]+"\", \""+selectedEdge[1]+"\", \""+selectedEdge[2]+"\")");
 					}
 					
 					function filterObjectTypes() {
@@ -333,7 +341,7 @@
 								selectedOptions.push(option.value);
 							}
 						}
-						return addFilter("<i class=\"fab fa-superpowers\"></i>&nbsp;Object types filter", "filterObjectsTypesSpecific(\""+selectedOptions.toString()+"\")");
+						return addFilter("<i class=\"fab fa-superpowers\"></i>&nbsp;Object types filter&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;", "filterObjectsTypesSpecific(\""+selectedOptions.toString()+"\")");
 					}
 					
 					function filterRelatedObjectsActivitySpecific(selectedActivity, selectedOt) {
