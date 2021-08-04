@@ -266,16 +266,6 @@
 						download(xmlStri, "flattened.xes", "text/xml");
 					}
 					
-					function filterObjectTypes() {
-						let selectedOptions = [];
-						for (let option of document.getElementById("objectTypes").children) {
-							if (option.selected) {
-								selectedOptions.push(option.value);
-							}
-						}
-						return filterObjectsTypesSpecific(selectedOptions);
-					}
-					
 					function expandActivity() {
 						visualization.doExpandActivity(selectedActivity);
 						visualization.represent();
@@ -307,11 +297,21 @@
 					}
 					
 					function filterRelatedObjectsEdge() {
-						return filterRelatedObjectsEdgeSpecific(selectedEdge[0], selectedEdge[1], selectedEdge[2]);
+						return addFilter("Related objects to edge ("+selectedEdge[0]+"->"+selectedEdge[1]+"@"+selectedEdge[2]+")", "filterRelatedObjectsEdgeSpecific(\""+selectedEdge[0]+"\", \""+selectedEdge[1]+"\", \""+selectedEdge[2]+"\")");
 					}
 					
 					function filterNonRelatedObjectsEdge() {
-						return filterNonRelatedObjectsEdgeSpecific(selectedEdge[0], selectedEdge[1], selectedEdge[2]);
+						return addFilter("Non related objects to edge ("+selectedEdge[0]+"->"+selectedEdge[1]+"@"+selectedEdge[2]+")", "filterNonRelatedObjectsEdgeSpecific(\""+selectedEdge[0]+"\", \""+selectedEdge[1]+"\", \""+selectedEdge[2]+"\")");
+					}
+					
+					function filterObjectTypes() {
+						let selectedOptions = [];
+						for (let option of document.getElementById("objectTypes").children) {
+							if (option.selected) {
+								selectedOptions.push(option.value);
+							}
+						}
+						return addFilter("Object types filter", "filterObjectsTypesSpecific(\""+selectedOptions.toString()+"\")");
 					}
 					
 					function filterRelatedObjectsActivitySpecific(selectedActivity, selectedOt) {
@@ -377,6 +377,7 @@
 					}
 					
 					function filterObjectsTypesSpecific(selectedOptions) {
+						selectedOptions = selectedOptions.split(",");
 						let filteredModel = visualization.model.filterObjectTypes(selectedOptions);
 						visualization.setFilteredModel(filteredModel);
 					}
