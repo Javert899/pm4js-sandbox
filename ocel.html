@@ -243,6 +243,12 @@
 						allFilters = [];
 					}
 					
+					function addFilter(filterDescription, filterMethod) {
+						this.allFilters.push([filterDescription, filterMethod]);
+						console.log(filterDescription+" "+filterMethod);
+						return eval(filterMethod);
+					}
+					
 					function downloadJsonOcel() {
 						let jsonStri = JsonOcelExporter.exportLog(visualization.model.ocel);
 						download(jsonStri, "obj-centr-log.jsonocel", "text/json");
@@ -270,55 +276,9 @@
 						return filterObjectsTypesSpecific(selectedOptions);
 					}
 					
-					function filterRelatedObjectsActivity() {
-						return filterRelatedObjectsActivitySpecific(selectedActivity, selectedOt);
-					}
-					
-					function filterNonRelatedObjectsActivity() {
-						return filterNonRelatedObjectsActivitySpecific(selectedActivity, selectedOt);
-					}
-					
 					function expandActivity() {
 						visualization.doExpandActivity(selectedActivity);
 						visualization.represent();
-					}
-					
-					function filterNonStartingWith() {
-						return filterNonStartingWithSpecific(selectedActivity, selectedOt);
-					}
-					
-					function filterNonEndingWith() {
-						return filterNonEndingWithSpecific(selectedActivity, selectedOt);
-					}
-					
-					function filterRelatedObjectsActivitySpecific(selectedActivity, selectedOt) {
-						let relObj = visualization.model.getRelObjActivity(selectedActivity, selectedOt);
-						let filteredModel = visualization.model.filterRelatedObjects(relObj);
-						visualization.setFilteredModel(filteredModel);
-					}
-					
-					function filterNonRelatedObjectsActivitySpecific(selectedActivity, selectedOt) {
-						let relObj = visualization.model.getRelObjActivity(selectedActivity, selectedOt);
-						let allObjOt = Object.keys(visualization.model.otObjectsView[selectedOt].objectsIds);
-						let difference = allObjOt.filter(x => !relObj.includes(x));
-						let filteredModel = visualization.model.filterNonRelatedObjects(difference, relObj);
-						visualization.setFilteredModel(filteredModel); 
-					}
-					
-					function filterNonStartingWithSpecific(selectedActivity, selectedOt) {
-						let startingWith = visualization.model.otObjectsView[selectedOt].getStartingWith(selectedActivity);
-						let allObjOt = Object.keys(visualization.model.otObjectsView[selectedOt].objectsIds);
-						let difference = allObjOt.filter(x => !startingWith.includes(x));
-						let filteredModel = visualization.model.filterNonRelatedObjects(difference, startingWith);
-						visualization.setFilteredModel(filteredModel);
-					}
-					
-					function filterNonEndingWithSpecific(selectedActivity, selectedOt) {
-						let endingWith = visualization.model.otObjectsView[selectedOt].getEndingWith(selectedActivity);
-						let allObjOt = Object.keys(visualization.model.otObjectsView[selectedOt].objectsIds);
-						let difference = allObjOt.filter(x => !endingWith.includes(x));
-						let filteredModel = visualization.model.filterNonRelatedObjects(difference, endingWith);
-						visualization.setFilteredModel(filteredModel);
 					}
 					
 					function seeRelatedObjAct() {
@@ -330,6 +290,22 @@
 						Swal.fire({title: "Related Objects", confirmButton: "ok", html: stru});
 					}
 					
+					function filterRelatedObjectsActivity() {
+						return addFilter("Related objects ("+selectedActivity+";"+selectedOt+")", "filterRelatedObjectsActivitySpecific(\""+selectedActivity+"\", \""+selectedOt+"\")");
+					}
+					
+					function filterNonRelatedObjectsActivity() {
+						return addFilter("Non related objects ("+selectedActivity+";"+selectedOt+")", "filterNonRelatedObjectsActivitySpecific(\""+selectedActivity+"\", \""+selectedOt+"\")");
+					}
+					
+					function filterNonStartingWith() {
+						return addFilter("Non starting with ("+selectedActivity+";"+selectedOt+")", "filterNonStartingWithSpecific(\""+selectedActivity+"\", \""+selectedOt+"\")");
+					}
+					
+					function filterNonEndingWith() {
+						return addFilter("Non ending with ("+selectedActivity+";"+selectedOt+")", "filterNonEndingWithSpecific(\""+selectedActivity+"\", \""+selectedOt+"\")");
+					}
+					
 					function filterRelatedObjectsEdge() {
 						return filterRelatedObjectsEdgeSpecific(selectedEdge[0], selectedEdge[1], selectedEdge[2]);
 					}
@@ -338,13 +314,61 @@
 						return filterNonRelatedObjectsEdgeSpecific(selectedEdge[0], selectedEdge[1], selectedEdge[2]);
 					}
 					
+					function filterRelatedObjectsActivitySpecific(selectedActivity, selectedOt) {
+						if (selectedOt == "null") {
+							selectedOt = null;
+						}
+						let relObj = visualization.model.getRelObjActivity(selectedActivity, selectedOt);
+						let filteredModel = visualization.model.filterRelatedObjects(relObj);
+						visualization.setFilteredModel(filteredModel);
+					}
+					
+					function filterNonRelatedObjectsActivitySpecific(selectedActivity, selectedOt) {
+						if (selectedOt == "null") {
+							selectedOt = null;
+						}
+						let relObj = visualization.model.getRelObjActivity(selectedActivity, selectedOt);
+						let allObjOt = Object.keys(visualization.model.otObjectsView[selectedOt].objectsIds);
+						let difference = allObjOt.filter(x => !relObj.includes(x));
+						let filteredModel = visualization.model.filterNonRelatedObjects(difference, relObj);
+						visualization.setFilteredModel(filteredModel); 
+					}
+					
+					function filterNonStartingWithSpecific(selectedActivity, selectedOt) {
+						if (selectedOt == "null") {
+							selectedOt = null;
+						}
+						let startingWith = visualization.model.otObjectsView[selectedOt].getStartingWith(selectedActivity);
+						let allObjOt = Object.keys(visualization.model.otObjectsView[selectedOt].objectsIds);
+						let difference = allObjOt.filter(x => !startingWith.includes(x));
+						let filteredModel = visualization.model.filterNonRelatedObjects(difference, startingWith);
+						visualization.setFilteredModel(filteredModel);
+					}
+					
+					function filterNonEndingWithSpecific(selectedActivity, selectedOt) {
+						if (selectedOt == "null") {
+							selectedOt = null;
+						}
+						let endingWith = visualization.model.otObjectsView[selectedOt].getEndingWith(selectedActivity);
+						let allObjOt = Object.keys(visualization.model.otObjectsView[selectedOt].objectsIds);
+						let difference = allObjOt.filter(x => !endingWith.includes(x));
+						let filteredModel = visualization.model.filterNonRelatedObjects(difference, endingWith);
+						visualization.setFilteredModel(filteredModel);
+					}
+					
 					function filterRelatedObjectsEdgeSpecific(sourceActivity, targetActivity, objectType) {
+						if (selectedOt == "null") {
+							selectedOt = null;
+						}
 						let relObj = visualization.model.getRelObjEdge([sourceActivity, targetActivity], objectType);
 						let filteredModel = visualization.model.filterRelatedObjects(relObj);
 						visualization.setFilteredModel(filteredModel);
 					}
 					
 					function filterNonRelatedObjectsEdgeSpecific(sourceActivity, targetActivity, objectType) {
+						if (selectedOt == "null") {
+							selectedOt = null;
+						}
 						let relObj = visualization.model.getRelObjEdge([selectedEdge[0], selectedEdge[1]], selectedEdge[2]);
 						let allObjOt = Object.keys(visualization.model.otObjectsView[selectedEdge[2]].objectsIds);
 						let difference = allObjOt.filter(x => !relObj.includes(x));
