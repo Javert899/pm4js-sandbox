@@ -211,7 +211,7 @@
 				<script type="text/javascript">
 					var navigationGraph = null;
 					
-					function doVisualization() {
+					function doVisualization(initNavGraph=true) {
 						let af = document.getElementById("af_slider").value / 100.0;
 						let pf = document.getElementById("pf_slider").value / 100.0;
 						let annotation = parseInt(document.getElementById("annotationSelector").value);
@@ -220,14 +220,15 @@
 						visualization.IDX = annotation;
 						visualization.displayType = document.getElementById("visualizationType").value;
 						visualization.represent();
-						if (navigationGraph == null) {
+						if (navigationGraph == null && initNavGraph) {
 							navigationGraph = new Navigation(document.getElementById("navigationGraph"));
+							navigationGraph = 1;
 						}
 					}
 					
 					function resetFilters() {
 						visualization.resetFilters();
-						doVisualization();
+						doVisualization(false);
 					}
 					
 					function downloadJsonOcel() {
@@ -259,17 +260,11 @@
 					}
 					
 					function filterRelatedObjectsActivity() {
-						let relObj = visualization.model.getRelObjActivity(selectedActivity, selectedOt);
-						let filteredModel = visualization.model.filterRelatedObjects(relObj);
-						visualization.setFilteredModel(filteredModel);
+						return filterRelatedObjectsActivitySpecific(selectedActivity, selectedOt);
 					}
 					
 					function filterNonRelatedObjectsActivity() {
-						let relObj = visualization.model.getRelObjActivity(selectedActivity, selectedOt);
-						let allObjOt = Object.keys(visualization.model.otObjectsView[selectedOt].objectsIds);
-						let difference = allObjOt.filter(x => !relObj.includes(x));
-						let filteredModel = visualization.model.filterNonRelatedObjects(difference, relObj);
-						visualization.setFilteredModel(filteredModel);
+						return filterNonRelatedObjectsActivitySpecific(selectedActivity, selectedOt);
 					}
 					
 					function expandActivity() {
@@ -278,6 +273,28 @@
 					}
 					
 					function filterNonStartingWith() {
+						return filterNonStartingWithSpecific(selectedActivity, selectedOt);
+					}
+					
+					function filterNonEndingWith() {
+						return filterNonEndingWithSpecific(selectedActivity, selectedOt);
+					}
+					
+					function filterRelatedObjectsActivitySpecific(selectedActivity, selectedOt) {
+						let relObj = visualization.model.getRelObjActivity(selectedActivity, selectedOt);
+						let filteredModel = visualization.model.filterRelatedObjects(relObj);
+						visualization.setFilteredModel(filteredModel);
+					}
+					
+					function filterNonRelatedObjectsActivitySpecific(selectedActivity, selectedOt) {
+						let relObj = visualization.model.getRelObjActivity(selectedActivity, selectedOt);
+						let allObjOt = Object.keys(visualization.model.otObjectsView[selectedOt].objectsIds);
+						let difference = allObjOt.filter(x => !relObj.includes(x));
+						let filteredModel = visualization.model.filterNonRelatedObjects(difference, relObj);
+						visualization.setFilteredModel(filteredModel); 
+					}
+					
+					function filterNonStartingWithSpecific(selectedActivity, selectedOt) {
 						let startingWith = visualization.model.otObjectsView[selectedOt].getStartingWith(selectedActivity);
 						let allObjOt = Object.keys(visualization.model.otObjectsView[selectedOt].objectsIds);
 						let difference = allObjOt.filter(x => !startingWith.includes(x));
@@ -285,7 +302,7 @@
 						visualization.setFilteredModel(filteredModel);
 					}
 					
-					function filterNonEndingWith() {
+					function filterNonEndingWithSpecific(selectedActivity, selectedOt) {
 						let endingWith = visualization.model.otObjectsView[selectedOt].getEndingWith(selectedActivity);
 						let allObjOt = Object.keys(visualization.model.otObjectsView[selectedOt].objectsIds);
 						let difference = allObjOt.filter(x => !endingWith.includes(x));
