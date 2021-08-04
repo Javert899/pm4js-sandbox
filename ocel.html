@@ -121,11 +121,17 @@
 							<div class="panel-heading"><h4>Statistics</h4></div>
 							<div class="panel-body">
 								<div>N. Events:</div>
-								<div id="numEvents" style="font-family: geneva; font-weight: bold; font-size: 18pt">0</div>
+								<div id="numEvents0">
+								<span id="numEvents" style="font-family: geneva; font-weight: bold; font-size: 18pt">0</span>/<span id="numEventsOriginal" style="font-family: geneva; font-weight: bold; font-size: 18pt">0</span>
+								</div>
 								<div>N. Unique Objects:</div>
-								<div id="numUniqObjects" style="font-family: geneva; font-weight: bold; font-size: 18pt">0</div>
+								<div id="numUniqueObjects0">
+								<span id="numUniqObjects" style="font-family: geneva; font-weight: bold; font-size: 18pt">0</span>/<span id="numUniqObjectsOriginal" style="font-family: geneva; font-weight: bold; font-size: 18pt">0</span>
+								</div>
 								<div>N. Total Objects:</div>
-								<div id="numTotalObjects" style="font-family: geneva; font-weight: bold; font-size: 18pt">0</div>
+								<div id="numTotalObjects0">
+								<span id="numTotalObjects" style="font-family: geneva; font-weight: bold; font-size: 18pt">0</span>/<span id="numTotalObjectsOriginal" style="font-family: geneva; font-weight: bold; font-size: 18pt">0</span>
+								</div>
 							</div>
 						</div>
 						<div>&nbsp;</div>
@@ -351,10 +357,13 @@
 						selectedEdge = edge;
 					}
 					
-					function callbackStatistics(events, uo, to) {
+					function callbackStatistics(events, uo, to, originalEvents, originalUo, originalTo) {
 						document.getElementById("numEvents").innerHTML = events;
 						document.getElementById("numUniqObjects").innerHTML = uo;
 						document.getElementById("numTotalObjects").innerHTML = to;
+						document.getElementById("numEventsOriginal").innerHTML = originalEvents;
+						document.getElementById("numUniqObjectsOriginal").innerHTML = originalUo;
+						document.getElementById("numTotalObjectsOriginal").innerHTML = originalTo;
 					}
 					
 					function allowDrop(ev) {

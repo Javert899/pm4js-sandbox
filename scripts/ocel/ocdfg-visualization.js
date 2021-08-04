@@ -58,7 +58,7 @@ class OcdfgVisualization {
 	
 	populateStatistics() {
 		if (this.callbackStatistics != null) {
-			this.callbackStatistics(this.model.getNumEvents(), this.model.getNumUniqueObjects(), this.model.getNumTotalObjects());
+			this.callbackStatistics(this.model.getNumEvents(), this.model.getNumUniqueObjects(), this.model.getNumTotalObjects(), this.original.getNumEvents(), this.original.getNumUniqueObjects(), this.original.getNumTotalObjects());
 		}
 	}
 	
