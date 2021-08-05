@@ -108,7 +108,7 @@ class OcdfgExecutionGraph {
 			}
 			else {
 				countPerType[nodeType] += 1;
-				nodesNames[node] = nodeType + " ("+countPerType[nodeType]+")";
+				nodesNames[node] = nodeType + "###("+countPerType[nodeType]+")";
 			}
 		}
 		let typeEdges = [];
@@ -216,7 +216,7 @@ class OcdfgExecutionGraph {
 		let gv = [];
 		gv.push("digraph G {");
 		for (let node of nodes) {
-			gv.push(nodesUuid[node]+" [label=\""+node+"\", style=\"filled\", fillcolor=\""+OcdfgExecutionGraph.stringToColour(node)+"\", fontcolor=\"white\"]");
+			gv.push(nodesUuid[node]+" [label=\""+node.replace("###"," ")+"\", style=\"filled\", fillcolor=\""+OcdfgExecutionGraph.stringToColour(node.split("###")[0])+"\", fontcolor=\"white\"]");
 		}
 		for (let edge of edges) {
 			gv.push(nodesUuid[edge[0]]+"->"+nodesUuid[edge[1]]);
