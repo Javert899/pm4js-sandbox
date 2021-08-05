@@ -124,6 +124,7 @@ class OcdfgExecutionGraph {
 		let descrObjs = {};
 		let descrDurations = {};
 		let vectExecutions = {};
+		let descrGraphviz = {};
 		let objExecutionDuration = {};
 		let objectsIds = this.model.overallObjectsView.objectsIdsSorted;
 		for (let obj in this.outgoingEdges) {
@@ -139,6 +140,8 @@ class OcdfgExecutionGraph {
 						descrCount[descr] = 0;
 						descrObjs[descr] = [];
 						descrDurations[descr] = [];
+						descrGraphviz[descr] = this.getGraphvizPerExecution(vect, descr);
+						console.log(descrGraphviz[descr]);
 					}
 					descrCount[descr] += 1;
 					descrObjs[descr].push(obj);
@@ -158,5 +161,53 @@ class OcdfgExecutionGraph {
 		}
 		descrCountArray.sort((a,b) => b[1]-a[1]);
 		return [descrCountArray, descrObjs, vectExecutions, objExecutionDuration, descrDurations];
+	}
+	
+	static uuidv4() {
+	  return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
+		var r = Math.random() * 16 | 0, v = c == 'x' ? r : (r & 0x3 | 0x8);
+		return v.toString(16);
+	  });
+	}
+	
+	static nodeUuid() {
+		let uuid = OcdfgExecutionGraph.uuidv4();
+		return "n"+uuid.replace(/-/g, "");
+	}
+	
+	getGraphvizPerExecution(vect, descr) {
+		let edges = descr.split("@#@");
+		let i = 0;
+		while (i < edges.length) {
+			edges[i] = edges[i].split(",");
+			i++;
+		}
+		let nodes = [];
+		let nodesUuid = {};
+		let invNodesUuid = {};
+		for (let edge of edges) {
+			if (!(nodes.includes(edge[0]))) {
+				nodes.push(edge[0]);
+				let uuid = OcdfgExecutionGraph.nodeUuid();
+				nodesUuid[edge[0]] = uuid;
+				invNodesUuid[uuid] = edge[0];
+			}
+			if (!(nodes.includes(edge[1]))) {
+				nodes.push(edge[1]);
+				let uuid = OcdfgExecutionGraph.nodeUuid();
+				nodesUuid[edge[1]] = uuid;
+				invNodesUuid[uuid] = edge[1];
+			}
+		}
+		let gv = [];
+		gv.push("digraph G {");
+		for (let node of nodes) {
+			gv.push(nodesUuid[node]+" [label=\""+node+"\"]");
+		}
+		for (let edge of edges) {
+			gv.push(nodesUuid[edge[0]]+"->"+nodesUuid[edge[1]]);
+		}
+		gv.push("}");
+		return gv.join("\n");
 	}
 }
