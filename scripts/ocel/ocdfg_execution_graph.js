@@ -122,25 +122,41 @@ class OcdfgExecutionGraph {
 	groupNodesPerExecution() {
 		let descrCount = {};
 		let descrObjs = {};
+		let descrDurations = {};
 		let vectExecutions = {};
+		let objExecutionDuration = {};
+		let objectsIds = this.model.overallObjectsView.objectsIdsSorted;
 		for (let obj in this.outgoingEdges) {
-			let vect = this.getSubgraphPerNode(obj);
-			vectExecutions[obj] = vect;
-			let descr = this.getDescriptionPerExecution(vect);
-			if (descr != "") {
-				if (!(descr in descrCount)) {
-					descrCount[descr] = 0;
-					descrObjs[descr] = [];
+			try {
+				let vect = this.getSubgraphPerNode(obj);
+				let firstObjectOfExecution = vect[2][0];
+				let lastObjectOfExecution = vect[2][vect[2].length - 1];
+				objExecutionDuration[obj] = objectsIds[lastObjectOfExecution][objectsIds[lastObjectOfExecution].length - 1][2] - objectsIds[firstObjectOfExecution][0][2];
+				vectExecutions[obj] = vect;
+				let descr = this.getDescriptionPerExecution(vect);
+				if (descr != "") {
+					if (!(descr in descrCount)) {
+						descrCount[descr] = 0;
+						descrObjs[descr] = [];
+						descrDurations[descr] = [];
+					}
+					descrCount[descr] += 1;
+					descrObjs[descr].push(obj);
+					descrDurations[descr].push(objExecutionDuration[obj]);
 				}
-				descrCount[descr] += 1;
-				descrObjs[descr].push(obj);
 			}
+			catch (err) {
+			}
+		}
+		for (let key in descrDurations) {
+			descrDurations[key].sort((a, b) => a - b);
+			descrDurations[key] = descrDurations[key][Math.floor(descrDurations[key].length / 2)];
 		}
 		let descrCountArray = [];
 		for (let el in descrCount) {
 			descrCountArray.push([el, descrCount[el]]);
 		}
 		descrCountArray.sort((a,b) => b[1]-a[1]);
-		return [descrCountArray, descrObjs, vectExecutions];
+		return [descrCountArray, descrObjs, vectExecutions, objExecutionDuration, descrDurations];
 	}
 }
