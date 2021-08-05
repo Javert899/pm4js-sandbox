@@ -8,8 +8,9 @@
 		<script src="scripts/generic/bootstrap.min.js"></script>
 		<script src="scripts/generic/navigation.min.js"></script>
 		<script src="scripts/generic/fontawesome-all.min.js"></script>
-		<script src="scripts/pm4js_latest.js"></script>
+		<script src="scripts/generic/sorttable.js"></script>
 		<script src="scripts/generic/mxClient.min.js"></script>
+		<script src="scripts/pm4js_latest.js"></script>
 		<script src="scripts/ocel/eventsView.js"></script>
 		<script src="scripts/ocel/objectsView.js"></script>
 		<script src="scripts/ocel/edgesView.js"></script>
@@ -20,7 +21,6 @@
 		<script src="scripts/ocel/jsonocel-exporter.js"></script>
 		<script src="scripts/ocel/jsonocel-importer.js"></script>
 		<script src="scripts/ocel/ocel-flattening.js"></script>
-		<script src="scripts/generic/sorttable.js"></script>
 		<script src="scripts/ocel/eventsList.js"></script>
 		<script src="scripts/ocel/objectsList.js"></script>
 		<script src="scripts/ocel/plotly-graphs.js"></script>
@@ -37,7 +37,6 @@
 			let selectedOt = null;
 			let selectedEdge = null;
 			let visualization = null;
-			//let eventLog = null;
 		</script>
 		<div id="uploadPart" style="display: ">
 			<!--<img src="static/pads_rwth.png" /><br />
@@ -221,7 +220,7 @@
 				<script type="text/javascript">
 					var navigationGraph = null;
 					var allFilters = [];
-					
+										
 					function doVisualization(initNavGraph=true) {
 						let af = document.getElementById("af_slider").value / 100.0;
 						let pf = document.getElementById("pf_slider").value / 100.0;
@@ -744,7 +743,6 @@ window.addEventListener('contextmenu', event => {
 			new ScrollZoom($('#graphContainer'), 4, 0.5);
 		</script>
 		
-		<script src="scripts/pm4js/eventLog.js"></script>
 		<script type="text/javascript">
 			createVisualization();
 		</script>
