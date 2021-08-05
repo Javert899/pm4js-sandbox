@@ -141,7 +141,6 @@ class OcdfgExecutionGraph {
 						descrObjs[descr] = [];
 						descrDurations[descr] = [];
 						descrGraphviz[descr] = this.getGraphvizPerExecution(vect, descr);
-						console.log(descrGraphviz[descr]);
 					}
 					descrCount[descr] += 1;
 					descrObjs[descr].push(obj);
@@ -149,7 +148,6 @@ class OcdfgExecutionGraph {
 				}
 			}
 			catch (err) {
-				console.log(err);
 			}
 		}
 		for (let key in descrDurations) {
