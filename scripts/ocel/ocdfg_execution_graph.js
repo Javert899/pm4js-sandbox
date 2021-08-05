@@ -127,6 +127,7 @@ class OcdfgExecutionGraph {
 		let descrGraphviz = {};
 		let objExecutionDuration = {};
 		let objectsIds = this.model.overallObjectsView.objectsIdsSorted;
+		let objGraphviz = {};
 		for (let obj in this.outgoingEdges) {
 			try {
 				let vect = this.getSubgraphPerNode(obj);
@@ -135,12 +136,13 @@ class OcdfgExecutionGraph {
 				objExecutionDuration[obj] = objectsIds[lastObjectOfExecution][objectsIds[lastObjectOfExecution].length - 1][2] - objectsIds[firstObjectOfExecution][0][2];
 				vectExecutions[obj] = vect;
 				let descr = this.getDescriptionPerExecution(vect);
+				objGraphviz[obj] = this.getGraphvizPerExecution(vect);
 				if (descr != "") {
 					if (!(descr in descrCount)) {
 						descrCount[descr] = 0;
 						descrObjs[descr] = [];
 						descrDurations[descr] = [];
-						descrGraphviz[descr] = this.getGraphvizPerExecution(vect, descr);
+						descrGraphviz[descr] = this.getGraphvizPerExecutionDescr(vect, descr);
 					}
 					descrCount[descr] += 1;
 					descrObjs[descr].push(obj);
@@ -148,6 +150,7 @@ class OcdfgExecutionGraph {
 				}
 			}
 			catch (err) {
+				console.log(err);
 			}
 		}
 		for (let key in descrDurations) {
@@ -159,7 +162,7 @@ class OcdfgExecutionGraph {
 			descrCountArray.push([el, descrCount[el]]);
 		}
 		descrCountArray.sort((a,b) => b[1]-a[1]);
-		return [descrCountArray, descrObjs, vectExecutions, objExecutionDuration, descrDurations];
+		return [descrCountArray, descrObjs, vectExecutions, objExecutionDuration, descrDurations, objGraphviz, descrGraphviz];
 	}
 	
 	static uuidv4() {
@@ -187,7 +190,7 @@ class OcdfgExecutionGraph {
 	  return colour;
 	}
 	
-	getGraphvizPerExecution(vect, descr) {
+	getGraphvizPerExecutionDescr(vect, descr) {
 		let edges = descr.split("@#@");
 		let i = 0;
 		while (i < edges.length) {
@@ -196,25 +199,57 @@ class OcdfgExecutionGraph {
 		}
 		let nodes = [];
 		let nodesUuid = {};
-		let invNodesUuid = {};
 		for (let edge of edges) {
 			if (!(nodes.includes(edge[0]))) {
 				nodes.push(edge[0]);
 				let uuid = OcdfgExecutionGraph.nodeUuid();
 				nodesUuid[edge[0]] = uuid;
-				invNodesUuid[uuid] = edge[0];
 			}
 			if (!(nodes.includes(edge[1]))) {
 				nodes.push(edge[1]);
 				let uuid = OcdfgExecutionGraph.nodeUuid();
 				nodesUuid[edge[1]] = uuid;
-				invNodesUuid[uuid] = edge[1];
 			}
 		}
 		let gv = [];
 		gv.push("digraph G {");
 		for (let node of nodes) {
 			gv.push(nodesUuid[node]+" [label=\""+node.replace("###"," ")+"\", style=\"filled\", fillcolor=\""+OcdfgExecutionGraph.stringToColour(node.split("###")[0])+"\", fontcolor=\"white\"]");
+		}
+		for (let edge of edges) {
+			gv.push(nodesUuid[edge[0]]+"->"+nodesUuid[edge[1]]);
+		}
+		gv.push("}");
+		return gv.join("\n");
+	}
+	
+	getGraphvizPerExecution(vect) {
+		let vectNodes = vect[0];
+		let edges0 = vect[1];
+		let edges = [];
+		let i = 0;
+		while (i < edges0.length) {
+			edges.push(edges0[i].split(","));
+			i++;
+		}
+		let nodes = [];
+		let nodesUuid = {};
+		for (let edge of edges) {
+			if (!(nodes.includes(edge[0]))) {
+				nodes.push(edge[0]);
+				let uuid = OcdfgExecutionGraph.nodeUuid();
+				nodesUuid[edge[0]] = uuid;
+			}
+			if (!(nodes.includes(edge[1]))) {
+				nodes.push(edge[1]);
+				let uuid = OcdfgExecutionGraph.nodeUuid();
+				nodesUuid[edge[1]] = uuid;
+			}
+		}
+		let gv = [];
+		gv.push("digraph G {");
+		for (let node of nodes) {
+			gv.push(nodesUuid[node]+" [label=\""+node+"\n("+vectNodes[node]+")\", style=\"filled\", fillcolor=\""+OcdfgExecutionGraph.stringToColour(vectNodes[node])+"\", fontcolor=\"white\"]");
 		}
 		for (let edge of edges) {
 			gv.push(nodesUuid[edge[0]]+"->"+nodesUuid[edge[1]]);
