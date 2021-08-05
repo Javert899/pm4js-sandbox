@@ -104,11 +104,11 @@ class OcdfgExecutionGraph {
 			let nodeType = nodes[node];
 			if (!(nodeType in countPerType)) {
 				nodesNames[node] = nodeType;
-				countPerType[node] = 1;
+				countPerType[nodeType] = 1;
 			}
 			else {
-				countPerType[node] += 1;
-				nodesNames[node] = nodeType + " (2)";
+				countPerType[nodeType] += 1;
+				nodesNames[node] = nodeType + " ("+countPerType[nodeType]+")";
 			}
 		}
 		let typeEdges = [];
@@ -149,6 +149,7 @@ class OcdfgExecutionGraph {
 				}
 			}
 			catch (err) {
+				console.log(err);
 			}
 		}
 		for (let key in descrDurations) {
@@ -173,6 +174,19 @@ class OcdfgExecutionGraph {
 	static nodeUuid() {
 		let uuid = OcdfgExecutionGraph.uuidv4();
 		return "n"+uuid.replace(/-/g, "");
+	}
+	
+	static stringToColour(str) {
+	  var hash = 0;
+	  for (var i = 0; i < str.length; i++) {
+		hash = str.charCodeAt(i) + ((hash << 5) - hash);
+	  }
+	  var colour = '#';
+	  for (var i = 0; i < 3; i++) {
+		var value = (hash >> (i * 8)) & 0xFF;
+		colour += ('00' + value.toString(16)).substr(-2);
+	  }
+	  return colour;
 	}
 	
 	getGraphvizPerExecution(vect, descr) {
@@ -202,7 +216,7 @@ class OcdfgExecutionGraph {
 		let gv = [];
 		gv.push("digraph G {");
 		for (let node of nodes) {
-			gv.push(nodesUuid[node]+" [label=\""+node+"\"]");
+			gv.push(nodesUuid[node]+" [label=\""+node+"\", style=\"filled\", fillcolor=\""+OcdfgExecutionGraph.stringToColour(node)+"\", fontcolor=\"white\"]");
 		}
 		for (let edge of edges) {
 			gv.push(nodesUuid[edge[0]]+"->"+nodesUuid[edge[1]]);
