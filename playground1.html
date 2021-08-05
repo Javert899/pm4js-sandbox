@@ -5,6 +5,7 @@
 		<script src="scripts/ocel/eventsView.js"></script>
 		<script src="scripts/ocel/objectsView.js"></script>
 		<script src="scripts/ocel/edgesView.js"></script>
+		<script src="scripts/ocel/ocdfg_execution_graph.js"></script>
 		<script src="scripts/ocel/ocdfg-model.js"></script>
 		<script src="scripts/ocel/ocdfg-visualization.js"></script>
 		<script src="scripts/ocel/xmlocel-exporter.js"></script>
@@ -15,15 +16,13 @@
 		<script src="scripts/ocel/eventsList.js"></script>
 		<script src="scripts/ocel/objectsList.js"></script>
 		<script src="scripts/ocel/plotly-graphs.js"></script>
-		<script src="scripts/ocel/ocdfg_execution_graph.js"></script>
 		<script src="logs/example-jsonocel.js"></script>
 	</head>
 	<body>
 		<script type="text/javascript">
 			model = new OcdfgModel(eventLog);
-			executionGraph = new OcdfgExecutionGraph(model);
-			let output = executionGraph.groupNodesPerExecution();
-			console.log(output[4]);
+			console.log(model.executionGraph);
+			console.log(model.executions);
 		</script>
 	</body>
 </html>

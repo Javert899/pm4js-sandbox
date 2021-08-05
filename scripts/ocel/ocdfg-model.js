@@ -10,6 +10,8 @@ class OcdfgModel {
 		this.otInductiveModels = {};
 		this.otReplayedTraces = {};
 		this.otTransMap = {};
+		this.executionGraph = null;
+		this.executions = null;
 		this.calculate();
 	}
 	
@@ -51,6 +53,8 @@ class OcdfgModel {
 			this.otObjectsView[ot].calculate();
 			this.otEdges[ot] = new EdgesView(this.ocel, this.otObjectsView[ot], this.otEventsView[ot]);
 		}
+		this.executionGraph = new OcdfgExecutionGraph(this);
+		this.executions = this.executionGraph.groupNodesPerExecution();
 	}
 	
 	filterObjectTypes(objTypes) {
