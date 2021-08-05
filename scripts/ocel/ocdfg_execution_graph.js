@@ -35,21 +35,21 @@ class OcdfgExecutionGraph {
 				}
 			}
 		}
-		//console.log(this.outgoingEdges);
 	}
 	
 	getSubgraphPerNode(nodeId) {
 		let nodes = {};
 		let edges = [];
 		let toVisit = [];
+		nodes[nodeId] = this.model.ocel["ocel:objects"][nodeId]["ocel:type"];
 		for (let outgoingNode in this.outgoingEdges[nodeId]) {
 			toVisit.push([nodeId, outgoingNode]);
 		}
 		while (toVisit.length > 0) {
 			let edge = toVisit.shift();
-			nodes[edge[0]] = 0;
-			nodes[edge[1]] = 0;
-			edges.push(edge);
+			nodes[edge[0]] = this.model.ocel["ocel:objects"][edge[0]]["ocel:type"];
+			nodes[edge[1]] = this.model.ocel["ocel:objects"][edge[1]]["ocel:type"];
+			edges.push(edge.toString());
 			for (let outgoingNode in this.outgoingEdges[edge[1]]) {
 				toVisit.push([edge[1], outgoingNode]);
 			}
@@ -59,13 +59,88 @@ class OcdfgExecutionGraph {
 		}
 		while (toVisit.length > 0) {
 			let edge = toVisit.shift();
-			nodes[edge[0]] = 0;
-			nodes[edge[1]] = 0;
-			edges.push(edge);
+			nodes[edge[0]] = this.model.ocel["ocel:objects"][edge[0]]["ocel:type"];
+			nodes[edge[1]] = this.model.ocel["ocel:objects"][edge[1]]["ocel:type"];
+			edges.push(edge.toString());
 			for (let ingoingNode in this.ingoingEdges[edge[0]]) {
 				toVisit.push([ingoingNode, edge[0]]);
 			}
 		}
-		console.log(edges);
+		let sortedNodes = Object.keys(nodes);
+		sortedNodes.sort(function(a, b) {
+			if (edges.includes([a, b].toString())) {
+				return -1;
+			}
+			else if (edges.includes([b, a].toString())) {
+				return 1;
+			}
+			return 0;
+		});
+		let sortedNodesIdx = {};
+		for (let nodeId in sortedNodes) {
+			sortedNodesIdx[sortedNodes[nodeId]] = nodeId;
+		}
+		edges.sort(function(a, b) {
+			a = a.split(",");
+			b = b.split(",");
+			if (sortedNodesIdx[a[0]] < sortedNodesIdx[b[0]]) {
+				return -1;
+			}
+			else if (sortedNodesIdx[a[0]] > sortedNodesIdx[b[0]]) {
+				return 1;
+			}
+			return 0
+		});
+		return [nodes, edges, sortedNodes];
+	}
+	
+	getDescriptionPerExecution(vect) {
+		let nodes = vect[0];
+		let edges = vect[1];
+		let sortedNodes = vect[2]; 
+		let countPerType = {};
+		let nodesNames = {};
+		for (let node of sortedNodes) {
+			let nodeType = nodes[node];
+			if (!(nodeType in countPerType)) {
+				nodesNames[node] = nodeType;
+				countPerType[node] = 1;
+			}
+			else {
+				countPerType[node] += 1;
+				nodesNames[node] = nodeType + " (2)";
+			}
+		}
+		let typeEdges = [];
+		for (let edge of edges) {
+			edge = edge.split(",");
+			typeEdges.push([nodesNames[edge[0]], nodesNames[edge[1]]].toString());
+		}
+		return typeEdges.join("@#@");
+	}
+	
+	groupNodesPerExecution() {
+		let descrCount = {};
+		let descrObjs = {};
+		let vectExecutions = {};
+		for (let obj in this.outgoingEdges) {
+			let vect = this.getSubgraphPerNode(obj);
+			vectExecutions[obj] = vect;
+			let descr = this.getDescriptionPerExecution(vect);
+			if (descr != "") {
+				if (!(descr in descrCount)) {
+					descrCount[descr] = 0;
+					descrObjs[descr] = [];
+				}
+				descrCount[descr] += 1;
+				descrObjs[descr].push(obj);
+			}
+		}
+		let descrCountArray = [];
+		for (let el in descrCount) {
+			descrCountArray.push([el, descrCount[el]]);
+		}
+		descrCountArray.sort((a,b) => b[1]-a[1]);
+		return [descrCountArray, descrObjs, vectExecutions];
 	}
 }

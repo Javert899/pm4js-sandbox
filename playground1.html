@@ -22,7 +22,8 @@
 		<script type="text/javascript">
 			model = new OcdfgModel(eventLog);
 			executionGraph = new OcdfgExecutionGraph(model);
-			executionGraph.getSubgraphPerNode("0005004649");
+			let output = executionGraph.groupNodesPerExecution();
+			console.log(output[2]);
 		</script>
 	</body>
 </html>
