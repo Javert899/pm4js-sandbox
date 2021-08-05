@@ -134,7 +134,14 @@ class OcdfgExecutionGraph {
 				let vect = this.getSubgraphPerNode(obj);
 				let firstObjectOfExecution = vect[2][0];
 				let lastObjectOfExecution = vect[2][vect[2].length - 1];
-				objExecutionDuration[obj] = objectsIds[lastObjectOfExecution][objectsIds[lastObjectOfExecution].length - 1][2] - objectsIds[firstObjectOfExecution][0][2];
+				let minTimest = 9999999999999999;
+				let maxTimest = -minTimest;
+				for (let subobjId of vect[2]) {
+					let subobj = objectsIds[subobjId];
+					minTimest = Math.min(minTimest, subobj[0][2]);
+					maxTimest = Math.max(maxTimest, subobj[subobj.length-1][2]);
+				}
+				objExecutionDuration[obj] = maxTimest - minTimest;
 				vectExecutions[obj] = vect;
 				let descr = this.getDescriptionPerExecution(vect);
 				objGraphviz[obj] = this.getGraphvizPerExecution(vect);

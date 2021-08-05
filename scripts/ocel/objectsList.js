@@ -24,6 +24,12 @@ class ObjectsListFactory {
 		let tdDuration = document.createElement("th");
 		tdDuration.innerHTML = "Lifecycle Duration (s)";
 		header.appendChild(tdDuration);
+		let tdExecutionDuration = document.createElement("th");
+		tdExecutionDuration.innerHTML = "Execution Duration (s)";
+		header.appendChild(tdExecutionDuration);
+		let tdShowExecution = document.createElement("th");
+		tdShowExecution.innerHTML = "";
+		header.appendChild(tdShowExecution);
 		for (let objId in otObjects) {
 			if (otObjects[objId].length > 0) {
 				let tr = document.createElement("tr");
@@ -40,6 +46,17 @@ class ObjectsListFactory {
 				let tdDuration = document.createElement("td");
 				tdDuration.innerHTML = otObjects[objId][otObjects[objId].length - 1][2] - otObjects[objId][0][2];
 				tr.appendChild(tdDuration);
+				let tdExecutionDuration = document.createElement("td");
+				try {
+					tdExecutionDuration.innerHTML = this.model.executions[3][objId];
+				}
+				catch (err) {
+					tdExecutionDuration.innerHTML = otObjects[objId][otObjects[objId].length - 1][2] - otObjects[objId][0][2];
+				}
+				tr.appendChild(tdExecutionDuration);
+				let tdShowExecution = document.createElement("td");
+				tdShowExecution.innerHTML = "<i class=\"fas fa-eye\"></i>";
+				tr.appendChild(tdShowExecution);
 			}
 		}
 		sorttable.makeSortable(container);
