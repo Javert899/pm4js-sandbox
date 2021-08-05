@@ -309,6 +309,7 @@ class OcdfgExecutionGraph {
 			td_m.innerHTML = descrDuration;
 			td_f.innerHTML = "<a href=\"javascript:executionGraphFilterDescr('"+descrName+"')\"><i class=\"fas fa-filter\"></i></a>";
 		}
+		sorttable.makeSortable(container);
 	}
 	
 	getObjectIdentifiers(descr) {
