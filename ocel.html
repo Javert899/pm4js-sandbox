@@ -689,6 +689,14 @@
 				document.getElementById("popupObjId").innerHTML = obj;
 			}
 			
+			function showGraphvizExecutionObject(obj) {
+				let gv = visualization.model.executions[5][obj];
+				let svgXml = Viz(gv, { format: "svg"});
+				document.getElementById("customEventsListTable").innerHTML = svgXml;
+				$('.hover_bkgr_fricc').show();
+				document.getElementById("popupObjId").innerHTML = obj+" (execution)";
+			}
+			
 			function showObjListOt() {
 				let selectedOt = document.getElementById("otObjListSelection").value;
 				objectsListFactory = new ObjectsListFactory(visualization.model);

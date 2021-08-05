@@ -55,7 +55,7 @@ class ObjectsListFactory {
 				}
 				tr.appendChild(tdExecutionDuration);
 				let tdShowExecution = document.createElement("td");
-				tdShowExecution.innerHTML = "<i class=\"fas fa-eye\"></i>";
+				tdShowExecution.innerHTML = "<a href=\"javascript:showGraphvizExecutionObject('"+objId+"')\"><i class=\"fas fa-eye\"></i></a>";
 				tr.appendChild(tdShowExecution);
 			}
 		}
