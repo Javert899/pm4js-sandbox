@@ -2,6 +2,7 @@
 	<head>
 		<link rel="stylesheet" href="ocel.css">
 		<script src="scripts/generic/jquery.min.js"></script>
+		<script src="scripts/generic/viz.js"></script>
 		<script src="scripts/generic/download-utility.js"></script>
 		<script src="scripts/generic/plotly-2.1.0.min.js"></script>
 		<script src="scripts/generic/sweetalert2.all.min.js"></script>
@@ -87,6 +88,10 @@
 							
 							<li class="navigation-item">
 								<a class="navigation-link" href="javascript:showObjectsList()"><i class="fas fa-database"></i>&nbsp;Objects</a>
+							</li>
+							
+							<li class="navigation-item">
+								<a class="navigation-link" href="javascript:showExecutions()"><i class="fab fa-mixer"></i>&nbsp;Executions</a>
 							</li>
 							
 							<li class="navigation-item">
@@ -523,6 +528,12 @@
 					</table>
 				</div>
 			</div>
+			<div id="executionsPage" style="display: none">
+				<p>An execution describes the connection between the lifecycle of different objects. Executions can be grouped together if they are equivalent in
+				the involved object types.</p>
+				<table id="executionsTable" border="1" class="table">
+				</table>
+			</div>
 			<div id="plotlyGraphsPage" style="display: none">
 				<div class="row" style="height: 85%">
 					<!--align-self-center text-center-->
@@ -579,10 +590,23 @@
 		</div>
 		<script src="logs/example-jsonocel.js"></script>
 		<script type="text/javascript">
+			function executionGraphFilterDescr(descr) {
+				let objectIdentifiers = visualization.model.executionGraph.getObjectIdentifiers(descr).toString();
+				showProcessModelPage();
+				addFilter("<i class=\"fab fa-mixer\"></i>&nbsp;Executions Filter&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;", "executionGraphFilterDescrSpecific(\""+objectIdentifiers+"\")");
+			}
+			
+			function executionGraphFilterDescrSpecific(relObj) {
+				relObj = relObj.split(",");
+				let filteredModel = visualization.model.filterRelatedObjects(relObj);
+				visualization.setFilteredModel(filteredModel);
+			}
+			
 			function hideAllDivsPages() {
 				document.getElementById("processModelPage").style.display = "none";
 				document.getElementById("eventsListPage").style.display = "none";
 				document.getElementById("objectsListPage").style.display = "none";
+				document.getElementById("executionsPage").style.display = "none";
 				document.getElementById("plotlyGraphsPage").style.display = "none";
 			}
 			
@@ -601,6 +625,12 @@
 			function showObjectsList() {
 				hideAllDivsPages();
 				document.getElementById("objectsListPage").style.display = "";
+			}
+			
+			function showExecutions() {
+				hideAllDivsPages();
+				document.getElementById("executionsPage").style.display = "";
+				visualization.model.executionGraph.buildExecutionsTable(document.getElementById("executionsTable"));
 			}
 			
 			function showGraphs() {

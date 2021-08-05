@@ -4,6 +4,7 @@ class OcdfgExecutionGraph {
 		this.ingoingEdges = {};
 		this.outgoingEdges = {};
 		this.buildGraph();
+		this.executions = null;
 	}
 	
 	buildGraph() {
@@ -162,7 +163,8 @@ class OcdfgExecutionGraph {
 			descrCountArray.push([el, descrCount[el]]);
 		}
 		descrCountArray.sort((a,b) => b[1]-a[1]);
-		return [descrCountArray, descrObjs, vectExecutions, objExecutionDuration, descrDurations, objGraphviz, descrGraphviz];
+		this.executions = [descrCountArray, descrObjs, vectExecutions, objExecutionDuration, descrDurations, objGraphviz, descrGraphviz];
+		return this.executions;
 	}
 	
 	static uuidv4() {
@@ -256,5 +258,61 @@ class OcdfgExecutionGraph {
 		}
 		gv.push("}");
 		return gv.join("\n");
+	}
+	
+	buildExecutionsTable(container) {
+		let descrCountArray = this.executions[0];
+		let descrObjs = this.executions[1];
+		let descrDurations = this.executions[4];
+		let descrGraphvizs = this.executions[6];
+		container.innerHTML = "";
+		let thead = document.createElement("thead");
+		let tbody = document.createElement("tbody");
+		container.appendChild(thead);
+		container.appendChild(tbody);
+		let header = document.createElement("tr");
+		thead.appendChild(header);
+		let executionGraphviz = document.createElement("th");
+		executionGraphviz.innerHTML = "Grouping Graph";
+		header.appendChild(executionGraphviz);
+		let executionCount = document.createElement("th");
+		executionCount.innerHTML = "Count";
+		header.appendChild(executionCount);
+		let executionMedianPerformance = document.createElement("th");
+		executionMedianPerformance.innerHTML = "Median Perf. (s)";
+		header.appendChild(executionMedianPerformance);
+		let executionFiltering = document.createElement("th");
+		executionFiltering.innerHTML = "";
+		header.appendChild(executionFiltering);
+		for (let descr of descrCountArray) {
+			let descrName = descr[0];
+			let descrCount = descr[1];
+			let descrDuration = descrDurations[descrName];
+			let descrGraphviz = descrGraphvizs[descrName];
+			let svgXml = Viz(descrGraphviz, { format: "svg"});
+			let exRow = document.createElement("tr");
+			tbody.appendChild(exRow);
+			let td_gg = document.createElement("td");
+			let inner_gg = document.createElement("div");
+			td_gg.appendChild(inner_gg);
+			let td_c = document.createElement("td");
+			let td_m = document.createElement("td");
+			let td_f = document.createElement("td");
+			exRow.appendChild(td_gg);
+			exRow.appendChild(td_c);
+			exRow.appendChild(td_m);
+			exRow.appendChild(td_f);
+			inner_gg.innerHTML = svgXml;
+			inner_gg.style.width = "900px";
+			inner_gg.style.overflow = "auto";
+			td_c.innerHTML = descrCount;
+			td_m.innerHTML = descrDuration;
+			td_f.innerHTML = "<a href=\"javascript:executionGraphFilterDescr('"+descrName+"')\"><i class=\"fas fa-filter\"></i></a>";
+		}
+	}
+	
+	getObjectIdentifiers(descr) {
+		let descrObjs = this.executions[1];
+		return descrObjs[descr];
 	}
 }
