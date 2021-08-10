@@ -30,35 +30,27 @@ class ObjectsListFactory {
 		let tdShowExecution = document.createElement("th");
 		tdShowExecution.innerHTML = "";
 		header.appendChild(tdShowExecution);
+		let objectsHtmlRepr = [];
 		for (let objId in otObjects) {
 			if (otObjects[objId].length > 0) {
-				let tr = document.createElement("tr");
-				tbody.appendChild(tr);
-				let tdId = document.createElement("td");
-				tr.appendChild(tdId);
-				tdId.innerHTML = "<a href=\"javascript:clickedObjectInEveTable('"+objId+"')\">"+objId+"</a>";;
-				let tdStartTimestamp = document.createElement("td");
-				tr.appendChild(tdStartTimestamp);
-				tdStartTimestamp.innerHTML = new Date(otObjects[objId][0][2]*1000).toISOString();
-				let tdEndTimestamp = document.createElement("td");
-				tr.appendChild(tdEndTimestamp);
-				tdEndTimestamp.innerHTML = new Date(otObjects[objId][otObjects[objId].length - 1][2]*1000).toISOString();
-				let tdDuration = document.createElement("td");
-				tdDuration.innerHTML = otObjects[objId][otObjects[objId].length - 1][2] - otObjects[objId][0][2];
-				tr.appendChild(tdDuration);
-				let tdExecutionDuration = document.createElement("td");
+				objectsHtmlRepr.push("<tr>");
+				objectsHtmlRepr.push("<td><a href=\"javascript:clickedObjectInEveTable('"+objId+"')\">"+objId+"</a></td>");
+				objectsHtmlRepr.push("<td>"+new Date(otObjects[objId][0][2]*1000).toISOString()+"</td>");
+				objectsHtmlRepr.push("<td>"+new Date(otObjects[objId][otObjects[objId].length - 1][2]*1000).toISOString()+"</td>");
+				objectsHtmlRepr.push("<td>"+(otObjects[objId][otObjects[objId].length - 1][2] - otObjects[objId][0][2])+"</td>");
 				try {
-					tdExecutionDuration.innerHTML = this.model.executions[3][objId];
+					objectsHtmlRepr.push("<td>"+this.model.executions[3][objId]+"</td>");
 				}
 				catch (err) {
-					tdExecutionDuration.innerHTML = otObjects[objId][otObjects[objId].length - 1][2] - otObjects[objId][0][2];
+					console.log(err);
+					objectsHtmlRepr.push("<td>"+(otObjects[objId][otObjects[objId].length - 1][2] - otObjects[objId][0][2])+"</td>");
 				}
-				tr.appendChild(tdExecutionDuration);
-				let tdShowExecution = document.createElement("td");
-				tdShowExecution.innerHTML = "<a href=\"javascript:showGraphvizExecutionObject('"+objId+"')\"><i class=\"fas fa-eye\"></i></a>";
-				tr.appendChild(tdShowExecution);
+				objectsHtmlRepr.push("<td><a href=\"javascript:showGraphvizExecutionObject('"+objId+"')\"><i class=\"fas fa-eye\"></i></a></td>");
+				objectsHtmlRepr.push("</tr>");
 			}
 		}
+		tbody.innerHTML = objectsHtmlRepr.join("");
+		
 		sorttable.makeSortable(container);
 	}
 }
