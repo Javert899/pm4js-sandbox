@@ -42,19 +42,13 @@ class EventsListFactory {
 			evAttributes.style.color = "green";
 			header.appendChild(evAttributes);
 		}
+		let eventsHtmlRepr = [];
 		for (let eveId in events) {
-			let evTr = document.createElement("tr");
-			tbody.appendChild(evTr);
 			let eve = logEvents[eveId];
-			let evId = document.createElement("td");
-			evId.innerHTML = eveId;
-			evTr.appendChild(evId);
-			let evAct = document.createElement("td");
-			evAct.innerHTML = eve["ocel:activity"];
-			evTr.appendChild(evAct);
-			let evTimest = document.createElement("td");
-			evTimest.innerHTML = eve["ocel:timestamp"];
-			evTr.appendChild(evTimest);
+			eventsHtmlRepr.push("<tr>");
+			eventsHtmlRepr.push("<td>"+eveId+"</td>");
+			eventsHtmlRepr.push("<td>"+eve["ocel:activity"]+"</td>");
+			eventsHtmlRepr.push("<td>"+eve["ocel:timestamp"]+"</td>");			
 			let vmap = eve["ocel:vmap"];
 			let omap = eve["ocel:omap"];
 			let omap_dictio = {};
@@ -68,35 +62,35 @@ class EventsListFactory {
 				}
 			}
 			for (let otype of otypes) {
-				let tdOtype = document.createElement("td");
-				evTr.appendChild(tdOtype);
-				let tdUl = document.createElement("ul");
-				tdOtype.appendChild(tdUl);
+				eventsHtmlRepr.push("<td><ul>");
 				for (let obj of omap_dictio[otype]) {
-					let tdLi = document.createElement("li");
-					tdUl.appendChild(tdLi);
+					eventsHtmlRepr.push("<li>");
 					if (enable_click) {
-						tdLi.innerHTML = "<a href=\"javascript:clickedObjectInEveTable('"+obj+"')\">"+obj+"</a>";
+						eventsHtmlRepr.push("<a href=\"javascript:clickedObjectInEveTable('"+obj+"')\">"+obj+"</a>");
 					}
 					else {
 						if (obj == target_obj) {
-							tdLi.innerHTML = "<b>"+obj+"</b>";
+							eventsHtmlRepr.push("<b>"+obj+"</b>");
 						}
 						else {
-							tdLi.innerHTML = obj;
+							eventsHtmlRepr.push(obj);
 						}
 					}
-					
+					eventsHtmlRepr.push("</li>");
 				}
+				eventsHtmlRepr.push("</ul></td>");
 			}
 			for (let att of attributes) {
-				let tdAtt = document.createElement("td");
-				evTr.appendChild(tdAtt);
 				if (att in vmap) {
-					tdAtt.innerHTML = vmap[att];
+					eventsHtmlRepr.push("<td>"+vmap[att]+"</td>");
+				}
+				else {
+					eventsHtmlRepr.push("<td></td>");
 				}
 			}
+			eventsHtmlRepr.push("</tr>");
 		}
-		sorttable.makeSortable(container);
+		tbody.innerHTML = eventsHtmlRepr.join("");
+		//sorttable.makeSortable(container);
 	}
 }
