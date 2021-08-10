@@ -291,13 +291,14 @@ class OcdfgExecutionGraph {
 		let executionFiltering = document.createElement("th");
 		executionFiltering.innerHTML = "";
 		header.appendChild(executionFiltering);
+		let exeGraphHtml = [];
 		for (let descr of descrCountArray) {
 			let descrName = descr[0];
 			let descrCount = descr[1];
 			let descrDuration = descrDurations[descrName];
 			let descrGraphviz = descrGraphvizs[descrName];
 			let svgXml = Viz(descrGraphviz, { format: "svg"});
-			let exRow = document.createElement("tr");
+			/*let exRow = document.createElement("tr");
 			tbody.appendChild(exRow);
 			let td_gg = document.createElement("td");
 			let inner_gg = document.createElement("div");
@@ -314,8 +315,15 @@ class OcdfgExecutionGraph {
 			inner_gg.style.overflow = "auto";
 			td_c.innerHTML = descrCount;
 			td_m.innerHTML = descrDuration;
-			td_f.innerHTML = "<a href=\"javascript:executionGraphFilterDescr('"+descrName+"')\"><i class=\"fas fa-filter\"></i></a>";
+			td_f.innerHTML = "<a href=\"javascript:executionGraphFilterDescr('"+descrName+"')\"><i class=\"fas fa-filter\"></i></a>";*/
+			exeGraphHtml.push("<tr>");
+			exeGraphHtml.push("<td><div style='width: 900px; overflow: auto'>"+svgXml+"</div></td>");
+			exeGraphHtml.push("<td>"+descrCount+"</td>");
+			exeGraphHtml.push("<td>"+descrDuration+"</td>");
+			exeGraphHtml.push("<td><a href=\"javascript:executionGraphFilterDescr('"+descrName+"')\"><i class=\"fas fa-filter\"></i></a></td>");
+			exeGraphHtml.push("</tr>");
 		}
+		tbody.innerHTML = exeGraphHtml.join("");
 		sorttable.makeSortable(container);
 	}
 	
