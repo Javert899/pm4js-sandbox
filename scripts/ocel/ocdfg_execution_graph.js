@@ -298,24 +298,6 @@ class OcdfgExecutionGraph {
 			let descrDuration = descrDurations[descrName];
 			let descrGraphviz = descrGraphvizs[descrName];
 			let svgXml = Viz(descrGraphviz, { format: "svg"});
-			/*let exRow = document.createElement("tr");
-			tbody.appendChild(exRow);
-			let td_gg = document.createElement("td");
-			let inner_gg = document.createElement("div");
-			td_gg.appendChild(inner_gg);
-			let td_c = document.createElement("td");
-			let td_m = document.createElement("td");
-			let td_f = document.createElement("td");
-			exRow.appendChild(td_gg);
-			exRow.appendChild(td_c);
-			exRow.appendChild(td_m);
-			exRow.appendChild(td_f);
-			inner_gg.innerHTML = svgXml;
-			inner_gg.style.width = "900px";
-			inner_gg.style.overflow = "auto";
-			td_c.innerHTML = descrCount;
-			td_m.innerHTML = descrDuration;
-			td_f.innerHTML = "<a href=\"javascript:executionGraphFilterDescr('"+descrName+"')\"><i class=\"fas fa-filter\"></i></a>";*/
 			exeGraphHtml.push("<tr>");
 			exeGraphHtml.push("<td><div style='width: 900px; overflow: auto'>"+svgXml+"</div></td>");
 			exeGraphHtml.push("<td>"+descrCount+"</td>");
