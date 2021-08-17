@@ -53,8 +53,13 @@ class OcdfgModel {
 			this.otObjectsView[ot].calculate();
 			this.otEdges[ot] = new EdgesView(this.ocel, this.otObjectsView[ot], this.otEventsView[ot]);
 		}
-		this.executionGraph = new OcdfgExecutionGraph(this);
-		this.executions = this.executionGraph.groupNodesPerExecution();
+	}
+	
+	calculateExecutions() {
+		if (this.executions == null) {
+			this.executionGraph = new OcdfgExecutionGraph(this);
+			this.executions = this.executionGraph.groupNodesPerExecution();
+		}
 	}
 	
 	filterObjectTypes(objTypes) {

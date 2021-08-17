@@ -623,11 +623,13 @@
 			}
 			
 			function showObjectsList() {
+				visualization.model.calculateExecutions();
 				hideAllDivsPages();
 				document.getElementById("objectsListPage").style.display = "";
 			}
 			
 			function showExecutions() {
+				visualization.model.calculateExecutions();
 				hideAllDivsPages();
 				document.getElementById("executionsPage").style.display = "";
 				visualization.model.executionGraph.buildExecutionsTable(document.getElementById("executionsTable"));

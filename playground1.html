@@ -7,6 +7,7 @@
 		<script src="scripts/ocel/edgesView.js"></script>
 		<script src="scripts/ocel/ocdfg_execution_graph.js"></script>
 		<script src="scripts/ocel/ocdfg-model.js"></script>
+		<script src="scripts/ocel/ocel_conf_num_objs.js"></script>
 		<script src="scripts/ocel/ocdfg-visualization.js"></script>
 		<script src="scripts/ocel/xmlocel-exporter.js"></script>
 		<script src="scripts/ocel/xmlocel-importer.js"></script>
@@ -16,13 +17,22 @@
 		<script src="scripts/ocel/eventsList.js"></script>
 		<script src="scripts/ocel/objectsList.js"></script>
 		<script src="scripts/ocel/plotly-graphs.js"></script>
-		<script src="logs/example-jsonocel.js"></script>
+		<script src="logs/example-jsonocel2.js"></script>
 	</head>
 	<body>
 		<script type="text/javascript">
+			/*$.get("logs/running-example.jsonocel", function(data) {
+				let eventLog = JsonOcelImporter.importLog(data);
+				console.log(JsonOcelExporter.exportLog(eventLog));
+			});*/
+			/*model = new OcdfgModel(eventLog);
+			let conf1 = new OcelConfNumObjs(model);
+			console.log(conf1);*/
+			console.log("ciao");
+			console.log(eventLog);
+			let conf1 = new OcelConfNumObjs(eventLog);
+			conf1.calculate(1);
 			model = new OcdfgModel(eventLog);
-			console.log(model.executionGraph);
-			console.log(model.executions);
 		</script>
 	</body>
 </html>
