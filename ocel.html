@@ -643,6 +643,17 @@
 		</div>
 		<script src="logs/example-jsonocel.js"></script>
 		<script type="text/javascript">
+			function filterDeviationsLifecycleObjects(objType, dev) {
+				
+			}
+			
+			function filterDeviationsDurationObjects(objType) {
+				let objectIdentifiers = Object.keys(visualization.model.conformanceDurationObjects.deviations[objType]).toString();
+				console.log(objectIdentifiers);
+				showProcessModelPage();
+				addFilter("<i class=\"fab fa-mixer\"></i>&nbsp;Deviations on the Lifecycle Duration&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;", "executionGraphFilterDescrSpecific(\""+objectIdentifiers+"\")");
+			}
+			
 			function filterDeviationsNumObjects(activity, objType) {
 				let objectIdentifiers = Object.keys(visualization.model.conformanceNumObjs.deviatingObjects[activity][objType]).toString();
 				showProcessModelPage();
