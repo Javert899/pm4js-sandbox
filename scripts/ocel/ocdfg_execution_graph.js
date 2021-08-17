@@ -267,7 +267,7 @@ class OcdfgExecutionGraph {
 		return gv.join("\n");
 	}
 	
-	buildExecutionsTable(container) {
+	buildExecutionsTable(container, maxCount=100) {
 		let descrCountArray = this.executions[0];
 		let descrObjs = this.executions[1];
 		let descrDurations = this.executions[4];
@@ -292,7 +292,12 @@ class OcdfgExecutionGraph {
 		executionFiltering.innerHTML = "";
 		header.appendChild(executionFiltering);
 		let exeGraphHtml = [];
+		let count = 0;
 		for (let descr of descrCountArray) {
+			count++;
+			if (count >= maxCount) {
+				break;
+			}
 			let descrName = descr[0];
 			let descrCount = descr[1];
 			let descrDuration = descrDurations[descrName];
