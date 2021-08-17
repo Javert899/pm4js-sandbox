@@ -1,12 +1,17 @@
 class OcelConfLifecycleObjects {
 	constructor(ocel) {
 		this.ocel = ocel;
-		this.flattenedLogs = {};
-		this.skeletonModels = {};
-		this.skeletonConfResults = {};
+		this.noiseThreshold = null;
+		this.flattenedLogs = null;
+		this.skeletonModels = null;
+		this.skeletonConfResults = null;
 	}
 	
 	calculate(noiseThreshold=0.05) {
+		this.noiseThreshold = noiseThreshold;
+		this.flattenedLogs = {};
+		this.skeletonModels = {};
+		this.skeletonConfResults = {};
 		let objTypes = this.ocel["ocel:global-log"]["ocel:object-types"];
 		for (let objType of objTypes) {
 			let eventLog = OcelFlattening.flatten(this.ocel, objType);
@@ -60,6 +65,7 @@ class OcelConfLifecycleObjects {
 		}
 		content.push("</tbody>");
 		content = content.join("");
-		console.log(content);
+		container.innerHTML = content;
+		sorttable.makeSortable(container);
 	}
 }

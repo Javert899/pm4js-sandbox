@@ -68,6 +68,7 @@ class OcelConfNumObjs {
 					this.stdPerType[activity][objType] += (this.countsPerType[activity][objType][obj] - parseFloat(this.avgPerType[activity][objType]))*(this.countsPerType[activity][objType][obj] - parseFloat(this.avgPerType[activity][objType]));
 				}
 				let stdev = this.stdPerType[activity][objType]  / (0.0 + Object.keys(this.countsPerType[activity][objType]).length);
+				stdev = Math.sqrt(stdev);
 				this.stdPerType[activity][objType] = stdev
 				for (let obj in this.countsPerType[activity][objType]) {
 					let objOcc = this.countsPerType[activity][objType][obj];
