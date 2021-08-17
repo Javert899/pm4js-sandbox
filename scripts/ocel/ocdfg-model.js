@@ -12,6 +12,7 @@ class OcdfgModel {
 		this.otTransMap = {};
 		this.executionGraph = null;
 		this.executions = null;
+		this.conformanceNumObjs = null;
 		this.calculate();
 	}
 	
@@ -59,6 +60,13 @@ class OcdfgModel {
 		if (this.executions == null) {
 			this.executionGraph = new OcdfgExecutionGraph(this);
 			this.executions = this.executionGraph.groupNodesPerExecution();
+		}
+	}
+	
+	calculateConformanceNumObjs() {
+		if (this.conformanceNumObjs == null) {
+			this.conformanceNumObjs = new OcelConfNumObjs(this.ocel);
+			this.conformanceNumObjs.calculate(1);
 		}
 	}
 	

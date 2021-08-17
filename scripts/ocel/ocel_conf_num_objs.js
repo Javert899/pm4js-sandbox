@@ -1,13 +1,19 @@
 class OcelConfNumObjs {
 	constructor(ocel) {
 		this.ocel = ocel;
+		this.countsPerType = null;
+		this.avgPerType = null;
+		this.stdPerType = null;
+		this.deviatingObjects = null;
+		this.zeta = null;
+	}
+	
+	calculate(zeta=1) {
+		this.zeta = zeta;
 		this.countsPerType = {};
 		this.avgPerType = {};
 		this.stdPerType = {};
 		this.deviatingObjects = {};
-	}
-	
-	calculate(zeta=1) {
 		let i = 0;
 		let events = this.ocel["ocel:events"];
 		let objects = this.ocel["ocel:objects"];
@@ -77,5 +83,26 @@ class OcelConfNumObjs {
 				}
 			}
 		}
+	}
+	
+	populateTable(container) {
+		let tableContent = [];
+		tableContent.push("<thead><tr><th>Activity</th><th>Object Type</th><th>Avg Objects</th><th>Std Objects</th><th>Num. Deviations</th><th>Filter</th></tr></thead>");
+		tableContent.push("<tbody>");
+		for (let activity in this.deviatingObjects) {
+			for (let objType in this.deviatingObjects[activity]) {
+				tableContent.push("<tr>");
+				tableContent.push("<td>"+activity+"</td>");
+				tableContent.push("<td>"+objType+"</td>");
+				tableContent.push("<td>"+this.avgPerType[activity][objType]+"</td>");
+				tableContent.push("<td>"+this.stdPerType[activity][objType]+"</td>");
+				tableContent.push("<td>"+Object.keys(this.deviatingObjects[activity][objType]).length+"</td>");
+				tableContent.push("<td><a href=\"javascript:filterDeviationsNumObjects('"+activity+"', '"+objType+"')\"><i class=\"fas fa-filter\"></i></a></td>");
+				tableContent.push("</tr>");
+			}
+		}
+		tableContent.push("</tbody>");
+		container.innerHTML = tableContent.join("");
+		sorttable.makeSortable(container);
 	}
 }

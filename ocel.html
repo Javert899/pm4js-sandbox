@@ -16,6 +16,7 @@
 		<script src="scripts/ocel/objectsView.js"></script>
 		<script src="scripts/ocel/edgesView.js"></script>
 		<script src="scripts/ocel/ocdfg_execution_graph.js"></script>
+		<script src="scripts/ocel/ocel_conf_num_objs.js"></script>
 		<script src="scripts/ocel/ocdfg-model.js"></script>
 		<script src="scripts/ocel/ocdfg-visualization.js"></script>
 		<script src="scripts/ocel/xmlocel-exporter.js"></script>
@@ -96,6 +97,10 @@
 							
 							<li class="navigation-item">
 								<a class="navigation-link" href="javascript:showGraphs()"><i class="fas fa-chart-pie"></i>&nbsp;Statistics</a>
+							</li>
+							
+							<li class="navigation-item">
+								<a class="navigation-link" href="javascript:showConformance()"><i class="fas fa-bell"></i>&nbsp;Conformance</a>
 							</li>
 						
 							<li class="navigation-item">
@@ -225,6 +230,7 @@
 				</div>
 				<script type="text/javascript">
 					var navigationGraph = null;
+					var conformanceNavigation = null;
 					var allFilters = [];
 										
 					function doVisualization(initNavGraph=true) {
@@ -576,20 +582,46 @@
 					</div>
 				</div>
 			</div>
+			<div id="conformancePage" style="display: none">
+				<nav id="conformanceNavigation" class="navigation navigation-justified border-bottom">
+					<div class="navigation-header">
+
+					</div>
+					<div class="navigation-body">
+						<ul class="navigation-menu">
+							
+							<li class="navigation-item">
+								<a class="navigation-link" href="javascript:showConformancePageNumObjects()"><i class="fas fa-database"></i>&nbsp;Number of Objects</a>
+							</li>
+						</ul>
+					</div>
+				</nav>
+				<div id="conformanceCheckingNumObjects" style="display:">
+					<table id="conformanceCheckingNumObjectsTable" class="table">
+						
+					</table>
+				</div>
+			</div>
 			<div class="hover_bkgr_fricc">
 				<span class="helper"></span>
 				<div>
 					<div class="popupCloseButton">&times;</div>
 					<h4><b>Lifecycle of the Object:</b> <span id="popupObjId"></h4>
 					<div style="width: 100%; height: 85%; overflow: scroll">
-						<table id="customEventsListTable" border="1">
+						<table id="customEventsListTable" border="1" class="table">
 						</table>
 					</div>
 				</div>
 			</div>
 		</div>
-		<script src="logs/example-jsonocel.js"></script>
+		<script src="logs/example-jsonocel2.js"></script>
 		<script type="text/javascript">
+			function filterDeviationsNumObjects(activity, objType) {
+				let objectIdentifiers = Object.keys(visualization.model.conformanceNumObjs.deviatingObjects[activity][objType]).toString();
+				showProcessModelPage();
+				addFilter("<i class=\"fab fa-mixer\"></i>&nbsp;Deviations on the number of Objects&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;", "executionGraphFilterDescrSpecific(\""+objectIdentifiers+"\")");
+			}
+			
 			function executionGraphFilterDescr(descr) {
 				let objectIdentifiers = visualization.model.executionGraph.getObjectIdentifiers(descr).toString();
 				showProcessModelPage();
@@ -608,6 +640,7 @@
 				document.getElementById("objectsListPage").style.display = "none";
 				document.getElementById("executionsPage").style.display = "none";
 				document.getElementById("plotlyGraphsPage").style.display = "none";
+				document.getElementById("conformancePage").style.display = "none";
 			}
 			
 			function showProcessModelPage() {
@@ -640,6 +673,27 @@
 				document.getElementById("plotlyGraphsPage").style.display = "";
 				plotlyOcelGraphs = new PlotlyOcelGraphs(visualization.model);
 				showSpecificGraph("plotlyOtGraph");
+			}
+			
+			function showConformance() {
+				hideAllDivsPages();
+				showConformancePageNumObjects();
+				document.getElementById("conformancePage").style.display = "";
+				if (conformanceNavigation == null) {
+					conformanceNavigation = new Navigation(document.getElementById("conformanceNavigation"));
+				}
+			}
+			
+			function hideAllConformancePages() {
+				document.getElementById("conformanceCheckingNumObjects").style.display = "none";
+			}
+			
+			function showConformancePageNumObjects() {
+				visualization.model.calculateConformanceNumObjs();
+				hideAllConformancePages();
+				document.getElementById("conformanceCheckingNumObjects").style.display = "";
+				console.log(document.getElementById("conformanceCheckingNumObjectsTable"));
+				visualization.model.conformanceNumObjs.populateTable(document.getElementById("conformanceCheckingNumObjectsTable"));
 			}
 			
 			function showSpecificGraph(divName) {
