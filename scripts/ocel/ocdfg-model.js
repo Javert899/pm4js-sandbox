@@ -13,6 +13,8 @@ class OcdfgModel {
 		this.executionGraph = null;
 		this.executions = null;
 		this.conformanceNumObjs = null;
+		this.conformanceLifecycleObjects = null;
+		this.conformanceDurationObjects = null;
 		this.calculate();
 	}
 	
@@ -66,7 +68,21 @@ class OcdfgModel {
 	calculateConformanceNumObjs() {
 		if (this.conformanceNumObjs == null) {
 			this.conformanceNumObjs = new OcelConfNumObjs(this.ocel);
-			this.conformanceNumObjs.calculate(1);
+			this.conformanceNumObjs.calculate();
+		}
+	}
+	
+	calculateConformanceLifecycleObjects() {
+		if (this.conformanceLifecycleObjects == null) {
+			this.conformanceLifecycleObjects = new OcelConfLifecycleObjects(this.ocel);
+			this.conformanceLifecycleObjects.calculate();
+		}
+	}
+	
+	calculateConformanceDurationObjects() {
+		if (this.conformanceDurationObjects == null) {
+			this.conformanceDurationObjects = new OcelConfDurationObjects(this.ocel);
+			this.conformanceDurationObjects.calculate();
 		}
 	}
 	

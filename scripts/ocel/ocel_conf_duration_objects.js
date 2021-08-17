@@ -51,7 +51,7 @@ class OcelConfDurationObjects {
 		}
 	}
 	
-	formTable(container) {
+	populateTable(container) {
 		let content = [];
 		content.push("<thead><tr><th>Object Type</th><th>Avg Lifecycle Dur.(s)</th><th>Stdev Lifecycle Dur.(s)</th><th>Number of Deviations</th><th>Filter</th></tr></thead>");
 		content.push("<tbody>");

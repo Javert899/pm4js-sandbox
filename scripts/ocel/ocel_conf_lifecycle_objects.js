@@ -49,7 +49,7 @@ class OcelConfLifecycleObjects {
 		return ret;
 	}
 	
-	formTable(container) {
+	populateTable(container) {
 		let content = [];
 		content.push("<thead><tr><th>Object Type</th><th>Rule</th><th>Violations</th><th>Filter</th></tr></thead>");
 		content.push("<tbody>");
