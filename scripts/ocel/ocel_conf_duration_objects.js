@@ -65,7 +65,7 @@ class OcelConfDurationObjects {
 			content.push("</tr>");
 		}
 		content.push("</tbody>");
-		container.innerHTML = content;
+		container.innerHTML = content.join("");
 		sorttable.makeSortable(container);
 	}
 }

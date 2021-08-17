@@ -27,10 +27,10 @@ class OcelConfLifecycleObjects {
 		let ruleElements = rule.split(",");
 		let ret = rule;
 		if (ruleElements[0] == "alwaysBefore") {
-			ret = "<b>"+ruleElements[1]+"</b> is not<br />preceded by <b>"+ruleElements[2]+"</b>";
+			ret = "<b>"+ruleElements[1]+"</b> is not preceded by <b>"+ruleElements[2]+"</b>";
 		}
 		else if (ruleElements[0] == "alwaysAfter") {
-			ret = "<b>"+ruleElements[1]+"</b> is not<br />followed by <b>"+ruleElements[2]+"</b>";
+			ret = "<b>"+ruleElements[1]+"</b> is not followed by <b>"+ruleElements[2]+"</b>";
 		}
 		else if (ruleElements[0] == "directlyFollows") {
 			/*console.log(rule);
@@ -38,13 +38,13 @@ class OcelConfLifecycleObjects {
 			console.log(ret);*/
 		}
 		else if (ruleElements[0] == "actCounter") {
-			ret = "Unusual number of occurrences of the activity<br /><b>"+ruleElements[1]+"</b> ("+ruleElements[2]+")";
+			ret = "Unusual number of occurrences of the activity <b>"+ruleElements[1]+"</b> ("+ruleElements[2]+")";
 		}
 		else if (ruleElements[0] == "equivalence") {
-			ret = "<b>"+ruleElements[1]+"</b> does not occur the same<br />number of times than <b>"+ruleElements[2]+"</b>";
+			ret = "<b>"+ruleElements[1]+"</b> does not occur the same number of times than <b>"+ruleElements[2]+"</b>";
 		}
 		else if (ruleElements[0] == "neverTogether") {
-			ret = "<b>"+ruleElements[1]+"</b> occurs together<br />with <b>"+ruleElements[2]+"</b>";
+			ret = "<b>"+ruleElements[1]+"</b> occurs together with <b>"+ruleElements[2]+"</b>";
 		}
 		return ret;
 	}

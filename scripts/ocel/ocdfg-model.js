@@ -81,7 +81,7 @@ class OcdfgModel {
 	
 	calculateConformanceDurationObjects() {
 		if (this.conformanceDurationObjects == null) {
-			this.conformanceDurationObjects = new OcelConfDurationObjects(this.ocel);
+			this.conformanceDurationObjects = new OcelConfDurationObjects(this);
 			this.conformanceDurationObjects.calculate();
 		}
 	}

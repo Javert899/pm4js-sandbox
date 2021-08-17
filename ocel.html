@@ -595,6 +595,14 @@
 							<li class="navigation-item">
 								<a class="navigation-link" href="javascript:showConformancePageNumObjects()"><i class="fas fa-database"></i>&nbsp;Number of Objects</a>
 							</li>
+							
+							<li class="navigation-item">
+								<a class="navigation-link" href="javascript:showConformancePageLifecycleObjects()"><i class="fas fa-database"></i>&nbsp;Objects Lifecycle</a>
+							</li>
+							
+							<li class="navigation-item">
+								<a class="navigation-link" href="javascript:showConformancePageDurationsObjects()"><i class="fas fa-database"></i>&nbsp;Objects Duration</a>
+							</li>							
 						</ul>
 					</div>
 				</nav>
@@ -603,6 +611,18 @@
 					(lower than avg - stdev, or higher than avg + stdev). It is offered a possibility to filter on the events related to such objects, to understand
 					the control flow in these situations.</p>
 					<table id="conformanceCheckingNumObjectsTable" class="table">
+						
+					</table>
+				</div>
+				<div id="conformanceCheckingLifecycleObjects" style="display: none">
+					<p>conformanceCheckingLifecycleObjects</p>
+					<table id="conformanceCheckingLifecycleObjectsTable" class="table">
+						
+					</table>
+				</div>
+				<div id="conformanceCheckingDurationObjects" style="display: none">
+					<p>conformanceCheckingDurationObjects</p>
+					<table id="conformanceCheckingDurationObjectsTable" class="table">
 						
 					</table>
 				</div>
@@ -691,14 +711,29 @@
 			
 			function hideAllConformancePages() {
 				document.getElementById("conformanceCheckingNumObjects").style.display = "none";
+				document.getElementById("conformanceCheckingLifecycleObjects").style.display = "none";
+				document.getElementById("conformanceCheckingDurationObjects").style.display = "none";
 			}
 			
 			function showConformancePageNumObjects() {
 				visualization.model.calculateConformanceNumObjs();
 				hideAllConformancePages();
 				document.getElementById("conformanceCheckingNumObjects").style.display = "";
-				console.log(document.getElementById("conformanceCheckingNumObjectsTable"));
 				visualization.model.conformanceNumObjs.populateTable(document.getElementById("conformanceCheckingNumObjectsTable"));
+			}
+			
+			function showConformancePageLifecycleObjects() {
+				visualization.model.calculateConformanceLifecycleObjects();
+				hideAllConformancePages();
+				document.getElementById("conformanceCheckingLifecycleObjects").style.display = "";
+				visualization.model.conformanceLifecycleObjects.populateTable(document.getElementById("conformanceCheckingLifecycleObjectsTable"));
+			}
+			
+			function showConformancePageDurationsObjects() {
+				visualization.model.calculateConformanceDurationObjects();
+				hideAllConformancePages();
+				document.getElementById("conformanceCheckingDurationObjects").style.display = "";
+				visualization.model.conformanceDurationObjects.populateTable(document.getElementById("conformanceCheckingDurationObjectsTable"));
 			}
 			
 			function showSpecificGraph(divName) {
