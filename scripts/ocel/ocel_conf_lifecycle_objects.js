@@ -68,4 +68,15 @@ class OcelConfLifecycleObjects {
 		container.innerHTML = content;
 		sorttable.makeSortable(container);
 	}
+	
+	getRelatedObjects(objType, dev) {
+		let eventLog = this.flattenedLogs[objType];
+		let skeletonConfResults = this.skeletonConfResults[objType][dev];
+		let identifiers = [];
+		for (let idx of skeletonConfResults) {
+			identifiers.push(eventLog.traces[idx].attributes["concept:name"].value);
+		}
+		console.log(identifiers);
+		return identifiers;
+	}
 }
