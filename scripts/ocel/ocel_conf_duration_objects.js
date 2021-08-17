@@ -61,7 +61,7 @@ class OcelConfDurationObjects {
 			content.push("<td>"+this.avgDurations[objType]+"</td>");
 			content.push("<td>"+this.stdDurations[objType]+"</td>");
 			content.push("<td>"+Object.keys(this.deviations[objType]).length+"</td>");
-			content.push("<td></td>");
+			content.push("<td><a href=\"javascript:filterDeviationsDurationObjects('"+objType+"')\"><i class=\"fas fa-filter\"></i></a></td>");
 			content.push("</tr>");
 		}
 		content.push("</tbody>");

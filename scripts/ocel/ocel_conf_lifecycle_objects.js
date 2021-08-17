@@ -59,7 +59,7 @@ class OcelConfLifecycleObjects {
 				content.push("<td>"+objType+"</td>");
 				content.push("<td>"+this.humanReadableRule(dev)+"</td>");
 				content.push("<td>"+this.skeletonConfResults[objType][dev].length+"</td>");
-				content.push("<td></td>");
+				content.push("<td><a href=\"javascript:filterDeviationsLifecycleObjects('"+objType+"', '"+dev+"')\"><i class=\"fas fa-filter\"></i></a></td>");
 				content.push("</tr>");
 			}
 		}
