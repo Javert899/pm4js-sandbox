@@ -597,6 +597,9 @@
 					</div>
 				</nav>
 				<div id="conformanceCheckingNumObjects" style="display:">
+					<p>The page shows the objects of the given type which are related to events of the given activity in extraordinary number
+					(lower than avg - stdev, or higher than avg + stdev). It is offered a possibility to filter on the events related to such objects, to understand\
+					the control flow.</p>
 					<table id="conformanceCheckingNumObjectsTable" class="table">
 						
 					</table>
@@ -614,7 +617,7 @@
 				</div>
 			</div>
 		</div>
-		<script src="logs/example-jsonocel2.js"></script>
+		<script src="logs/example-jsonocel.js"></script>
 		<script type="text/javascript">
 			function filterDeviationsNumObjects(activity, objType) {
 				let objectIdentifiers = Object.keys(visualization.model.conformanceNumObjs.deviatingObjects[activity][objType]).toString();
