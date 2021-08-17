@@ -1,13 +1,13 @@
 class OcelConfNumObjs {
-	constructor(model) {
-		this.ocel = model.ocel;
+	constructor(ocel) {
+		this.ocel = ocel;
 		this.countsPerType = {};
 		this.avgPerType = {};
 		this.stdPerType = {};
-		this.calculate();
+		this.deviatingObjects = {};
 	}
 	
-	calculate() {
+	calculate(zeta=1) {
 		let i = 0;
 		let events = this.ocel["ocel:events"];
 		let objects = this.ocel["ocel:objects"];
@@ -56,13 +56,26 @@ class OcelConfNumObjs {
 				for (let obj in this.countsPerType[activity][objType]) {
 					this.avgPerType[activity][objType] += this.countsPerType[activity][objType][obj];
 				}
-				this.avgPerType[activity][objType] = this.avgPerType[activity][objType] / (0.0 + Object.keys(this.countsPerType[activity][objType]).length);
+				let avg = this.avgPerType[activity][objType] / (0.0 + Object.keys(this.countsPerType[activity][objType]).length);
+				this.avgPerType[activity][objType] = avg;
 				for (let obj in this.countsPerType[activity][objType]) {
 					this.stdPerType[activity][objType] += (this.countsPerType[activity][objType][obj] - parseFloat(this.avgPerType[activity][objType]))*(this.countsPerType[activity][objType][obj] - parseFloat(this.avgPerType[activity][objType]));
 				}
-				this.stdPerType[activity][objType] = this.stdPerType[activity][objType]  / (0.0 + Object.keys(this.countsPerType[activity][objType]).length);
+				let stdev = this.stdPerType[activity][objType]  / (0.0 + Object.keys(this.countsPerType[activity][objType]).length);
+				this.stdPerType[activity][objType] = stdev
+				for (let obj in this.countsPerType[activity][objType]) {
+					let objOcc = this.countsPerType[activity][objType][obj];
+					if (objOcc < avg - zeta * stdev || objOcc > avg + zeta * stdev) {
+						if (!(activity in this.deviatingObjects)) {
+							this.deviatingObjects[activity] = {};
+						}
+						if (!(objType in this.deviatingObjects[activity])) {
+							this.deviatingObjects[activity][objType] = {};
+						}
+						this.deviatingObjects[activity][objType][obj] = objOcc;
+					}
+				}
 			}
 		}
-		//console.log(this.stdPerType);
 	}
 }
