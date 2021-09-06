@@ -325,6 +325,11 @@
 						visualization.represent();
 					}
 					
+					function expandEdge() {
+						visualization.expandedEdges[selectedEdge] = 0;
+						visualization.represent();
+					}
+					
 					function seeRelatedObjAct() {
 						let relObj = visualization.model.getRelObjActivity(selectedActivity, selectedOt);
 						let stru = relObj.toString();

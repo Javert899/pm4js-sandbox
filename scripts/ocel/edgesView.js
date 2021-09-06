@@ -73,6 +73,13 @@ class EdgesView {
 		return "";
 	}
 	
+	toIntermediateString(actCouple, idx) {
+		let ret = "EC="+this.edgesStatistics[actCouple]["events"]+"<br />";
+		ret += "UO="+this.edgesStatistics[actCouple]["unique_objects"]+"<br />";
+		ret += "TO="+this.edgesStatistics[actCouple]["total_objects"];
+		return ret;
+	}
+	
 	toCompleteString(actCouple) {
 		let ret = "<b>"+actCouple.split(",")[0]+"->"+actCouple.split(",")[1]+"<br />";
 		ret += "(" + this.objectsView.objectType+")</b><br /><br />";

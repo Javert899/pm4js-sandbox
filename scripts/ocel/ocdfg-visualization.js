@@ -158,6 +158,9 @@ class OcdfgVisualization {
 					let li3 = document.createElement("li");
 					li3.innerHTML = "<a href=\"javascript:seeRelatedObjEdge()\"><i class='fab fa-connectdevelop'></i>&nbsp;See Rel.Obj. Edge</a>";
 					menu.appendChild(li3);
+					let li5 = document.createElement("li");
+					li5.innerHTML = "<a href=\"javascript:expandEdge()\"><i class='fas fa-expand'></i>&nbsp;Expand Edge</a>";
+					menu.appendChild(li5);
 					let li4 = document.createElement("li");
 					li4.innerHTML = "<a href=\"javascript:Swal.fire({title: 'Edge Statistics', confirmButton: 'Ok', html: '"+htmlStri+"'})\"><i class='fas fa-chart-pie'></i>&nbsp;Statistics</a>";
 					menu.appendChild(li4);
@@ -317,7 +320,16 @@ class OcdfgVisualization {
 								let color = this.stringToColour(ot);
 								let obj1 = this.activitiesIndipendent[activities[0]];
 								let obj2 = this.activitiesIndipendent[activities[1]];
+								
+								let penwidth = Math.floor(1 + Math.log(1 + value)/2);
+								let label = otEdges.toReducedString(edge, this.IDX);
 								if (edgeVect in this.expandedEdges) {
+									label = otEdges.toIntermediateString(edge, this.IDX);
+								}
+								let arc = this.graph.insertEdge(parent, edgeVect.toString(), label, obj1, obj2, "fontSize=16;strokeWidth="+penwidth+";strokeColor="+color+";fontColor="+color);
+								this.graphEdges[edgeVect] = arc;
+								this.invGraphEdges[arc.id] = edgeVect;
+								/*if (edgeVect in this.expandedEdges) {
 									let intermediateNode = this.graph.insertVertex(parent, "", otEdges.toCompleteString(edge), 150, 150, 275, 250, "fontSize=11;shape=doubleEllipse;fillColor="+color+";fontColor=white");
 									let arc1 = this.graph.insertEdge(parent, null, "", obj1, intermediateNode, "fontSize=16;strokeColor="+color+";fontColor="+color);
 									let arc2 = this.graph.insertEdge(parent, null, "", intermediateNode, obj2, "fontSize=16;strokeColor="+color+";fontColor="+color);
@@ -330,7 +342,7 @@ class OcdfgVisualization {
 									let arc = this.graph.insertEdge(parent, edgeVect.toString(), label, obj1, obj2, "fontSize=16;strokeWidth="+penwidth+";strokeColor="+color+";fontColor="+color);
 									this.graphEdges[edgeVect] = arc;
 									this.invGraphEdges[arc.id] = edgeVect;
-								}
+								}*/
 							}
 						}
 					}
