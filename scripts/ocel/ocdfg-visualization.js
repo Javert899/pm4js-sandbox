@@ -263,15 +263,25 @@ class OcdfgVisualization {
 			let minActiCount = (1 - af) * this.MAX_INDIPENDENT_ACT_COUNT;
 			let minEdgeCount = (1 - pf) * this.MAX_EDGE_COUNT;
 			var parent = this.graph.getDefaultParent();
+			this.graph.convertValueToString = function(cell) {
+				try {
+					var div = document.createElement('div');
+					div.innerHTML = cell.value;
+					return div;
+				}
+				catch (err) {
+					return "err";
+				}
+			}
 			for (let act in this.model.overallEventsView.activities) {
 				if (this.model.overallEventsView.satisfy(act, this.IDX, minActiCount)) {
 					let count = this.model.overallEventsView.getValue(act, this.IDX);
-					let width = 275;
-					let height = 60;
+					let width = Math.floor(this.model.overallEventsView.getThisWidth(act, act in this.expandedActivities) * 10);
+					let height = Math.floor(this.model.overallEventsView.getThisHeight(act, act in this.expandedActivities) * 25);
 					let label = this.model.overallEventsView.toReducedString(act, this.IDX);
 					if (act in this.expandedActivities) {
 						height = 250;
-						label = this.model.overallEventsView.toCompleteString(act).replaceAll("<br />", "\n").replaceAll("<br/>", "\n").replaceAll("<b>","").replaceAll("</b>","");
+						label = this.model.overallEventsView.toIntermediateString(act, this.IDX);
 					}
 					let cc = Math.floor(125 + 125 * (this.MAX_INDIPENDENT_ACT_COUNT - count)/(this.MAX_INDIPENDENT_ACT_COUNT - this.MIN_INDIPENDENT_ACT_COUNT + 0.000001));
 					cc = cc + 256 * cc + 256*256 * cc;
@@ -279,7 +289,7 @@ class OcdfgVisualization {
 					let activityObject = this.graph.insertVertex(parent, act, label, 150, 150, width, height, "fontSize=18;fillColor="+hex);
 					this.activitiesIndipendent[act] = activityObject;
 					this.invActivitiesIndipendent[activityObject.id] = act;
-					if (act in this.expandedActivities) {
+					/*if (act in this.expandedActivities) {
 						for (let ot in this.model.otEventsView) {
 							let otView = this.model.otEventsView[ot];
 							if (act in otView.activities) {
@@ -292,7 +302,7 @@ class OcdfgVisualization {
 								}
 							}
 						}
-					}
+					}*/
 				}
 			}
 			if (this.displayType == "dfg") {
@@ -329,8 +339,10 @@ class OcdfgVisualization {
 					let color = this.stringToColour(ot);
 					let otObjects = this.model.otObjectsView[ot];
 					let otSa = otObjects.filteredSa(minEdgeCount, this.activitiesIndipendent);
+					let endpointWidth = ot.length * 10;
+					let endpointHeight = 2 * 25;
 					if (Object.keys(otSa).length > 0) {
-						let saNode = this.graph.insertVertex(this.parent, "SA_"+ot, ot, 150, 150, 275, 60, "shape=ellipse;fontColor=white;fillColor="+color);
+						let saNode = this.graph.insertVertex(this.parent, "SA_"+ot, ot, 150, 150, endpointWidth, endpointHeight, "shape=ellipse;fontColor=white;fillColor="+color);
 						this.saNodes[ot] = saNode;
 						this.invSaNodes[saNode.id] = ot;
 						for (let act in otSa) {
@@ -341,7 +353,8 @@ class OcdfgVisualization {
 					}
 					let otEa = otObjects.filteredEa(minEdgeCount, this.activitiesIndipendent);
 					if (Object.keys(otEa).length > 0) {
-						let eaNode = this.graph.insertVertex(this.parent, "EA_"+ot, "", 150, 150, 60, 60, "shape=ellipse;fillColor="+color);
+						endpointWidth = endpointHeight;
+						let eaNode = this.graph.insertVertex(this.parent, "EA_"+ot, "", 150, 150, endpointWidth, endpointHeight, "shape=ellipse;fillColor="+color);
 						this.eaNodes[ot] = eaNode;
 						this.invEaNodes[eaNode.id] = ot;
 						for (let act in otEa) {
@@ -353,12 +366,6 @@ class OcdfgVisualization {
 				}
 			}
 			else if (this.displayType == "petriNet") {
-				/*
-				this.placesDict = {};
-				this.invPlacesDict = {};
-				this.transDict = {};
-				this.invTransDict = {};
-				*/
 				for (let ot in this.model.otEventLogs) {
 					let activities = Object.keys(this.activitiesIndipendent);
 					let consideredLog = LogGeneralFiltering.filterEventsHavingEventAttributeValues(this.model.otEventLogs[ot], activities);
@@ -378,7 +385,7 @@ class OcdfgVisualization {
 						for (let placeId in acceptingPetriNet.net.places) {
 							let place = acceptingPetriNet.net.places[placeId];
 							let placeLabel = "p="+replayResult.totalProducedPerPlace[place]+";m="+replayResult.totalMissingPerPlace[place]+"\nc="+replayResult.totalConsumedPerPlace[place]+";r="+replayResult.totalRemainingPerPlace[place];
-							let placeSizeX = 90;
+							let placeSizeX = 130;
 							let placeSizeY = 90;
 							if (place in acceptingPetriNet.im.tokens) {
 								placeLabel = ot;

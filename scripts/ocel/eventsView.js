@@ -1,6 +1,7 @@
 class EventsView {
-	constructor(ocel) {
+	constructor(ocel, model) {
 		this.ocel = ocel;
+		this.model = model;
 		this.objectType = null;
 		this.eventsIds = {};
 		this.activities = {};
@@ -95,7 +96,7 @@ class EventsView {
 	toReducedString(acti, idx) {
 		let ret = acti+"\n"
 		if (idx == 0) {
-			ret += "EC="+this.activitiesCounters[acti]["events"];
+			ret += "E="+this.activitiesCounters[acti]["events"];
 		}
 		else if (idx == 1) {
 			ret += "UO="+this.activitiesCounters[acti]["unique_objects"];
@@ -120,6 +121,65 @@ class EventsView {
 		if (this.objectType != null) {
 			ret += "min rel. obj = "+this.activitiesCounters[acti]["min_related_objects"]+"<br />";
 			ret += "max rel. obj = "+this.activitiesCounters[acti]["max_related_objects"]+"<br />";
+		}
+		return ret;
+	}
+	
+	stringToColour(str) {
+	  var hash = 0;
+	  for (var i = 0; i < str.length; i++) {
+		hash = str.charCodeAt(i) + ((hash << 5) - hash);
+	  }
+	  var colour = '#';
+	  for (var i = 0; i < 3; i++) {
+		var value = (hash >> (i * 8)) & 0xFF;
+		colour += ('00' + value.toString(16)).substr(-2);
+	  }
+	  return colour;
+	}
+	
+	toIntermediateStringThis(acti) {
+		let ret = "E="+this.activitiesCounters[acti]["events"]+" UO="+this.activitiesCounters[acti]["unique_objects"]+" TO="+this.activitiesCounters[acti]["total_objects"];
+		if (this.objectType != null) {
+			ret = "<span style='color: "+this.stringToColour(this.objectType)+"'>" + ret + "</span>";
+		}
+		else {
+			ret = "<b>" + ret + "</b>";
+		}
+		return ret;
+	}
+	
+	getThisWidth(acti, isExpanded) {
+		if (isExpanded) {
+			return Math.max(acti.length, this.toIntermediateStringThis(acti).length);
+		}
+		else {
+			return this.toReducedString(acti, 2).length;
+		}
+	}
+	
+	getThisHeight(acti, isExpanded) {
+		let ret = 2;
+		if (isExpanded) {
+			ret = 4;
+			for (let ot in this.model.otEventsView) {
+				let otEvents = this.model.otEventsView[ot];
+				if (acti in otEvents.activities) {
+					ret += 1;
+				}
+			}
+		}
+		return ret;
+	}
+	
+	toIntermediateString(acti, idx) {
+		let ret = acti+"<br /><br />";
+		ret += this.toIntermediateStringThis(acti) + "<br /><br />";
+		for (let ot in this.model.otEventsView) {
+			let otEvents = this.model.otEventsView[ot];
+			if (acti in otEvents.activities) {
+				ret += otEvents.toIntermediateStringThis(acti) + "<br />";
+			}
 		}
 		return ret;
 	}

@@ -1,7 +1,7 @@
 class OcdfgModel {
 	constructor(ocel) {
 		this.ocel = ocel;
-		this.overallEventsView = new EventsView(ocel);
+		this.overallEventsView = new EventsView(ocel, this);
 		this.overallObjectsView = new ObjectsView(ocel);
 		this.otEventsView = {};
 		this.otObjectsView = {};
@@ -25,7 +25,7 @@ class OcdfgModel {
 	calculate() {
 		for (let otId in this.ocel["ocel:global-log"]["ocel:object-types"]) {
 			let ot = this.ocel["ocel:global-log"]["ocel:object-types"][otId];
-			this.otEventsView[ot] = new EventsView(this.ocel);
+			this.otEventsView[ot] = new EventsView(this.ocel, this);
 			this.otObjectsView[ot] = new ObjectsView(this.ocel);
 			this.otEventsView[ot].objectType = ot;
 			this.otObjectsView[ot].objectType = ot;
