@@ -168,20 +168,24 @@ class PlotlyOcelGraphs {
 		}
 		serie.sort((a, b) => a[1] - b[1]);
 		let allColors = {};
+		let prob = 500 / serie.length;
 		for (let elCount in serie) {
-			let el = serie[elCount];
-			let objId = el[0];
-			let relEve = objectsIds[objId];
-			for (let eve of relEve) {
-				let timestamp = eve[2];
-				let activity = eve[1];
-				let timestampDate = new Date(timestamp*1000);
-				let timestampStru = timestampDate.getFullYear()  + "-" + (timestampDate.getMonth()+1) + "-" + timestampDate.getDate() + " " + timestampDate.getHours()+":"+timestampDate.getMinutes()+":"+timestampDate.getSeconds();
-				if (!(activity in allColors)) {
-					allColors[activity] = {x: [], y: [], type: "scatter", mode: "markers", name: activity};
+			let rr = Math.random();
+			if (rr < prob) {
+				let el = serie[elCount];
+				let objId = el[0];
+				let relEve = objectsIds[objId];
+				for (let eve of relEve) {
+					let timestamp = eve[2];
+					let activity = eve[1];
+					let timestampDate = new Date(timestamp*1000);
+					let timestampStru = timestampDate.getFullYear()  + "-" + (timestampDate.getMonth()+1) + "-" + timestampDate.getDate() + " " + timestampDate.getHours()+":"+timestampDate.getMinutes()+":"+timestampDate.getSeconds();
+					if (!(activity in allColors)) {
+						allColors[activity] = {x: [], y: [], type: "scatter", mode: "markers", name: activity};
+					}
+					allColors[activity].x.push(timestampStru);
+					allColors[activity].y.push(elCount);
 				}
-				allColors[activity].x.push(timestampStru);
-				allColors[activity].y.push(elCount);
 			}
 		}
 		let colors = Object.keys(allColors).sort();
@@ -215,21 +219,25 @@ class PlotlyOcelGraphs {
 		}
 		serie.sort((a, b) => a[1] - b[1]);
 		let allColors = {};
+		let prob = 500 / serie.length;
 		for (let elCount in serie) {
-			let el = serie[elCount];
-			let objId = el[0];
-			let objType = this.model.ocel["ocel:objects"][objId]["ocel:type"];
-			let relEve = objectsIds[objId];
-			for (let eve of relEve) {
-				let timestamp = eve[2];
-				let activity = eve[1];
-				let timestampDate = new Date(timestamp*1000);
-				let timestampStru = timestampDate.getFullYear()  + "-" + (timestampDate.getMonth()+1) + "-" + timestampDate.getDate() + " " + timestampDate.getHours()+":"+timestampDate.getMinutes()+":"+timestampDate.getSeconds();
-				if (!(objType in allColors)) {
-					allColors[objType] = {x: [], y: [], type: "scatter", mode: "markers", name: objType};
+			let rr = Math.random();
+			if (rr < prob) {
+				let el = serie[elCount];
+				let objId = el[0];
+				let objType = this.model.ocel["ocel:objects"][objId]["ocel:type"];
+				let relEve = objectsIds[objId];
+				for (let eve of relEve) {
+					let timestamp = eve[2];
+					let activity = eve[1];
+					let timestampDate = new Date(timestamp*1000);
+					let timestampStru = timestampDate.getFullYear()  + "-" + (timestampDate.getMonth()+1) + "-" + timestampDate.getDate() + " " + timestampDate.getHours()+":"+timestampDate.getMinutes()+":"+timestampDate.getSeconds();
+					if (!(objType in allColors)) {
+						allColors[objType] = {x: [], y: [], type: "scatter", mode: "markers", name: objType};
+					}
+					allColors[objType].x.push(timestampStru);
+					allColors[objType].y.push(elCount);
 				}
-				allColors[objType].x.push(timestampStru);
-				allColors[objType].y.push(elCount);
 			}
 		}
 		let colors = Object.keys(allColors).sort();
