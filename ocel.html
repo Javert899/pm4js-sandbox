@@ -175,14 +175,14 @@
 													<div class="navigation-row">
 														<div>Visualization:
 														<select id="visualizationType" class="form-select">
-															<option value="dfg" selected>DFG</option>
-															<option value="petriNet">Petri Net</option>
+															<option value="dfg" selected>OC-DFG</option>
+															<option value="petriNet">OC-Petri Net</option>
 														</select></div>
 														<div>Annotation:
 														<select id="annotationSelector" class="form-select">
-															<option id="events" value="0">Events</option>
-															<option id="unique_objects" value="1" selected>Unique Objects</option>
-															<option id="total_objects" value="2">Total Objects</option>
+															<option id="events" value="0">E/EC</option>
+															<option id="unique_objects" value="1" selected>UO</option>
+															<option id="total_objects" value="2">TO</option>
 														</select></div>
 														<div><button id="apply_changes2" onclick="doVisualization()" class="btn btn-primary">Apply Changes</button></div>
 													</div>
@@ -646,7 +646,7 @@
 				</div>
 			</div>
 		</div>
-		<script src="logs/example-jsonocel.js"></script>
+		<script src="logs/example-jsonocel2.js"></script>
 		<script type="text/javascript">
 			function filterDeviationsLifecycleObjects(objType, dev) {
 				let objectIdentifiers = visualization.model.conformanceLifecycleObjects.getRelatedObjects(objType, dev).toString();
