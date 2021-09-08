@@ -3,7 +3,7 @@ class EventsListFactory {
 		this.model = model;
 	}
 	
-	buildEventsTable(container, events=null, enable_click=true, target_obj=null) {
+	buildEventsTable(container, events=null, enable_click=true, target_obj=null, currStart=0, currEnd=1000000) {
 		container.innerHTML = "";
 		let otypes = this.model.ocel["ocel:global-log"]["ocel:object-types"];
 		let attributes = this.model.ocel["ocel:global-log"]["ocel:attribute-names"];
@@ -43,7 +43,10 @@ class EventsListFactory {
 			header.appendChild(evAttributes);
 		}
 		let eventsHtmlRepr = [];
-		for (let eveId in events) {
+		let eventKeys = Object.keys(events).sort();
+		let i = currStart;
+		while (i <= currEnd) {
+			let eveId = eventKeys[i];
 			let eve = logEvents[eveId];
 			eventsHtmlRepr.push("<tr>");
 			eventsHtmlRepr.push("<td>"+eveId+"</td>");
@@ -89,6 +92,7 @@ class EventsListFactory {
 				}
 			}
 			eventsHtmlRepr.push("</tr>");
+			i++;
 		}
 		tbody.innerHTML = eventsHtmlRepr.join("");
 		//sorttable.makeSortable(container);

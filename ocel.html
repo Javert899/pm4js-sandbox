@@ -521,10 +521,23 @@
 					document.getElementById('upload').addEventListener('change', handleFileSelect, false);
 				</script>
 			</div>
+			<script type="text/javascript">
+				var numEvents = 0;
+				var currStart0 = 0;
+				var currEnd0 = 0;
+				var currStart = 0;
+				var currEnd = 0;
+				var pageSize = 500;
+			</script>
 			<div id="eventsListPage" style="display: none">
 				<p>The page shows the list of events of the log. Each event is distinguished by its fundamental properties (ID, activity and timestamp),
 				a list of related objects for each type, and values for some attributes. Clicking an object, it is possible to see the lifecycle
 				of the object.</p>
+				<div>
+					<b>Number of events:</b> <span id="numEventsEventsPage"></span>
+					&nbsp;&nbsp;<b>Current displayed range:</b> <span id="currStartEventsPage"></span>-<span id="currEndEventsPage"></span>
+					&nbsp;&nbsp;<button class="button" onclick="javascript:decreaseRange()">&#8592;</button><button class="button" onclick="javascript:increaseRange()">&#8594;</button>
+				</div>
 				<table id="eventsListTable" border="1"  class="table">
 				</table>
 			</div>
@@ -694,9 +707,33 @@
 			
 			function showEventsList() {
 				hideAllDivsPages();
+				numEvents = Object.keys(visualization.model.ocel["ocel:events"]).length;
+				currStart0 = 0;
+				currEnd0 = pageSize - 1;
 				document.getElementById("eventsListPage").style.display = "";
+				populateNumEventsEventsPage();
+			}
+			
+			function populateNumEventsEventsPage() {
+				currStart = Math.max(0, Math.min(numEvents, currStart0));
+				currEnd = Math.max(0, Math.min(numEvents, currEnd0));
+				document.getElementById("numEventsEventsPage").innerHTML = numEvents;
+				document.getElementById("currStartEventsPage").innerHTML = currStart;
+				document.getElementById("currEndEventsPage").innerHTML = currEnd;
 				eventsListFactory = new EventsListFactory(visualization.model);
-				eventsListFactory.buildEventsTable(document.getElementById("eventsListTable"));
+				eventsListFactory.buildEventsTable(document.getElementById("eventsListTable"), null, true, null, currStart, currEnd);
+			}
+			
+			function increaseRange() {
+				currStart0 = currStart0 + pageSize;
+				currEnd0 = currEnd0 + pageSize;
+				populateNumEventsEventsPage();
+			}
+			
+			function decreaseRange() {
+				currStart0 = currStart0 - pageSize;
+				currEnd0 = currEnd0 - pageSize;
+				populateNumEventsEventsPage();
 			}
 			
 			function showObjectsList() {
