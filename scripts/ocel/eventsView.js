@@ -40,7 +40,16 @@ class EventsView {
 				let eve = this.ocel["ocel:events"][evId];
 				for (let objIdx in eve["ocel:omap"]) {
 					let objId = eve["ocel:omap"][objIdx];
-					uniqueObjects[objId] = 0;
+					let obj = this.ocel["ocel:objects"][objId];
+					if (this.objectType != null) {
+						let objType = obj["ocel:type"];
+						if (objType == this.objectType) {
+							uniqueObjects[objId] = 0;
+						}
+					}
+					else {
+						uniqueObjects[objId] = 0;
+					}
 				}
 			}
 			this.activitiesCounters[act]["unique_objects"] = Object.keys(uniqueObjects).length;
@@ -49,12 +58,24 @@ class EventsView {
 	
 	calculateActivityNumTotalObjects() {
 		for (let act in this.activities) {
-			let count = 0;
+			let uniqueObjects = {};
 			for (let evId in this.activities[act]) {
 				let eve = this.ocel["ocel:events"][evId];
-				count += eve["ocel:omap"].length;
+				for (let objIdx in eve["ocel:omap"]) {
+					let objId = eve["ocel:omap"][objIdx];
+					let obj = this.ocel["ocel:objects"][objId];
+					if (this.objectType != null) {
+						let objType = obj["ocel:type"];
+						if (objType == this.objectType) {
+							uniqueObjects[objId+","+eve] = 0;
+						}
+					}
+					else {
+						uniqueObjects[objId+","+eve] = 0;
+					}
+				}
 			}
-			this.activitiesCounters[act]["total_objects"] = count;
+			this.activitiesCounters[act]["total_objects"] = Object.keys(uniqueObjects).length;
 		}
 	}
 	
