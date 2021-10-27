@@ -42,6 +42,10 @@
 			let selectedOt = null;
 			let selectedEdge = null;
 			let visualization = null;
+			let celonisUrl = null;
+			let celonisApi = null;
+			let celonisMapper = null;
+			let celonisWrapper = null;
 		</script>
 		<div id="uploadPart" style="display: ">
 			<!--<img src="static/pads_rwth.png" /><br />
@@ -66,6 +70,67 @@
 
 					<div id="initial_upload" style="height: 20%; width: 100%; display: " class="d-flex justify-content-center align-items-center">
 						... Or upload it using the following button: &nbsp;&nbsp;&nbsp; <input type="file" id="upload" />
+					</div>
+					
+					<div id="celonis_connection_parameters" style="width: 100%; display: " style="text-align: center;">
+						<script type="text/javascript">
+							function connectToCelonis() {
+								document.getElementById("celonis_connection_parameters").style.display = "none";
+								document.getElementById("celonis_waiting_circle").style.display = "";
+								try {
+									celonisUrl = document.getElementById("celonis_url").value;
+									celonisApi = document.getElementById("celonis_api").value;
+									celonisMapper = new CelonisMapper(celonisUrl, celonisApi);
+									fillDataModelSelectionUpload();
+								}
+								catch (err) {
+									document.getElementById("celonis_connection_parameters").style.display = "";
+									document.getElementById("celonis_waiting_circle").style.display = "none";
+									console.log(err);
+								}
+							}
+							
+							function fillDataModelSelectionUpload() {
+								let dataModelSelectionUpload = document.getElementById("dataModelSelectionUpload");
+								/*for (let dataPoolId in celonisMapper.dataPoolsDataModels) {
+									let dataPool = celonisMapper.dataPools[dataPoolId];
+									for (let dataModelId in celonisMapper.dataPoolsDataModels[dataPoolId]) {
+										let dataModel = celonisMapper.dataPoolsDataModels[dataPoolId][dataModelId];
+										let option = document.createElement("option");
+										option.value = dataPoolId + "@@@" + dataModelId;
+										option.text = dataModel["name"] + " ("+dataPool["name"]+")";
+										dataModelSelectionUpload.appendChild(option);
+									}
+								}*/
+								for (let analysisId in celonisMapper.analysis) {
+									let analysis = celonisMapper.analysis[analysisId];
+									let dataModelId = celonisMapper.analysisDataModel[analysisId];
+									let dataModel = celonisMapper.dataModels[dataModelId];
+									let dataPoolId = celonisMapper.dataModelsDataPools[dataModelId];
+									let dataPool = celonisMapper.dataPools[dataPoolId];
+									let option = document.createElement("option");
+									option.value = analysisId;
+									option.text = analysis["name"] + " (DP="+dataPool["name"]+"; DM="+dataModel["name"]+")";
+									dataModelSelectionUpload.appendChild(option);
+								}
+							}
+							
+							function downloadDataModelFromCelonis() {
+								
+							}
+						</script>
+						<div>.. Or connect to Celonis and retrieve an analysis!</div>
+						<div>Celonis URL: <input id="celonis_url" type="text"></input> Celonis API: <input id="celonis_api" type="text"></input> <button class="btn btn-primary" onclick="javascript:connectToCelonis()">Connect</button></div>
+					</div>
+
+					<div id="celonis_waiting_circle" style="display: none; text-align: center;">
+						<div>Please select the analysis to download:</div>
+						<div>
+							<select name="dataModelSelectionUpload" id="dataModelSelectionUpload">
+								
+							</select>
+							<button class="btn btn-primary" onclick="javascript:downloadDataModelFromCelonis()">Download</button>
+						</div>
 					</div>
 				</div>
 			</div>
