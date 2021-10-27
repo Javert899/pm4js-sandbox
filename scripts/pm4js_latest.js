@@ -59,7 +59,7 @@ class Pm4JS {
 	}
 }
 
-Pm4JS.VERSION = "0.0.7";
+Pm4JS.VERSION = "0.0.12";
 Pm4JS.registrationEnabled = false;
 Pm4JS.objects = [];
 Pm4JS.algorithms = [];
@@ -8488,8 +8488,8 @@ class PetriNetReduction {
 }
 
 try {
-	require('../../pm4js.js');
-	require('./petri_net.js');
+	require('../../../pm4js.js');
+	require('../petri_net.js');
 	module.exports = {PetriNetReduction: PetriNetReduction};
 	global.PetriNetReduction = PetriNetReduction;
 }
@@ -8499,6 +8499,48 @@ catch (err) {
 }
 
 Pm4JS.registerAlgorithm("PetriNetReduction", "apply", ["AcceptingPetriNet"], "AcceptingPetriNet", "SESE Reduction of Accepting Petri Net", "Alessandro Berti");
+
+
+class PetriNetReachableVisibleTransitions {
+	static apply(net, marking) {
+		let reachableVisibleTransitions = {};
+		let visited = {};
+		let toVisit = [];
+		toVisit.push(marking);
+		while (toVisit.length > 0) {
+			//console.log(reachableVisibleTransitions);
+			let currMarking = toVisit.shift();
+			if (currMarking in visited) {
+				continue;
+			}
+			visited[currMarking] = 0;
+			let enabledTransitions = currMarking.getEnabledTransitions();
+			for (let trans of enabledTransitions) {
+				if (trans.label != null) {
+					reachableVisibleTransitions[trans.label] = 0;
+				}
+				else {
+					let newMarking = currMarking.execute(trans);
+					if (!(newMarking in visited)) {
+						toVisit.push(newMarking);
+					}
+				}
+			}
+		}
+		return Object.keys(reachableVisibleTransitions);
+	}
+}
+
+try {
+	require('../../../pm4js.js');
+	require('../petri_net.js');
+	module.exports = {PetriNetReachableVisibleTransitions: PetriNetReachableVisibleTransitions};
+	global.PetriNetReachableVisibleTransitions = PetriNetReachableVisibleTransitions;
+}
+catch (err) {
+	//console.log(err);
+	// not in Node
+}
 
 
 class PnmlImporter {
@@ -8788,6 +8830,7 @@ class ProcessTree {
 		this.label = label;
 		this.id = ProcessTree.uuidv4();
 		this.children = [];
+		this.properties = {};
 	}
 	
 	toString() {
@@ -8982,7 +9025,7 @@ try {
 	require('../../../pm4js.js');
 	require('../../process_tree/process_tree.js');
 	require('../../petri_net/petri_net.js');
-	require('../../petri_net/reduction.js');
+	require('../../petri_net/util/reduction.js');
 	module.exports = {ProcessTreeToPetriNetConverter: ProcessTreeToPetriNetConverter};
 	global.ProcessTreeToPetriNetConverter = ProcessTreeToPetriNetConverter;
 }
@@ -9412,6 +9455,8 @@ class TokenBasedReplayResult {
 		this.totalTraces = this.result.length;
 		this.fitTraces = 0;
 		this.logFitness = 0.0;
+		this.averageTraceFitness = 0.0;
+		this.percentageFitTraces = 0.0;
 		this.compute();
 	}
 	
@@ -9424,15 +9469,6 @@ class TokenBasedReplayResult {
 			this.totalProduced += res["produced"];
 			this.totalMissing += res["missing"];
 			this.totalRemaining += res["remaining"];
-			let fitMC = 0.0;
-			let fitRP = 0.0;
-			if (this.totalConsumed > 0) {
-				fitMC = 1.0 - this.totalMissing / this.totalConsumed;
-			}
-			if (this.totalProduced > 0) {
-				fitRP = 1.0 - this.totalRemaining / this.totalProduced;
-			}
-			this.logFitness = 0.5*fitMC + 0.5*fitRP;
 			for (let t of res["visitedTransitions"]) {
 				this.transExecutions[t]++;
 				for (let a in t.inArcs) {
@@ -9448,7 +9484,19 @@ class TokenBasedReplayResult {
 				this.totalMissingPerPlace[p] += res["missingPerPlace"][p];
 				this.totalRemainingPerPlace[p] += res["remainingPerPlace"][p];
 			}
+			this.averageTraceFitness += res["fitness"];
 		}
+		let fitMC = 0.0;
+		let fitRP = 0.0;
+		if (this.totalConsumed > 0) {
+			fitMC = 1.0 - this.totalMissing / this.totalConsumed;
+		}
+		if (this.totalProduced > 0) {
+			fitRP = 1.0 - this.totalRemaining / this.totalProduced;
+		}
+		this.logFitness = 0.5*fitMC + 0.5*fitRP;
+		this.averageTraceFitness = this.averageTraceFitness / this.result.length;
+		this.percentageFitTraces = this.fitTraces / this.totalTraces;
 	}
 }
 
@@ -9480,6 +9528,29 @@ class TokenBasedReplay {
 		Pm4JS.registerObject(finalResult, "Token-Based Replay Result");
 		
 		return finalResult;
+	}
+	
+	static applyListListAct(listListActivities, acceptingPetriNet, reachFm=true, retMarking=false) {
+		let invisibleChain = TokenBasedReplay.buildInvisibleChain(acceptingPetriNet.net);
+		let transitionsMap = {};
+		for (let transId in acceptingPetriNet.net.transitions) {
+			let trans = acceptingPetriNet.net.transitions[transId];
+			if (trans.label != null) {
+				transitionsMap[trans.label] = trans;
+			}
+		}
+		let ret = [];
+		for (let activities of listListActivities) {
+			let tbrResult = TokenBasedReplay.performTbr(activities.split(","), transitionsMap, acceptingPetriNet, invisibleChain, reachFm);
+			if (retMarking) {
+				let isFit = tbrResult.isFit;
+				tbrResult = tbrResult.visitedMarkings;
+				tbrResult = tbrResult[tbrResult.length - 1];
+				tbrResult.isFit = isFit;
+			}
+			ret.push(tbrResult);
+		}
+		return ret;
 	}
 	
 	static performTbr(activities, transitionsMap, acceptingPetriNet, invisibleChain, reachFm) {
@@ -9814,7 +9885,11 @@ class GeneralizationTbrResults {
 }
 
 class GeneralizationTbr {
-	static apply(tbrResults) {
+	static apply(log, acceptingPetriNet, activityKey="concept:name") {
+		return GeneralizationTbr.evaluate(TokenBasedReplay.apply(log, acceptingPetriNet, activityKey));
+	}
+	
+	static evaluate(tbrResults) {
 		let invSqOccSum = 0.0
 		for (let trans in tbrResults.transExecutions) {
 			let thisTerm = 1.0 / Math.sqrt(Math.max(tbrResults.transExecutions[trans], 1));
@@ -9827,8 +9902,8 @@ class GeneralizationTbr {
 }
 
 try {
-	require("../../../pm4js.js");
-	require("../../conformance/tokenreplay/algorithm.js");
+	require("../../../../pm4js.js");
+	require("../../../conformance/tokenreplay/algorithm.js");
 	module.exports = {GeneralizationTbr: GeneralizationTbr, GeneralizationTbrResults: GeneralizationTbrResults};
 	global.GeneralizationTbr = GeneralizationTbr;
 	global.GeneralizationTbrResults = GeneralizationTbrResults;
@@ -9838,7 +9913,7 @@ catch (err) {
 	//console.log(err);
 }
 
-Pm4JS.registerAlgorithm("GeneralizationTbr", "apply", ["TokenBasedReplayResult"], "GeneralizationTbrResults", "Calculate Generalization", "Alessandro Berti");
+Pm4JS.registerAlgorithm("GeneralizationTbr", "evaluate", ["TokenBasedReplayResult"], "GeneralizationTbrResults", "Calculate Generalization", "Alessandro Berti");
 
 
 class SimplicityArcDegreeResults {
@@ -9849,6 +9924,10 @@ class SimplicityArcDegreeResults {
 
 class SimplicityArcDegree {
 	static apply(acceptingPetriNet, k=0) {
+		return SimplicityArcDegree.evaluate(acceptingPetriNet, k);
+	}
+	
+	static evaluate(acceptingPetriNet, k=0) {
 		let summ = 0.0;
 		let count = 0;
 		for (let placeId in acceptingPetriNet.net.places) {
@@ -9875,8 +9954,8 @@ class SimplicityArcDegree {
 }
 
 try {
-	require("../../../pm4js.js");
-	require("../../../objects/petri_net/petri_net.js");
+	require("../../../../pm4js.js");
+	require("../../../../objects/petri_net/petri_net.js");
 	module.exports = {SimplicityArcDegree: SimplicityArcDegree, SimplicityArcDegreeResults: SimplicityArcDegreeResults};
 	global.SimplicityArcDegree = SimplicityArcDegree;
 	global.SimplicityArcDegreeResults = SimplicityArcDegreeResults;
@@ -9886,7 +9965,7 @@ catch (err) {
 	//console.log(err);
 }
 
-Pm4JS.registerAlgorithm("SimplicityArcDegree", "apply", ["AcceptingPetriNet"], "SimplicityArcDegreeResults", "Calculate Simplicity (Arc Degree)", "Alessandro Berti");
+Pm4JS.registerAlgorithm("SimplicityArcDegree", "evaluate", ["AcceptingPetriNet"], "SimplicityArcDegreeResults", "Calculate Simplicity (Arc Degree)", "Alessandro Berti");
 
 
 class FrequencyDfg {
@@ -10296,6 +10375,9 @@ class PerformanceDfgDiscovery {
 			else if (aggregationMeasure == "sum") {
 				paths[path] = PerformanceDfgDiscovery.calculateSum(paths[path]);
 			}
+			else if (aggregationMeasure == "raw_values") {
+				// returns the raw values
+			}
 			else {
 				paths[path] = PerformanceDfgDiscovery.calculateMean(paths[path]);
 			}
@@ -10381,6 +10463,10 @@ class InductiveMiner {
 		return InductiveMiner.apply(null, activityKey, threshold, frequencyDfg, removeNoise);
 	}
 	
+	static applyDfg(frequencyDfg, threshold=0.0, removeNoise=false) {
+		return InductiveMiner.apply(null, null, threshold, frequencyDfg, removeNoise);
+	}
+	
 	static apply(eventLog, activityKey="concept:name", threshold=0.0, freqDfg=null, removeNoise=false) {
 		let tree = InductiveMiner.inductiveMiner(eventLog, null, activityKey, removeNoise, threshold, freqDfg);
 		if (eventLog == null) {
@@ -10445,12 +10531,16 @@ class InductiveMiner {
 		if (detectedCut != null) {
 			return detectedCut;
 		}
-		if (log != null) {
-			if (!(removeNoise)) {
-				let detectedFallthrough = InductiveMiner.detectFallthroughs(log, freqDfg, treeParent, activityKey, threshold);
-				if (detectedFallthrough != null) {
-					return detectedFallthrough;
-				}
+		if (!(removeNoise)) {
+			let detectedFallthrough = null;
+			if (log != null) {
+				detectedFallthrough = InductiveMiner.detectFallthroughs(log, freqDfg, treeParent, activityKey, threshold);
+			}
+			else {
+				detectedFallthrough = InductiveMiner.detectFallthroughsDfg(freqDfg, treeParent, threshold);
+			}
+			if (detectedFallthrough != null) {
+				return detectedFallthrough;
 			}
 		}
 		if (!(removeNoise) && threshold > 0) {
@@ -10578,6 +10668,27 @@ class InductiveMiner {
 		return null;
 	}
 	
+	static detectFallthroughsDfg(freqDfg, treeParent, threshold) {
+		let activityConcurrentCut = InductiveMinerActivityConcurrentFallthroughDFG.detect(freqDfg, threshold);
+		if (activityConcurrentCut != null) {
+			let parNode = new ProcessTree(treeParent, ProcessTreeOperator.PARALLEL, null);
+			let xorWithSkipsNode = new ProcessTree(treeParent, ProcessTreeOperator.EXCLUSIVE, null);
+			parNode.children.push(xorWithSkipsNode);
+			let actNode = new ProcessTree(xorWithSkipsNode, null, activityConcurrentCut[0]);
+			let skipNode = new ProcessTree(xorWithSkipsNode, null, null);
+			xorWithSkipsNode.children.push(actNode);
+			xorWithSkipsNode.children.push(skipNode);
+			let xorWithSkipsNode2 = new ProcessTree(parNode, ProcessTreeOperator.EXCLUSIVE, null);
+			let skipNode2 = new ProcessTree(xorWithSkipsNode2, null, null);
+			xorWithSkipsNode2.children.push(activityConcurrentCut[1]);
+			xorWithSkipsNode2.children.push(skipNode2);
+			activityConcurrentCut[1].parentNode = xorWithSkipsNode2;
+			parNode.children.push(xorWithSkipsNode2);
+			parNode.properties["concurrentActivity"] = activityConcurrentCut[0];
+			return parNode;
+		}
+	}
+	
 	static detectFallthroughs(log, freqDfg, treeParent, activityKey, threshold) {
 		let activityOncePerTraceCandidate = InductiveMinerActivityOncePerTraceFallthrough.detect(log, freqDfg, activityKey);
 		if (activityOncePerTraceCandidate != null) {
@@ -10597,6 +10708,7 @@ class InductiveMiner {
 			parNode.children.push(InductiveMiner.inductiveMiner(filteredLog, parNode, activityKey, false, threshold));
 			activityConcurrentCut[1].parentNode = parNode;
 			parNode.children.push(activityConcurrentCut[1]);
+			parNode.properties["concurrentActivity"] = activityConcurrentCut[0];
 			return parNode;
 		}
 		let strictTauLoop = InductiveMinerStrictTauLoopFallthrough.detect(log, freqDfg, activityKey);
@@ -11384,6 +11496,52 @@ class InductiveMinerActivityConcurrentFallthrough {
 	}
 }
 
+class InductiveMinerActivityConcurrentFallthroughDFG {
+	static removeActFromDFG(freqDfg, activity) {
+		let activities = {};
+		let startActivities = {};
+		let endActivities = {};
+		let pathsFrequency = {};
+		for (let act in freqDfg.activities) {
+			if (act != activity) {
+				activities[act] = freqDfg.activities[act];
+			}
+		}
+		for (let act in freqDfg.startActivities) {
+			if (act != activity) {
+				startActivities[act] = freqDfg.startActivities[act];
+			}
+		}
+		for (let act in freqDfg.endActivities) {
+			if (act != activity) {
+				endActivities[act] = freqDfg.endActivities[act];
+			}
+		}
+		for (let path0 in freqDfg.pathsFrequency) {
+			let path = path0.split(",");
+			if (path[0] != activity && path[1] != activity) {
+				pathsFrequency[path0] = freqDfg.pathsFrequency[path0];
+			}
+		}
+		return new FrequencyDfg(activities, startActivities, endActivities, pathsFrequency);
+	}
+	
+	static detect(freqDfg, threshold) {
+		for (let act in freqDfg.activities) {
+			let subdfg = InductiveMinerActivityConcurrentFallthroughDFG.removeActFromDFG(freqDfg, act);
+			let detectedCut = InductiveMiner.detectCut(null, subdfg, null, null, threshold);
+			if (detectedCut != null) {
+				return [act, detectedCut];
+			}
+		}
+		return null;
+	}
+	
+	static projectDfg(frequencyDfg, act) {
+		return InductiveMinerActivityConcurrentFallthroughDFG.removeActFromDFG(freqDfg, act);
+	}
+}
+
 class InductiveMinerStrictTauLoopFallthrough {
 	static detect(log, freqDfg, activityKey) {
 		let proj = new EventLog();
@@ -11989,6 +12147,7 @@ class LogSkeletonConformanceCheckingResult {
 			}
 			i++;
 		}
+		this.percentageFitTraces = this.fitTraces / this.totalTraces;
 	}
 }
 
@@ -12296,21 +12455,21 @@ class CaseFeatures {
 		for (let attr of evStrAttr) {
 			let values = Object.keys(GeneralLogStatistics.getAttributeValues(eventLog, attr));
 			valuesCorr["event@@"+attr] = values;
-			for (let val in values) {
+			for (let val of values) {
 				features.push("event@@"+attr+"##"+val);
 			}
 		}
 		for (let attr of trStrAttr) {
 			let values = Object.keys(GeneralLogStatistics.getTraceAttributeValues(eventLog, attr));
 			valuesCorr["trace@@"+attr] = values;
-			for (let val in values) {
+			for (let val of values) {
 				features.push("trace@@"+attr+"##"+val);
 			}
 		}
 		for (let attr of evSuccStrAttr) {
 			let frequencyDfg = Object.keys(FrequencyDfgDiscovery.apply(eventLog, attr).pathsFrequency);
 			valuesCorr["succession@@"+attr] = frequencyDfg;
-			for (let path in frequencyDfg) {
+			for (let path of frequencyDfg) {
 				features.push("succession@@"+attr+"##"+path);
 			}
 		}
@@ -12483,27 +12642,37 @@ class PetriNetAlignmentsResults {
 		this.overallResult = overallResult;
 		this.acceptingPetriNet = acceptingPetriNet;
 		this.movesUsage = {};
+		this.totalTraces = this.overallResult.length;
 		this.fitTraces = 0;
 		this.totalCost = 0;
+		this.totalBwc = 0;
+		this.averageTraceFitness = 0;
 		for (let alTrace of this.overallResult) {
-			for (let move of alTrace["alignment"].split(",")) {
-				if (!(move in this.movesUsage)) {
-					this.movesUsage[move] = 1;
+			if (alTrace != null) {
+				for (let move of alTrace["alignment"].split(",")) {
+					if (!(move in this.movesUsage)) {
+						this.movesUsage[move] = 1;
+					}
+					else {
+						this.movesUsage[move] += 1;
+					}
 				}
-				else {
-					this.movesUsage[move] += 1;
+				if (alTrace["cost"] < 1) {
+					this.fitTraces += 1;
 				}
+				this.totalBwc += alTrace["bwc"];
+				this.totalCost += alTrace["cost"];
+				this.averageTraceFitness += alTrace["fitness"];
 			}
-			if (alTrace["cost"] < 10000) {
-				this.fitTraces += 1;
-			}
-			this.totalCost += alTrace["cost"];
 		}
+		this.averageTraceFitness = this.averageTraceFitness / this.overallResult.length;
+		this.logFitness = 1.0 - (this.totalCost)/(this.totalBwc);
+		this.percentageFitTraces = this.fitTraces / this.totalTraces;
 	}
 }
 
 class PetriNetAlignments {
-	static apply(log, acceptingPetriNet, activityKey="concept:name", syncCosts=null, modelMoveCosts=null, logMoveCosts=null) {
+	static apply(log, acceptingPetriNet, activityKey="concept:name", maxExecutionTime=Number.MAX_VALUE, syncCosts=null, modelMoveCosts=null, logMoveCosts=null) {
 		let logActivities = GeneralLogStatistics.getAttributeValues(log, activityKey);
 		if (syncCosts == null) {
 			syncCosts = {};
@@ -12575,13 +12744,31 @@ class PetriNetAlignments {
 		let alignedTraces = {};
 		let res = [];
 		let count = 0;
+		let minPathInModelCost = 0;
+		try {
+			minPathInModelCost = Math.floor(PetriNetAlignments.applyTrace([], acceptingPetriNet.net, acceptingPetriNet.im, acceptingPetriNet.fm, syncCosts, modelMoveCosts, logMoveCosts, comparator, maxExecutionTime)["cost"] / 10000);
+		}
+		catch (err) {
+		}
 		for (let trace of log.traces) {
+			let bwc = trace.events.length + minPathInModelCost;
 			let listAct = [];
 			for (let eve of trace.events) {
 				listAct.push(eve.attributes[activityKey].value);
 			}
 			if (!(listAct in alignedTraces)) {
-				alignedTraces[listAct] = PetriNetAlignments.applyTrace(listAct, acceptingPetriNet.net, acceptingPetriNet.im, acceptingPetriNet.fm, syncCosts, modelMoveCosts, logMoveCosts, comparator);
+				let ali = PetriNetAlignments.applyTrace(listAct, acceptingPetriNet.net, acceptingPetriNet.im, acceptingPetriNet.fm, syncCosts, modelMoveCosts, logMoveCosts, comparator, maxExecutionTime);
+				let fitness = 1.0;
+				if (ali != null) {
+					let dividedCost = Math.floor(ali["cost"] / 10000);
+					if (bwc > 0) {
+						fitness = 1.0 - dividedCost / bwc;
+					}
+					ali["cost"] = dividedCost;
+					ali["fitness"] = fitness;
+					ali["bwc"] = bwc;
+				}
+				alignedTraces[listAct] = ali;
 			}
 			res.push(alignedTraces[listAct]);
 			count++;
@@ -12604,11 +12791,12 @@ class PetriNetAlignments {
 		closedSet[tup[3]] = tup[1];
 	}
 	
-	static applyTrace(listAct, net, im, fm, syncCosts, modelMoveCosts, logMoveCosts, comparator) {
+	static applyTrace(listAct, net, im, fm, syncCosts, modelMoveCosts, logMoveCosts, comparator, maxExecutionTime) {
 		let queue = new PriorityQueue(comparator);
 		queue.push([0, 0, 0, im, false, null, null]);
 		let count = 0;
 		let closedSet = {};
+		let startTime = (new Date()).getTime();
 		while (true) {
 			count++;
 			let tup = queue.pop();
@@ -12622,6 +12810,10 @@ class PetriNetAlignments {
 				continue;
 			}
 			else {
+				let thisTime = (new Date()).getTime();
+				if ((thisTime - startTime)/1000.0 > maxExecutionTime) {
+					return null;
+				}
 				PetriNetAlignments.closeTuple(closedSet, tup);
 				if (!(tup[3].equals(fm))) {
 					let enabledTransitions = tup[3].getEnabledTransitions();
@@ -12700,8 +12892,11 @@ class DfgAlignmentsResults {
 		this.overallResult = overallResult;
 		this.frequencyDfg = frequencyDfg;
 		this.movesUsage = {};
+		this.totalTraces = this.overallResult.length;
 		this.fitTraces = 0;
 		this.totalCost = 0;
+		this.totalBwc = 0;
+		this.averageTraceFitness = 0;
 		for (let alTrace of this.overallResult) {
 			for (let move of alTrace["alignment"].split(",")) {
 				if (!(move in this.movesUsage)) {
@@ -12711,11 +12906,16 @@ class DfgAlignmentsResults {
 					this.movesUsage[move] += 1;
 				}
 			}
-			if (alTrace["cost"] < 10000) {
+			if (alTrace["cost"] < 1) {
 				this.fitTraces += 1;
 			}
 			this.totalCost += alTrace["cost"];
+			this.totalBwc += alTrace["bwc"];
+			this.averageTraceFitness += alTrace["fitness"];
 		}
+		this.averageTraceFitness = this.averageTraceFitness / this.overallResult.length;
+		this.logFitness = 1.0 - (this.totalCost)/(this.totalBwc);
+		this.percentageFitTraces = this.fitTraces / this.totalTraces;
 	}
 }
 
@@ -12783,13 +12983,24 @@ class DfgAlignments {
 		let alignedTraces = {};
 		let res = [];
 		let count = 0;
+		let minPathInModelCost = Math.floor(DfgAlignments.applyTrace([], frequencyDfg, outgoing, syncCosts, modelMoveCosts, logMoveCosts, comparator)["cost"] / 10000);
 		for (let trace of log.traces) {
+			let bwc = trace.events.length + minPathInModelCost;
 			let listAct = [];
 			for (let eve of trace.events) {
 				listAct.push(eve.attributes[activityKey].value);
 			}
 			if (!(listAct in alignedTraces)) {
-				alignedTraces[listAct] = DfgAlignments.applyTrace(listAct, frequencyDfg, outgoing, syncCosts, modelMoveCosts, logMoveCosts, comparator);
+				let ali = DfgAlignments.applyTrace(listAct, frequencyDfg, outgoing, syncCosts, modelMoveCosts, logMoveCosts, comparator);
+				let fitness = 1.0;
+				let dividedCost = Math.floor(ali["cost"] / 10000);
+				if (bwc > 0) {
+					fitness = 1.0 - dividedCost / bwc;
+				}
+				ali["cost"] = dividedCost;
+				ali["fitness"] = fitness;
+				ali["bwc"] = bwc;
+				alignedTraces[listAct] = ali;
 			}
 			res.push(alignedTraces[listAct]);
 			count++;
@@ -12902,10 +13113,11 @@ catch (err) {
 }
 
 Pm4JS.registerAlgorithm("DfgAlignments", "apply", ["EventLog", "FrequencyDfg"], "DfgAlignmentsResults", "Perform Alignments on DFG", "Alessandro Berti");
+Pm4JS.registerAlgorithm("DfgAlignments", "apply", ["EventLog", "PerformanceDfg"], "DfgAlignmentsResults", "Perform Alignments on DFG", "Alessandro Berti");
 
 
 class DfgPlayout {
-	static apply(freqDfg, numDesideredTraces=1000, activityKey="concept:name") {
+	static apply(freqDfg, numDesideredTraces=1000, activityKey="concept:name", timestampKey="time:timestamp") {
 		let vect = freqDfg.getArtificialDfg();
 		let outgoing = {};
 		for (let act in vect[0]) {
@@ -12922,6 +13134,7 @@ class DfgPlayout {
 		let start = [["▶"], 0];
 		queue.push(start);
 		let count = 0;
+		let minTimestamp = 10000000;
 		let eventLog = new EventLog();
 		while (true) {
 			if (count >= numDesideredTraces) {
@@ -12941,6 +13154,7 @@ class DfgPlayout {
 					let newEve = new Event();
 					trace.events.push(newEve);
 					newEve.attributes[activityKey] = new Attribute(activities[i]);
+					newEve.attributes[timestampKey] = new Attribute(new Date((minTimestamp + count)*1000));
 					i++;
 				}
 				count++;
@@ -12951,6 +13165,7 @@ class DfgPlayout {
 				queue.push([newActivities, el[1] + outgoing[lastActivity][act]]);
 			}
 		}
+		Pm4JS.registerObject(eventLog, "Simulated Event log (from DFG)");
 		return eventLog;
 	}
 }
@@ -12959,12 +13174,16 @@ try {
 	require('../../../../pm4js.js');
 	require('../../../conformance/alignments/heapq.js');
 	module.exports = {DfgPlayout: DfgPlayout};
-	global.DfgPlayout = DfgPlayout
+	global.DfgPlayout = DfgPlayout;
 }
 catch (err) {
 	// not in Node
 	//console.log(err);
 }
+
+Pm4JS.registerAlgorithm("DfgPlayout", "apply", ["FrequencyDfg"], "EventLog", "Perform Playout on a DFG", "Alessandro Berti");
+Pm4JS.registerAlgorithm("DfgPlayout", "apply", ["PerformanceDfg"], "EventLog", "Perform Playout on a DFG", "Alessandro Berti");
+
 
 class FilteredDfgMaximization {
 	static apply(freqDfg) {
@@ -13083,4 +13302,2687 @@ catch (err) {
 Pm4JS.registerAlgorithm("FilteredDfgMaximization", "apply", ["FrequencyDfg"], "FrequencyDfg", "Maximize DFG capacity", "Alessandro Berti");
 Pm4JS.registerAlgorithm("FilteredDfgMaximization", "apply", ["PerformanceDfg"], "PerformanceDfg", "Maximize DFG capacity", "Alessandro Berti");
 
+
+class EventLogPrefixes {
+	static apply(eventLog, activityKey="concept:name") {
+		let prefixes = {};
+		let i = 0;
+		for (let trace of eventLog.traces) {
+			i = 0;
+			let actArray = [];
+			while (i < trace.events.length - 1) {
+				let act = trace.events[i].attributes[activityKey].value;
+				let nextAct = trace.events[i+1].attributes[activityKey].value;
+				actArray.push(act);
+				if (!(actArray in prefixes)) {
+					prefixes[actArray] = {};
+				}
+				if (!(nextAct in prefixes[actArray])) {
+					prefixes[actArray][nextAct] = 0;
+				}
+				prefixes[actArray][nextAct] += 1;
+				i++;
+			}
+		}
+		return prefixes;
+	}
+}
+
+try {
+	require('../../../pm4js.js');
+	require('../log.js');
+	module.exports = {EventLogPrefixes: EventLogPrefixes};
+	global.EventLogPrefixes = EventLogPrefixes;
+}
+catch (err) {
+	// not in node
+	//console.log(err);
+}
+
+
+class TbrFitness {
+	static apply(eventLog, acceptingPetriNet, activityKey="concept:name") {
+		return TokenBasedReplay.apply(eventLog, acceptingPetriNet, activityKey);
+	}
+	
+	static evaluate(tbrResults) {
+		return tbrResults;
+	}
+}
+
+try {
+	require("../../../../pm4js.js");
+	require("../../../conformance/tokenreplay/algorithm.js");
+	module.exports = {TbrFitness: TbrFitness};
+	global.TbrFitness = TbrFitness;
+}
+catch (err) {
+	// not in Node
+	//console.log(err);
+}
+
+
+class AlignmentsFitness {
+	static apply(eventLog, acceptingPetriNet, activityKey="concept:name") {
+		return PetriNetAlignments.apply(eventLog, acceptingPetriNet, activityKey);
+	}
+	
+	static evaluate(alignResults) {
+		return alignResults;
+	}
+}
+
+try {
+	require("../../../../pm4js.js");
+	require("../../../conformance/alignments/petri_net/algorithm.js");
+	module.exports = {AlignmentsFitness: AlignmentsFitness};
+	global.AlignmentsFitness = AlignmentsFitness;
+}
+catch (err) {
+	// not in Node
+	//console.log(err);
+}
+
+
+class ETConformanceResult {
+	constructor(activatedTransitions, escapingEdges, precision) {
+		this.activatedTransitions = activatedTransitions;
+		this.escapingEdges = escapingEdges;
+		this.precision = precision;
+	}
+}
+
+class ETConformance {
+	static apply(eventLog, acceptingPetriNet, activityKey="concept:name") {
+		let prefixes = EventLogPrefixes.apply(eventLog, activityKey);
+		let prefixesKeys = Object.keys(prefixes);
+		let ret = TokenBasedReplay.applyListListAct(prefixesKeys, acceptingPetriNet, false, true);
+		let i = 0;
+		let sum_at = 0;
+		let sum_ee = 0;
+		let logTransitions = Object.keys(GeneralLogStatistics.getStartActivities(eventLog, activityKey));
+		let activatedTransitions = PetriNetReachableVisibleTransitions.apply(acceptingPetriNet.net, acceptingPetriNet.im);
+		let escapingEdges = [];
+		for (let at of activatedTransitions) {
+			if (!(logTransitions.includes(at))) {
+				escapingEdges.push(at);
+			}
+		}
+		sum_at += activatedTransitions.length * eventLog.traces.length;
+		sum_ee += escapingEdges.length * eventLog.traces.length;
+		i = 0;
+		while (i < prefixesKeys.length) {
+			if (ret[i].isFit) {
+				let activatedTransitions = PetriNetReachableVisibleTransitions.apply(acceptingPetriNet.net, ret[i]);
+				let prefix = prefixesKeys[i];
+				let logTransitions = Object.keys(prefixes[prefix]);
+				let sumPrefix = 0;
+				for (let transition of logTransitions) {
+					sumPrefix += prefixes[prefix][transition];
+				}
+				let escapingEdges = [];
+				for (let at of activatedTransitions) {
+					if (!(logTransitions.includes(at))) {
+						escapingEdges.push(at);
+					}
+				}
+				sum_at += activatedTransitions.length * sumPrefix;
+				sum_ee += escapingEdges.length * sumPrefix;
+			}
+			i++;
+		}
+		let precision = 1.0;
+		if (sum_at > 0) {
+			precision = 1.0 - (sum_ee / (0.0 + sum_at));
+		}
+		let finalResult = new ETConformanceResult(sum_at, sum_ee, precision);
+		Pm4JS.registerObject(finalResult, "ETConformance Precision Results");
+		return finalResult;
+	}
+}
+
+try {
+	require("../../../../pm4js.js");
+	require("../../../../objects/petri_net/petri_net.js");
+	require("../../../../objects/petri_net/util/reachable_visible_transitions.js");
+	require("../../../../statistics/log/general.js");
+	module.exports = {ETConformance: ETConformance, ETConformanceResult: ETConformanceResult};
+	global.ETConformance = ETConformance;
+	global.ETConformanceResult = ETConformanceResult;
+}
+catch (err) {
+	// not in Node
+	//console.log(err);
+}
+
+Pm4JS.registerAlgorithm("ETConformance", "apply", ["EventLog", "AcceptingPetriNet"], "ETConformanceResult", "Calculate Precision (ETConformance based on TBR)", "Alessandro Berti");
+
+
+class BpmnGraph {
+	constructor(id="", name="") {
+		this.id = id;
+		this.name = name;
+		this.nodes = {};
+		this.edges = {};
+		this.properties = {};
+	}
+	
+	addNode(id) {
+		if (id == null) {
+			throw "addNode called with id=null";
+		}
+		if (id in this.nodes) {
+			return this.nodes[id];
+		}
+		this.nodes[id] = new BpmnNode(this, id);
+		return this.nodes[id];
+	}
+	
+	addEdge(id) {
+		if (id == null) {
+			throw "addEdge called with id=null";
+		}
+		if (id in this.edges) {
+			return this.edges[id];
+		}
+		this.edges[id] = new BpmnEdge(this, id);
+		return this.edges[id];
+	}
+	
+	toString() {
+		return this.id;
+	}
+	
+	removeNode(id) {
+		if (id == null) {
+			throw "removeNode called with id=null";
+		}
+		if (id in this.nodes) {
+			let node = this.nodes[id];
+			for (let edgeId in node.incoming) {
+				let edge = node.incoming[edgeId];
+				let source = edge.source;
+				delete source.outgoing[edge];
+				delete this.edges[edge];
+			}
+			for (let edgeId in node.outgoing) {
+				let edge = node.outgoing[edgeId];
+				let target = edge.target;
+				delete target.incoming[edge];
+				delete this.edges[edge];
+			}
+			delete this.nodes[id];
+		}
+	}
+}
+
+class BpmnNode {
+	constructor(graph, id) {
+		this.graph = graph;
+		this.id = id;
+		this.name = "";
+		this.type = null;
+		this.incoming = {};
+		this.outgoing = {};
+		this.bounds = {};
+		this.properties = {};
+	}
+	
+	addIncoming(id) {
+		if (id == null) {
+			throw "addIncoming called with id=null";
+		}
+		let edge = this.graph.addEdge(id);
+		this.incoming[id] = edge;
+	}
+	
+	addOutgoing(id) {
+		if (id == null) {
+			throw "addOutgoing called with id=null";
+		}
+		let edge = this.graph.addEdge(id);
+		this.outgoing[id] = edge;
+	}
+	
+	toString() {
+		return this.id;
+	}
+}
+
+class BpmnEdge {
+	constructor(graph, id) {
+		this.graph = graph;
+		this.id = id;
+		this.name = "";
+		this.source = null;
+		this.target = null;
+		this.waypoints = [];
+		this.properties = {};
+	}
+	
+	setSource(id) {
+		if (id == null) {
+			throw "setSource called with id=null";
+		}
+		if (!(id in this.graph.nodes)) {
+			console.log("creating node with ID "+id+" before node instantiation");
+		}
+		let sourceNode = this.graph.addNode(id);
+		sourceNode.outgoing[this.id] = this;
+		this.source = sourceNode;
+	}
+	
+	setTarget(id) {
+		if (id == null) {
+			throw "setTarget called with id=null";
+		}
+		if (!(id in this.graph.nodes)) {
+			console.log("creating node with ID "+id+" before node instantiation");
+		}
+		let targetNode = this.graph.addNode(id);
+		targetNode.incoming[this.id] = this;
+		this.target = targetNode;
+	}
+	
+	toString() {
+		return this.id;
+	}
+}
+
+try {
+	require('../../pm4js.js');
+	module.exports = {BpmnGraph: BpmnGraph, BpmnNode: BpmnNode, BpmnEdge: BpmnEdge};
+	global.BpmnGraph = BpmnGraph;
+	global.BpmnNode = BpmnNode;
+	global.BpmnEdge = BpmnEdge;
+}
+catch (err) {
+	// not in node
+}
+
+class BpmnImporter {
+	static apply(xmlString) {
+		let parser = new DOMParser();
+		var xmlDoc = parser.parseFromString(xmlString, "text/xml");
+		let definitions = null;
+		for (let childId in xmlDoc.childNodes) {
+			let child = xmlDoc.childNodes[childId];
+			if (child.tagName != null && child.tagName.endsWith("definitions")) {
+				definitions = child;
+			}
+		}
+		let bpmnGraph = new BpmnGraph();
+		BpmnImporter.parseRecursive(definitions, null, bpmnGraph);
+		
+		Pm4JS.registerObject(bpmnGraph, "BPMN graph imported from a .bpmn file");
+
+		return bpmnGraph;
+	}
+	
+	static parseRecursive(el, thisParent, bpmnGraph) {
+		if (el.tagName != null) {
+			if (el.tagName.endsWith("BPMNDiagram")) {
+				for (let attrId in el.attributes) {
+					let attr = el.attributes[attrId];
+					if (attr.name == "id") {
+						bpmnGraph.id = attr.value;
+					}
+					else if (attr.name == "name") {
+						bpmnGraph.name = attr.value;
+					}
+					else {
+						if (attr.value != null) {
+							bpmnGraph.properties[attr.name] = attr.value;
+						}
+					}
+				}
+				for (let childId in el.childNodes) {
+					let child = el.childNodes[childId];
+					BpmnImporter.parseRecursive(child, thisParent, bpmnGraph);
+				}
+			}
+			else if (el.tagName.endsWith("definitions")) {
+				for (let childId in el.childNodes) {
+					let child = el.childNodes[childId];
+					BpmnImporter.parseRecursive(child, thisParent, bpmnGraph);
+				}
+			}
+			else if (el.tagName.endsWith("process")) {
+				for (let childId in el.childNodes) {
+					let child = el.childNodes[childId];
+					BpmnImporter.parseRecursive(child, thisParent, bpmnGraph);
+				}
+			}
+			else if (el.tagName.endsWith("BPMNPlane")) {
+				for (let childId in el.childNodes) {
+					let child = el.childNodes[childId];
+					BpmnImporter.parseRecursive(child, thisParent, bpmnGraph);
+				}
+			}
+			else if (el.tagName.endsWith("BPMNShape")) {
+				let nodeId = null;
+				for (let attrId in el.attributes) {
+					let attr = el.attributes[attrId];
+					if (attr.name == "bpmnElement") {
+						nodeId = attr.value;
+					}
+				}
+				let bpmnNode = bpmnGraph.addNode(nodeId);
+				for (let childId in el.childNodes) {
+					let child = el.childNodes[childId];
+					BpmnImporter.parseRecursive(child, bpmnNode, bpmnGraph);
+				}
+			}
+			else if (el.tagName.endsWith("Bounds")) {
+				for (let attrId in el.attributes) {
+					let attr = el.attributes[attrId];
+					if (attr.value != null) {
+						thisParent.bounds[attr.name] = attr.value;
+					}
+				}
+			}
+			else if (el.tagName.endsWith("BPMNEdge")) {
+				let edgeId = null;
+				for (let attrId in el.attributes) {
+					let attr = el.attributes[attrId];
+					if (attr.name == "bpmnElement") {
+						edgeId = attr.value;
+					}
+				}
+				let bpmnEdge = bpmnGraph.addEdge(edgeId);
+				for (let childId in el.childNodes) {
+					let child = el.childNodes[childId];
+					BpmnImporter.parseRecursive(child, bpmnEdge, bpmnGraph);
+				}
+			}
+			else if (el.tagName.endsWith("waypoint")) {
+				let this_X = "0";
+				let this_Y = "0";
+				for (let attrId in el.attributes) {
+					let attr = el.attributes[attrId];
+					if (attr.name == "x") {
+						this_X = attr.value;
+					}
+					else if (attr.name == "y") {
+						this_Y = attr.value;
+					}
+				}
+				this_X = parseInt(this_X);
+				this_Y = parseInt(this_Y);
+				thisParent.waypoints.push([this_X, this_Y]);
+			}
+			else if (el.tagName.toLowerCase().endsWith("flow")) {
+				let flowId = null;
+				let flowName = "";
+				let flowSourceRef = null;
+				let flowTargetRef = null;
+				for (let attrId in el.attributes) {
+					let attr = el.attributes[attrId];
+					if (attr.name == "id") {
+						flowId = attr.value;
+					}
+					else if (attr.name == "name") {
+						flowName = attr.value;
+					}
+					else if (attr.name == "sourceRef") {
+						flowSourceRef = attr.value;
+					}
+					else if (attr.name == "targetRef") {
+						flowTargetRef = attr.value;
+					}
+				}
+				let bpmnEdge = bpmnGraph.addEdge(flowId);
+				bpmnEdge.name = flowName;
+				bpmnEdge.setSource(flowSourceRef);
+				bpmnEdge.setTarget(flowTargetRef);
+			}
+			else if (thisParent != null && thisParent.constructor.name == "BpmnNode") {
+				if (el.tagName == "incoming") {
+					thisParent.addIncoming(el.textContent);					
+				}
+				else if (el.tagName == "outgoing") {
+					thisParent.addOutgoing(el.textContent);
+				}
+			}
+			else {
+				let nodeId = null;
+				let nodeName = "";
+				let nodeType = el.tagName;
+				for (let attrId in el.attributes) {
+					let attr = el.attributes[attrId];
+					if (attr.name == "id") {
+						nodeId = attr.value;
+					}
+					else if (attr.name == "name") {
+						nodeName = attr.value;
+					}
+				}
+				let bpmnNode = bpmnGraph.addNode(nodeId);
+				bpmnNode.name = nodeName;
+				bpmnNode.type = nodeType.split(":");
+				bpmnNode.type = bpmnNode.type[bpmnNode.type.length - 1];
+				for (let attrId in el.attributes) {
+					let attr = el.attributes[attrId];
+					if (attr.value != null) {
+						if (attr.name != "id" && attr.name != "name") {
+							bpmnNode.properties[attr.name] = attr.value;
+						}
+					}
+				}
+				for (let childId in el.childNodes) {
+					let child = el.childNodes[childId];
+					BpmnImporter.parseRecursive(child, bpmnNode, bpmnGraph);
+				}
+			}
+		}
+	}
+}
+
+try {
+	require('../../../pm4js.js');
+	require('../bpmn_graph.js');
+	module.exports = {BpmnImporter: BpmnImporter};
+	global.BpmnImporter = BpmnImporter;
+	global.DOMParser = require('xmldom').DOMParser;
+}
+catch (err) {
+	// not in Node
+	//console.log(err);
+}
+
+Pm4JS.registerImporter("BpmnImporter", "apply", ["bpmn"], "BPMN Importer", "Alessandro Berti");
+
+
+class BpmnExporter {
+		static uuidv4() {
+		  return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
+			var r = Math.random() * 16 | 0, v = c == 'x' ? r : (r & 0x3 | 0x8);
+			return v.toString(16);
+		  });
+		}
+		
+		static nodeUuid() {
+			let uuid = BpmnExporter.uuidv4();
+			return "id"+uuid.replace(/-/g, "");
+		}
+	
+	static apply(bpmnGraph) {
+		let definitions = document.createElementNS("", "definitions");
+		let processId = BpmnExporter.nodeUuid();
+		definitions.setAttribute("xmlns", "http://www.omg.org/spec/BPMN/20100524/MODEL");
+		definitions.setAttribute("xmlns:bpmndi", "http://www.omg.org/spec/BPMN/20100524/DI");
+		definitions.setAttribute("xmlns:omgdc", "http://www.omg.org/spec/DD/20100524/DC");
+		definitions.setAttribute("xmlns:omgdi", "http://www.omg.org/spec/DD/20100524/DI");
+		definitions.setAttribute("xmlns:xsi", "http://www.w3.org/2001/XMLSchema-instance");
+		definitions.setAttribute("xmlns:xsd", "http://www.w3.org/2001/XMLSchema");
+		definitions.setAttribute("targetNamespace", "http://www.signavio.com/bpmn20");
+		definitions.setAttribute("typeLanguage", "http://www.w3.org/2001/XMLSchema");
+		definitions.setAttribute("expressionLanguage", "http://www.w3.org/1999/XPath");
+		let bpmnDiagram = document.createElementNS("", "bpmndi"+BpmnExporter.DUMMY_SEP+"BPMNDiagram");
+		definitions.appendChild(bpmnDiagram);
+		bpmnDiagram.setAttribute("id", bpmnGraph.id);
+		bpmnDiagram.setAttribute("name", bpmnGraph.name);
+		let bpmnPlane = document.createElementNS("", "bpmndi"+BpmnExporter.DUMMY_SEP+"BPMNPlane");
+		bpmnDiagram.appendChild(bpmnPlane);
+		bpmnPlane.setAttribute("id", BpmnExporter.nodeUuid());
+		bpmnPlane.setAttribute("bpmnElement", processId);
+		for (let nodeId in bpmnGraph.nodes) {
+			let node = bpmnGraph.nodes[nodeId];
+			let shape = document.createElementNS("", "bpmndi"+BpmnExporter.DUMMY_SEP+"BPMNShape");
+			shape.setAttribute("bpmnElement", nodeId);
+			shape.setAttribute("id", nodeId+"_gui");
+			let bounds = document.createElementNS("", "omgdc"+BpmnExporter.DUMMY_SEP+"Bounds");
+			if (Object.keys(node.bounds).length > 0) {
+				for (let prop in node.bounds) {
+					bounds.setAttribute(prop, ""+node.bounds[prop]);
+				}
+			}
+			else {
+				// layouting has not been done. exports with default
+				bounds.setAttribute("width", 100);
+				bounds.setAttribute("height", 100);
+				bounds.setAttribute("x", 0);
+				bounds.setAttribute("y", 0);
+			}
+			shape.appendChild(bounds);
+			bpmnPlane.appendChild(shape);
+		}
+		for (let edgeId in bpmnGraph.edges) {
+			let edge = bpmnGraph.edges[edgeId];
+			let xmlEdge = document.createElementNS("", "bpmndi"+BpmnExporter.DUMMY_SEP+"BPMNEdge");
+			xmlEdge.setAttribute("bpmnElement", edgeId);
+			xmlEdge.setAttribute("id", edgeId+"_gui");
+			if (Object.keys(edge.waypoints).length > 0) {
+				for (let waypoint of edge.waypoints) {
+					let xmlWaypoint = document.createElementNS("", "omgdi"+BpmnExporter.DUMMY_SEP+"waypoint");
+					xmlWaypoint.setAttribute("x", ""+waypoint[0]);
+					xmlWaypoint.setAttribute("y", ""+waypoint[1]);
+					xmlEdge.appendChild(xmlWaypoint);
+				}
+			}
+			else {
+				// layouting has not been done. exports with default
+					let xmlWaypoint = document.createElementNS("", "omgdi"+BpmnExporter.DUMMY_SEP+"waypoint");
+					xmlWaypoint.setAttribute("x", 0);
+					xmlWaypoint.setAttribute("y", 0);
+					xmlEdge.appendChild(xmlWaypoint);
+			}
+			bpmnPlane.appendChild(xmlEdge);
+		}
+		//<process id="id071a1d8d-32e0-4b39-ae20-8ab8c71faec3" isClosed="false" isExecutable="false" processType="None">
+		let process = document.createElementNS("", "process");
+		process.setAttribute("id", processId);
+		process.setAttribute("isClosed", "false");
+		process.setAttribute("isExecutable", "false");
+		process.setAttribute("processType", "null");
+		definitions.appendChild(process);
+		for (let nodeId in bpmnGraph.nodes) {
+			let node = bpmnGraph.nodes[nodeId];
+			let xmlNode = document.createElementNS("", node.type);
+			xmlNode.setAttribute("id", nodeId);
+			xmlNode.setAttribute("name", node.name);
+			for (let prop in node.properties) {
+				xmlNode.setAttribute(prop, node.properties[prop]);
+			}
+			for (let inc in node.incoming) {
+				let xmlInc = document.createElementNS("", "incoming");
+				xmlInc.textContent = inc;
+				xmlNode.appendChild(xmlInc);
+			}
+			for (let out in node.outgoing) {
+				let xmlOut = document.createElementNS("", "outgoing");
+				xmlOut.textContent = out;
+				xmlNode.appendChild(xmlOut);
+			}
+			process.appendChild(xmlNode);
+		}
+		for (let edgeId in bpmnGraph.edges) {
+			let edge = bpmnGraph.edges[edgeId];
+			let xmlEdge = document.createElementNS("", "sequenceFlow");
+			xmlEdge.setAttribute("id", edgeId);
+			xmlEdge.setAttribute("name", edge.name);
+			xmlEdge.setAttribute("sourceRef", edge.source.id);
+			xmlEdge.setAttribute("targetRef", edge.target.id);
+			process.appendChild(xmlEdge);
+		}
+		let serializer = null;
+		try {
+			serializer = new XMLSerializer();
+		}
+		catch (err) {
+			serializer = require('xmlserializer');
+		}
+		let xmlStr = serializer.serializeToString(definitions);
+		xmlStr = xmlStr.replace(/AIOEWFRIUOERWQIO/g, ":");
+		return xmlStr;
+	}
+}
+
+// unlikely string, better look at other solutions ...
+BpmnExporter.DUMMY_SEP = "AIOEWFRIUOERWQIO";
+
+try {
+	const jsdom = require("jsdom");
+	const { JSDOM } = jsdom;
+	global.dom = new JSDOM('<!doctype html><html><body></body></html>');
+	global.window = dom.window;
+	global.document = dom.window.document;
+	global.navigator = global.window.navigator;
+	require('../../../pm4js.js');
+	require('../bpmn_graph.js');
+	module.exports = {BpmnExporter: BpmnExporter};
+	global.BpmnExporter = BpmnExporter;
+}
+catch (err) {
+	// not in node
+	//console.log(err);
+}
+
+Pm4JS.registerExporter("BpmnExporter", "apply", "BpmnGraph", "bpmn", "text/xml", "BPMN Exporter (.bpmn)", "Alessandro Berti");
+
+
+class BpmnToPetriNetConverter {
+	static uuidv4() {
+	  return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
+		var r = Math.random() * 16 | 0, v = c == 'x' ? r : (r & 0x3 | 0x8);
+		return v.toString(16);
+	  });
+	}
+	
+	static nodeUuid() {
+		let uuid = BpmnToPetriNetConverter.uuidv4();
+		return "id"+uuid.replace(/-/g, "");
+	}
+		
+	static apply(bpmnGraph) {
+		let petriNet = new PetriNet("converted from BPMN");
+		let im = new Marking(petriNet);
+		let fm = new Marking(petriNet);
+		let sourcePlace = petriNet.addPlace("source");
+		let sinkPlace = petriNet.addPlace("sink");
+		im.setTokens(sourcePlace, 1);
+		fm.setTokens(sinkPlace, 1);
+		let inclusiveGatewayEntry = {};
+		let inclusiveGatewayExit = {};
+		let flowPlace = {};
+		let sourceCount = {};
+		let targetCount = {};
+		for (let flowId in bpmnGraph.edges) {
+			let flow = bpmnGraph.edges[flowId];
+			let source = flow.source;
+			let target = flow.target;
+			let place = petriNet.addPlace(flowId);
+			flowPlace[flow] = place;
+			if (!(source in sourceCount)) {
+				sourceCount[source] = 0;
+			}
+			if (!(target in targetCount)) {
+				targetCount[target] = 0;
+			}
+			sourceCount[source] = sourceCount[source] + 1;
+			targetCount[target] = targetCount[target] + 1;
+		}
+		for (let flowId in bpmnGraph.edges) {
+			let flow = bpmnGraph.edges[flowId];
+			let source = flow.source;
+			let target = flow.target;
+			if (source.type.endsWith("inclusiveGateway") && sourceCount[source] > 1) {
+				inclusiveGatewayExit[flowId] = 0;
+			}
+			if (target.type.endsWith("inclusiveGateway") && targetCount[target] > 1) {
+				inclusiveGatewayEntry[flowId] = 0;
+			}
+		}
+		let inclusivGatInters = {};
+		for (let el in inclusiveGatewayEntry) {
+			if (el in inclusiveGatewayExit) {
+				inclusivGatInters[el] = 0;
+			}
+		}
+		
+		let nodesEntering = {};
+		let nodesExiting = {};
+		for (let nodeId in bpmnGraph.nodes) {
+			let node = bpmnGraph.nodes[nodeId];
+			let entryPlace = petriNet.addPlace("ent_"+nodeId);
+			let exitingPlace = petriNet.addPlace("exi_"+nodeId);
+			let label = null;
+			if (node.type.toLowerCase().endsWith("task")) {
+				label = node.name;
+			}
+			let transition = petriNet.addTransition(nodeId, label);
+			petriNet.addArcFromTo(entryPlace, transition);
+			petriNet.addArcFromTo(transition, exitingPlace);
+			if (node.type.endsWith("parallelGateway") || node.type.endsWith("inclusiveGateway")) {
+				let exitingObject = null;
+				let enteringObject = null;
+				if (sourceCount[node] > 1) {
+					exitingObject = petriNet.addTransition(BpmnToPetriNetConverter.nodeUuid(), null);
+					petriNet.addArcFromTo(exitingPlace, exitingObject);
+				}
+				else {
+					exitingObject = exitingPlace;
+				}
+				
+				if (targetCount[node] > 1) {
+					enteringObject = petriNet.addTransition(BpmnToPetriNetConverter.nodeUuid(), null);
+					petriNet.addArcFromTo(enteringObject, entryPlace);
+				}
+				else {
+					enteringObject = entryPlace;
+				}
+				nodesEntering[node] = enteringObject;
+				nodesExiting[node] = exitingObject;
+			}
+			else {
+				nodesEntering[node] = entryPlace;
+				nodesExiting[node] = exitingPlace;
+			}
+			
+			if (node.type.toLowerCase().endsWith("startevent")) {
+				let startTransition = petriNet.addTransition(BpmnToPetriNetConverter.nodeUuid(), null);
+				petriNet.addArcFromTo(sourcePlace, startTransition);
+				petriNet.addArcFromTo(startTransition, entryPlace);
+			}
+			else if (node.type.toLowerCase().endsWith("endevent")) {
+				let endTransition = petriNet.addTransition(BpmnToPetriNetConverter.nodeUuid(), null);
+				petriNet.addArcFromTo(exitingPlace, endTransition);
+				petriNet.addArcFromTo(endTransition, sinkPlace);
+			}
+		}
+		
+		for (let flowId in bpmnGraph.edges) {
+			let flow = bpmnGraph.edges[flowId];
+			let sourceObject = nodesExiting[flow.source];
+			let targetObject = nodesEntering[flow.target];
+			if (sourceObject.constructor.name == "PetriNetPlace") {
+				let inv1 = petriNet.addTransition(BpmnToPetriNetConverter.nodeUuid(), null);
+				petriNet.addArcFromTo(sourceObject, inv1);
+				sourceObject = inv1;
+			}
+			if (targetObject.constructor.name == "PetriNetPlace") {
+				let inv2 = petriNet.addTransition(BpmnToPetriNetConverter.nodeUuid(), null);
+				petriNet.addArcFromTo(inv2, targetObject);
+				targetObject = inv2;
+			}
+			petriNet.addArcFromTo(sourceObject, flowPlace[flow]);
+			petriNet.addArcFromTo(flowPlace[flow], targetObject);
+		}
+		
+		// TODO: extra management of inclusiveGateways
+		
+		let acceptingPetriNet = new AcceptingPetriNet(petriNet, im, fm);
+		PetriNetReduction.apply(acceptingPetriNet, false);
+		
+		Pm4JS.registerObject(acceptingPetriNet, "Accepting Petri Net (converted from BPMN)");
+
+		return acceptingPetriNet;
+	}
+}
+
+try {
+	require('../../../pm4js.js');
+	require('../../bpmn/bpmn_graph.js');
+	require('../../petri_net/petri_net.js');
+	require('../../petri_net/util/reduction.js');
+	module.exports = {BpmnToPetriNetConverter: BpmnToPetriNetConverter};
+	global.BpmnToPetriNetConverter = BpmnToPetriNetConverter;
+}
+catch (err) {
+	//console.log(err);
+	// not in Node
+}
+
+Pm4JS.registerAlgorithm("BpmnToPetriNetConverter", "apply", ["BpmnGraph"], "AcceptingPetriNet", "Convert BPMN graph to an Accepting Petri Net", "Alessandro Berti");
+
+
+class WfNetToBpmnConverter {
+	static uuidv4() {
+	  return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
+		var r = Math.random() * 16 | 0, v = c == 'x' ? r : (r & 0x3 | 0x8);
+		return v.toString(16);
+	  });
+	}
+	
+	static nodeUuid() {
+		let uuid = WfNetToBpmnConverter.uuidv4();
+		return "id"+uuid.replace(/-/g, "");
+	}
+	
+	static apply(acceptingPetriNet) {
+		let bpmnGraph = new BpmnGraph(WfNetToBpmnConverter.nodeUuid());
+		let enteringDictio = {};
+		let exitingDictio = {};
+		for (let placeId in acceptingPetriNet.net.places) {
+			let place = acceptingPetriNet.net.places[placeId];
+			let node = bpmnGraph.addNode(WfNetToBpmnConverter.nodeUuid());
+			node.type = "exclusiveGateway";
+			enteringDictio[place] = node;
+			exitingDictio[place] = node;
+		}
+		for (let transId in acceptingPetriNet.net.transitions) {
+			let trans = acceptingPetriNet.net.transitions[transId];
+			if (trans.label == null) {
+				let node = bpmnGraph.addNode(WfNetToBpmnConverter.nodeUuid());
+				if (Object.keys(trans.inArcs).length > 1 || Object.keys(trans.outArcs).length > 1) {
+					node.type = "parallelGateway";
+				}
+				else {
+					node.type = "exclusiveGateway";
+				}
+				enteringDictio[trans] = node;
+				exitingDictio[trans] = node;
+			}
+			else {
+				let enteringNode = bpmnGraph.addNode(WfNetToBpmnConverter.nodeUuid());
+				let exitingNode = bpmnGraph.addNode(WfNetToBpmnConverter.nodeUuid());
+				let task = bpmnGraph.addNode(WfNetToBpmnConverter.nodeUuid());
+				
+				if (Object.keys(trans.inArcs).length > 1) {
+					enteringNode.type = "parallelGateway";
+				}
+				else {
+					enteringNode.type = "exclusiveGateway";
+				}
+				
+				if (Object.keys(trans.outArcs).length > 1) {
+					exitingNode.type = "parallelGateway";
+				}
+				else {
+					exitingNode.type = "exclusiveGateway";
+				}
+				
+				task.type = "task";
+				task.name = trans.label;
+				
+				let edge = bpmnGraph.addEdge(WfNetToBpmnConverter.nodeUuid());
+				edge.setSource(enteringNode);
+				edge.setTarget(task);
+				
+				edge = bpmnGraph.addEdge(WfNetToBpmnConverter.nodeUuid());
+				edge.setSource(task);
+				edge.setTarget(exitingNode);
+				
+				enteringDictio[trans] = enteringNode;
+				exitingDictio[trans] = exitingNode;
+			}
+		}
+		for (let arcId in acceptingPetriNet.net.arcs) {
+			let arc = acceptingPetriNet.net.arcs[arcId];
+			let edge = bpmnGraph.addEdge(WfNetToBpmnConverter.nodeUuid());
+			edge.setSource(exitingDictio[arc.source]);
+			edge.setTarget(enteringDictio[arc.target]);
+		}
+		
+		let startNode = bpmnGraph.addNode(WfNetToBpmnConverter.nodeUuid());
+		let endNode = bpmnGraph.addNode(WfNetToBpmnConverter.nodeUuid());
+		startNode.type = "startEvent";
+		endNode.type = "endEvent";
+		for (let placeId in acceptingPetriNet.im.tokens) {
+			let place = acceptingPetriNet.net.places[placeId];
+			let edge = bpmnGraph.addEdge(WfNetToBpmnConverter.nodeUuid());
+			edge.setSource(startNode);
+			edge.setTarget(enteringDictio[place]);
+		}
+		for (let placeId in acceptingPetriNet.fm.tokens) {
+			let place = acceptingPetriNet.net.places[placeId];
+			let edge = bpmnGraph.addEdge(WfNetToBpmnConverter.nodeUuid());
+			edge.setSource(exitingDictio[place]);
+			edge.setTarget(endNode);
+		}
+		
+		// reduction
+		let changed = true;
+		while (changed) {
+			changed = false;
+			let nodes = Object.keys(bpmnGraph.nodes);
+			for (let nodeId of nodes) {
+				let node = bpmnGraph.nodes[nodeId];
+				if (node.type == "exclusiveGateway" && Object.keys(node.incoming).length == 1 && Object.keys(node.outgoing).length == 1) {
+					let leftNode = bpmnGraph.edges[Object.keys(node.incoming)[0]].source;
+					let rightNode = bpmnGraph.edges[Object.keys(node.outgoing)[0]].target;
+					bpmnGraph.removeNode(node.id);
+					let newEdge = bpmnGraph.addEdge(WfNetToBpmnConverter.nodeUuid());
+					newEdge.setSource(leftNode);
+					newEdge.setTarget(rightNode);
+					changed = true;
+				}
+			}
+		}
+
+		Pm4JS.registerObject(bpmnGraph, "BPMN graph (converted from accepting Petri net)");
+		
+		return bpmnGraph;
+	}
+}
+
+try {
+	require('../../../pm4js.js');
+	require('../../petri_net/petri_net.js');
+	require('../../bpmn/bpmn_graph.js');
+	module.exports = {WfNetToBpmnConverter: WfNetToBpmnConverter};
+	global.WfNetToBpmnConverter = WfNetToBpmnConverter;
+}
+catch (err) {
+	//console.log(err);
+	// not in Node
+}
+
+Pm4JS.registerAlgorithm("WfNetToBpmnConverter", "apply", ["AcceptingPetriNet"], "BpmnGraph", "Convert WF-NET to BPMN graph", "Alessandro Berti");
+
+
+class PtmlExporter {
+	static uuidv4() {
+	  return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
+		var r = Math.random() * 16 | 0, v = c == 'x' ? r : (r & 0x3 | 0x8);
+		return v.toString(16);
+	  });
+	}
+	
+	static apply(processTree) {
+		let xmlDoc = document.createElement("ptml");
+		let xmlProcessTree = document.createElementNS(PtmlExporter.DUMMY_SEP, "processTree");
+		xmlDoc.appendChild(xmlProcessTree);
+		let ptId = PtmlExporter.uuidv4();
+		xmlProcessTree.setAttribute("id", ptId);
+		xmlProcessTree.setAttribute("name", ptId);
+		xmlProcessTree.setAttribute("root", processTree.id);
+		let descendants = {};
+		PtmlExporter.findAllDescendants(processTree, descendants);
+		for (let treeId in descendants) {
+			let tree = descendants[treeId];
+			let label = "";
+			let nodeType = "automaticTask";
+			if (tree.label != null) {
+				label = tree.label;
+				nodeType = "manualTask";
+			}
+			if (tree.operator == ProcessTreeOperator.SEQUENCE) {
+				nodeType = "sequence";
+			}
+			else if (tree.operator == ProcessTreeOperator.PARALLEL) {
+				nodeType = "and";
+			}
+			else if (tree.operator == ProcessTreeOperator.INCLUSIVE) {
+				nodeType = "or";
+			}
+			else if (tree.operator == ProcessTreeOperator.EXCLUSIVE) {
+				nodeType = "xor";
+			}
+			else if (tree.operator == ProcessTreeOperator.LOOP) {
+				nodeType = "xorLoop";
+			}
+			
+			let xmlNode = document.createElementNS(PtmlExporter.DUMMY_SEP, nodeType);
+			xmlNode.setAttribute("id", treeId);
+			xmlNode.setAttribute("name", label);
+			xmlProcessTree.appendChild(xmlNode);
+		}
+
+		for (let treeId in descendants) {
+			let tree = descendants[treeId];
+
+			if (tree.parentNode != null) {
+				let xmlParentsNode = document.createElementNS(PtmlExporter.DUMMY_SEP, "parentsNode");
+				xmlParentsNode.setAttribute("id", PtmlExporter.uuidv4());
+				xmlParentsNode.setAttribute("sourceId", tree.parentNode.id);
+				xmlParentsNode.setAttribute("targetId", tree.id);
+				xmlProcessTree.appendChild(xmlParentsNode);
+			}
+			
+		}
+		
+		let serializer = null;
+		try {
+			serializer = new XMLSerializer();
+		}
+		catch (err) {
+			serializer = require('xmlserializer');
+		}
+		
+		let xmlStr = serializer.serializeToString(xmlDoc);
+		xmlStr = xmlStr.replace(/AIOEWFRIUOERWQIO/g, "");
+
+		return xmlStr;
+	}
+
+	static findAllDescendants(processTree, descendants) {
+		descendants[processTree.id] = processTree;
+		if (processTree.operator == ProcessTreeOperator.LOOP) {
+			if (processTree.children.length < 3) {
+				let thirdChild = new ProcessTree();
+				thirdChild.parent = processTree;
+				processTree.children.push(thirdChild);
+			}
+		}
+		for (let child of processTree.children) {
+			PtmlExporter.findAllDescendants(child, descendants);
+		}
+	}
+}
+
+// unlikely string, better look at other solutions ...
+PtmlExporter.DUMMY_SEP = "AIOEWFRIUOERWQIO";
+
+try {
+	const jsdom = require("jsdom");
+	const { JSDOM } = jsdom;
+	global.dom = new JSDOM('<!doctype html><html><body></body></html>');
+	global.window = dom.window;
+	global.document = dom.window.document;
+	global.navigator = global.window.navigator;
+	require('../../../pm4js.js');
+	global.PtmlExporter = PtmlExporter;
+	module.exports = {PtmlExporter: PtmlExporter};
+}
+catch (err) {
+	// not in node
+	//console.log(err);
+}
+
+Pm4JS.registerExporter("PtmlExporter", "apply", "ProcessTree", "ptml", "text/xml", "Process tree Exporter (.ptml)", "Alessandro Berti");
+
+
+class FrequencyDfgExporter {
+	static apply(frequencyDfg) {
+		let ret = [];
+		let activities = Object.keys(frequencyDfg.activities);
+		ret.push(activities.length);
+		for (let act in frequencyDfg.activities) {
+			ret.push(act);
+		}
+		ret.push(Object.keys(frequencyDfg.startActivities).length);
+		for (let act in frequencyDfg.startActivities) {
+			ret.push(activities.indexOf(act)+"x"+frequencyDfg.startActivities[act]);
+		}
+		ret.push(Object.keys(frequencyDfg.endActivities).length);
+		for (let act in frequencyDfg.endActivities) {
+			ret.push(activities.indexOf(act)+"x"+frequencyDfg.endActivities[act]);
+		}
+		for (let path0 in frequencyDfg.pathsFrequency) {
+			let path = path0.split(",");
+			ret.push(activities.indexOf(path[0])+">"+activities.indexOf(path[1])+"x"+frequencyDfg.pathsFrequency[path0]);
+		}
+		return ret.join("\n");
+	}
+}
+
+try {
+	require('../../../pm4js.js');
+	global.FrequencyDfgExporter = FrequencyDfgExporter;
+	module.exports = {FrequencyDfgExporter: FrequencyDfgExporter};
+}
+catch (err) {
+	// not in node
+	//console.log(err);
+}
+
+Pm4JS.registerExporter("FrequencyDfgExporter", "apply", "FrequencyDfg", "dfg", "text/plain", "DFG Exporter (.dfg)", "Alessandro Berti");
+Pm4JS.registerExporter("FrequencyDfgExporter", "apply", "PerformanceDfg", "dfg", "text/plain", "DFG Exporter (.dfg)", "Alessandro Berti");
+
+
+class FrequencyDfgImporter {
+	static apply(txtStri) {
+		let stri = txtStri.split("\n");
+		let i = 0;
+		let numActivities = i + 1 + parseInt(stri[i]);
+		i++;
+		let activities = [];
+		let activitiesIngoing = {};
+		let startActivities = {};
+		let endActivities = {};
+		let pathsFrequency = {};
+		while (i < numActivities) {
+			activities.push(stri[i].trim());
+			i++;
+		}
+		let numStartActivities = i + 1 + parseInt(stri[i]);
+		i++;
+		while (i < numStartActivities) {
+			let stru = stri[i].trim().split("x");
+			let act = activities[parseInt(stru[0])]
+			startActivities[act] = parseInt(stru[1]);
+			if (!(act in activitiesIngoing)) {
+				activitiesIngoing[act] = 0;
+			}
+			activitiesIngoing[act] += parseInt(stru[1]);
+			i++;
+		}
+		let numEndActivities = i + 1 + parseInt(stri[i]);
+		i++;
+		while (i < numEndActivities) {
+			let stru = stri[i].trim().split("x");
+			let act = activities[parseInt(stru[0])];
+			endActivities[act] = parseInt(stru[1]);
+			i++;
+		}
+		while (i < stri.length) {
+			let stru = stri[i].trim();
+			if (stru.length > 0) {
+				let act1 = activities[parseInt(stru.split(">")[0])];
+				let act2 = activities[parseInt(stru.split("x")[0].split(">")[1])];
+				let count = parseInt(stru.split("x")[1]);
+				if (!(act2 in activitiesIngoing)) {
+					activitiesIngoing[act2] = 0;
+				}
+				activitiesIngoing[act2] += count;
+				pathsFrequency[[act1, act2]] = count;
+			}
+			i++;
+		}
+		let ret = new FrequencyDfg(activitiesIngoing, startActivities, endActivities, pathsFrequency);
+		Pm4JS.registerObject(ret, "Frequency DFG");
+		return ret;
+	}
+}
+
+try {
+	require('../../../pm4js.js');
+	global.FrequencyDfgImporter = FrequencyDfgImporter;
+	module.exports = {FrequencyDfgImporter: FrequencyDfgImporter};
+}
+catch (err) {
+	// not in Node
+	//console.log(err);
+}
+
+Pm4JS.registerImporter("FrequencyDfgImporter", "apply", ["dfg"], "Frequency DFG Importer", "Alessandro Berti");
+
+
+class PetriNetPlayout {
+	static apply(acceptingPetriNet, numDesideredTraces=1000, activityKey="concept:name", timestampKey="time:timestamp") {
+		let petriNet = acceptingPetriNet.net;
+		let initialMarking = acceptingPetriNet.im;
+		let finalMarking = acceptingPetriNet.fm;
+		let count = 0;
+		let minTimestamp = 10000000;
+		let eventLog = new EventLog();
+		while (true) {
+			if (count >= numDesideredTraces) {
+				break;
+			}
+			let trace = new Trace();
+			let marking = initialMarking.copy();
+			while (!(finalMarking.equals(marking))) {
+				let enabledTransitions = marking.getEnabledTransitions();
+				let pickedTransition = enabledTransitions[Math.floor(Math.random() * enabledTransitions.length)];
+				if (pickedTransition.label != null) {
+					let eve = new Event();
+					eve.attributes[activityKey] = new Attribute(pickedTransition.label);
+					eve.attributes[timestampKey] = new Attribute(new Date(minTimestamp*1000));
+					trace.events.push(eve);
+				}
+				marking = marking.execute(pickedTransition);
+				minTimestamp++;
+			}
+			eventLog.traces.push(trace);
+			count++;
+		}
+		Pm4JS.registerObject(eventLog, "Simulated Event log (from Petri net)");
+		return eventLog;
+	}
+}
+
+try {
+	require('../../../../pm4js.js');
+	global.PetriNetPlayout = PetriNetPlayout;
+	module.exports = {PetriNetPlayout: PetriNetPlayout};
+}
+catch (err) {
+	// not in Node
+	//console.log(err);
+}
+
+Pm4JS.registerAlgorithm("PetriNetPlayout", "apply", ["AcceptingPetriNet"], "EventLog", "Perform Playout on a Petri net", "Alessandro Berti");
+
+
+class ExponentialRandomVariable {
+	constructor(lam) {
+		this.lam = lam;
+	}
+	
+	toString() {
+		return "ExponentialRandomVariable lam="+this.lam;
+	}
+	
+	static gen() {
+		ExponentialRandomVariable.C = (ExponentialRandomVariable.C*ExponentialRandomVariable.G) % ExponentialRandomVariable.P;
+		return ExponentialRandomVariable.C / ExponentialRandomVariable.P;
+	}
+	
+	pdf(x) {
+		if (x < 0) {
+			throw "Exponential not defined for x < 0";
+		}
+		return this.lam * Math.exp(-this.lam * x);
+	}
+	
+	cdf(x) {
+		if (x < 0) {
+			throw "Exponential not defined for x < 0";
+		}
+		return 1 - Math.exp(-this.lam * x);
+	}
+	
+	getValue() {
+		return (-1.0 / this.lam) * Math.log(1.0 - ExponentialRandomVariable.gen());
+	}
+	
+	logLikelihood(arrayValues) {
+		let ret = 0.0;
+		for (let v of arrayValues) {
+			ret += Math.log(this.pdf(v));
+		}
+		return ret;
+	}
+	
+	static estimateParameters(arrayValues) {
+		let sum = 0.0;
+		for (let v of arrayValues) {
+			if (v < 0) {
+				throw "Exponential not defined for x < 0";
+			}
+			sum += v;
+		}
+		return new ExponentialRandomVariable(1.0 / (sum / arrayValues.length));
+	}
+	
+	getMean() {
+		return 1.0 / this.lam;
+	}
+	
+	getVariance() {
+		return 1.0 / (this.lam * this.lam);
+	}
+	
+	getMedian() {
+		return Math.log(2) / this.lam;
+	}
+	
+	getMode() {
+		return 0;
+	}
+	
+	getQuantile(p) {
+		return - Math.log(1 - p) / this.lam;
+	}
+}
+
+ExponentialRandomVariable.G = 536870911;
+ExponentialRandomVariable.P = 2147483647;
+ExponentialRandomVariable.C = 1;
+
+
+try {
+	require('../../pm4js.js');
+	global.ExponentialRandomVariable = ExponentialRandomVariable;
+	module.exports = {ExponentialRandomVariable: ExponentialRandomVariable};
+}
+catch (err) {
+	// not in Node
+	//console.log(err);
+}
+
+
+class NormalRandomVariable {
+	constructor(mu, sig) {
+		this.mu = mu;
+		this.sig = sig;
+	}
+	
+	toString() {
+		return "NormalRandomVariable mu="+this.mu+" sig="+this.sig;
+	}
+	
+	static gen() {
+		NormalRandomVariable.C = (NormalRandomVariable.C*NormalRandomVariable.G) % NormalRandomVariable.P;
+		return NormalRandomVariable.C / NormalRandomVariable.P;
+	}
+	
+	static erf(x) {
+		let v = 1;
+		v = v + 0.278393*x;
+		let y = x * x;
+		v = v + 0.230389*y;
+		y = y * x;
+		v = v + 0.000972*y;
+		y = y * x;
+		v = v + 0.078108*y;
+		v = v * v;
+		v = v * v;
+		v = 1.0 / v;
+		v = 1.0 - v;
+		return v;
+	}
+	
+	static erfinv(x) {
+		let sgn = 1;
+		if (x < 0) {
+			sgn = -1;
+			x = -x;
+		}
+		x = (1 - x)*(1 + x);
+		let lnx = Math.log(x);
+		let tt1 = 2/(Math.PI * 0.147) + 0.5 * lnx;
+		let tt2 = 1/0.147 * lnx;
+		return sgn * Math.sqrt(-tt1 + Math.sqrt(tt1 * tt1 - tt2));
+	}
+	
+	pdf(x) {
+		return 1.0/(this.sig*Math.sqrt(2*Math.PI)) * Math.exp(-0.5*((x-this.mu)/this.sig)*((x-this.mu)/this.sig));
+	}
+	
+	cdf(x) {
+		return 0.5*(1.0 + NormalRandomVariable.erf((x - this.mu)/(this.sig * Math.sqrt(2))));
+	}
+	
+	getValue() {
+		let v1 = NormalRandomVariable.gen();
+		let v2 = NormalRandomVariable.gen();
+		return this.mu + this.sig * Math.cos(2*Math.PI*v2) * Math.sqrt(-2.0 * Math.log(v1));
+	}
+	
+	logLikelihood(arrayValues) {
+		let ret = 0.0;
+		for (let v of arrayValues) {
+			ret += Math.log(this.pdf(v));
+		}
+		return ret;
+	}
+	
+	static estimateParameters(arrayValues) {
+		let sum = 0.0;
+		for (let v of arrayValues) {
+			sum += v;
+		}
+		let avg = sum / arrayValues.length;
+		sum = 0.0;
+		for (let v of arrayValues) {
+			sum += (v - avg) * (v-avg);
+		}
+		let std = Math.sqrt(sum / arrayValues.length);
+		return new NormalRandomVariable(avg, std);
+	}
+	
+	getMean() {
+		return this.mu;
+	}
+	
+	getVariance() {
+		return this.sig * this.sig;
+	}
+	
+	getMedian() {
+		return this.mu;
+	}
+	
+	getMode() {
+		return this.mu;
+	}
+	
+	getQuantile(p) {
+		return this.mu + this.sig * Math.sqrt(2) * NormalRandomVariable.erfinv(2*p - 1);
+	}
+}
+
+NormalRandomVariable.G = 536870911;
+NormalRandomVariable.P = 2147483647;
+NormalRandomVariable.C = 1;
+
+
+try {
+	require('../../pm4js.js');
+	global.NormalRandomVariable = NormalRandomVariable;
+	module.exports = {NormalRandomVariable: NormalRandomVariable};
+}
+catch (err) {
+	// not in Node
+	//console.log(err);
+}
+
+
+class LogNormalRandomVariable {
+	constructor(mu, sig) {
+		this.mu = mu;
+		this.sig = sig;
+	}
+	
+	toString() {
+		return "LogNormalRandomVariable mu="+this.mu+" sig="+this.sig;
+	}
+	
+	static gen() {
+		LogNormalRandomVariable.C = (LogNormalRandomVariable.C*LogNormalRandomVariable.G) % LogNormalRandomVariable.P;
+		return LogNormalRandomVariable.C / LogNormalRandomVariable.P;
+	}
+	
+	static erf(x) {
+		let v = 1;
+		v = v + 0.278393*x;
+		let y = x * x;
+		v = v + 0.230389*y;
+		y = y * x;
+		v = v + 0.000972*y;
+		y = y * x;
+		v = v + 0.078108*y;
+		v = v * v;
+		v = v * v;
+		v = 1.0 / v;
+		v = 1.0 - v;
+		return v;
+	}
+	
+	static erfinv(x) {
+		let sgn = 1;
+		if (x < 0) {
+			sgn = -1;
+			x = -x;
+		}
+		x = (1 - x)*(1 + x);
+		let lnx = Math.log(x);
+		let tt1 = 2/(Math.PI * 0.147) + 0.5 * lnx;
+		let tt2 = 1/0.147 * lnx;
+		return sgn * Math.sqrt(-tt1 + Math.sqrt(tt1 * tt1 - tt2));
+	}
+	
+	pdf(x) {
+		if (x < 0) {
+			throw "Lognormal not defined for x < 0";
+		}
+		return 1.0 / (x * this.sig * Math.sqrt(2 * Math.PI)) * Math.exp(-(Math.log(x) - this.mu)*(Math.log(x) - this.mu)/(2 * this.sig * this.sig));
+	}
+	
+	cdf(x) {
+		if (x < 0) {
+			throw "Lognormal not defined for x < 0";
+		}
+		return 0.5*(1.0 + LogNormalRandomVariable.erf((Math.log(x) - this.mu)/(this.sig * Math.sqrt(2))));
+	}
+	
+	getValue() {
+		let v1 = NormalRandomVariable.gen();
+		let v2 = NormalRandomVariable.gen();
+		return Math.exp(this.mu + this.sig * Math.cos(2*Math.PI*v2) * Math.sqrt(-2.0 * Math.log(v1)));
+	}
+	
+	logLikelihood(arrayValues) {
+		let ret = 0.0;
+		for (let v of arrayValues) {
+			ret += Math.log(this.pdf(v));
+		}
+		return ret;
+	}
+	
+	static estimateParameters(arrayValues) {
+		let sum = 0.0;
+		for (let v of arrayValues) {
+			if (v < 0) {
+				throw "Lognormal not defined for x < 0";
+			}
+			sum += v;
+		}
+		let avg = sum / arrayValues.length;
+		sum = 0.0;
+		for (let v of arrayValues) {
+			sum += (v - avg) * (v-avg);
+		}
+		let std = Math.sqrt(sum / arrayValues.length);
+		let mu = Math.log((avg * avg)/(Math.sqrt(avg*avg + std*std)));
+		let s = Math.sqrt(Math.log(1 + (std*std)/(avg*avg)))
+		return new LogNormalRandomVariable(mu, s);
+	}
+	
+	getMean() {
+		return Math.exp(this.mu + this.sig * this.sig / 2.0);
+	}
+	
+	getVariance() {
+		return (Math.exp(this.sig * this.sig) - 1) * Math.exp(2*this.mu + this.sig * this.sig);
+	}
+	
+	getMedian() {
+		return Math.exp(this.mu);
+	}
+	
+	getMode() {
+		return Math.exp(this.mu - this.sig * this.sig);
+	}
+	
+	getQuantile(p) {
+		return Math.exp(this.mu + Math.sqrt(2 * this.sig * this.sig) * LogNormalRandomVariable.erfinv(2 * p - 1));
+	}
+}
+
+LogNormalRandomVariable.G = 536870911;
+LogNormalRandomVariable.P = 2147483647;
+LogNormalRandomVariable.C = 1;
+
+
+try {
+	require('../../pm4js.js');
+	global.LogNormalRandomVariable = LogNormalRandomVariable;
+	module.exports = {LogNormalRandomVariable: LogNormalRandomVariable};
+}
+catch (err) {
+	// not in Node
+	//console.log(err);
+}
+
+
+class GammaRandomVariable {
+	constructor(k, theta) {
+		this.k = k;
+		this.theta = theta;
+	}
+	
+	toString() {
+		return "GammaRandomVariable k="+this.k+" theta="+this.theta;
+	}
+	
+	static gen() {
+		GammaRandomVariable.C = (GammaRandomVariable.C*GammaRandomVariable.G) % GammaRandomVariable.P;
+		return GammaRandomVariable.C / GammaRandomVariable.P;
+	}
+	
+	static estimateParameters(arrayValues) {
+		let n = arrayValues.length;
+		let kn = 0;
+		for (let v of arrayValues) {
+			if (v < 0) {
+				throw "Gamma not defined for x < 0";
+			}
+			kn += v;
+		}
+		kn = kn * n * (n-1);
+		let kd1 = 0;
+		let kd2 = 0;
+		let kd3 = 0;
+		for (let v of arrayValues) {
+			kd1 += v * Math.log(v);
+			kd2 += Math.log(v);
+			kd3 += v;
+		}
+		kd1 = kd1 * n;
+		let kd = (n+2)*(kd1 - kd2 * kd3);
+		let k = kn / kd;
+		let theta = kd / (n * n * (n-1));
+		return new GammaRandomVariable(k, theta);
+	}
+	
+	static eulerGamma(x) {
+		x = x - 1;
+		return Math.sqrt(Math.PI) * Math.pow(Math.abs(x) / Math.E, x) * Math.pow(8 * x * x *x + 4 *x *x + x + 1.0 / 3.0, 1.0 / 6.0);
+	}
+	
+	pdf(x) {
+		if (x < 0) {
+			throw "Gamma not defined for x < 0";
+		}
+		return (Math.pow(x, this.k - 1) * Math.exp(-x / this.theta)) / (Math.pow(this.theta, this.k) * GammaRandomVariable.eulerGamma(this.k));
+	}
+	
+	logLikelihood(arrayValues) {
+		let ret = 0.0;
+		for (let v of arrayValues) {
+			ret += Math.log(this.pdf(v));
+		}
+		return ret;
+	}
+	
+	getMean() {
+		return this.k * this.theta;
+	}
+	
+	getVariance() {
+		return this.k * this.theta * this.theta;
+	}
+	
+	getMode() {
+		if (this.k > 1) {
+			return (this.k - 1)*this.theta;
+		}
+		return 0;
+	}
+	
+	getValue() {
+		let k = 0 + this.k;
+		let exp = new ExponentialRandomVariable(1.0 / this.theta);
+		let ret = 0;
+		while (k > 1) {
+			ret += exp.getValue();
+			k = k - 1;
+		}
+		let umax = Math.pow((k / Math.E), k / 2.0);
+		let vmin = -2 / Math.E;
+		let vmax = 2*k / (Math.E * (Math.E - k));
+		while (true) {
+			let v1 = GammaRandomVariable.gen();
+			let v2 = GammaRandomVariable.gen();
+			let u = umax * v1;
+			let v = (vmax - vmin) * v2 + vmin;
+			let t = v / u;
+			let x = Math.exp(t / k);
+			if (2*Math.log(u) <= t - x) {
+				ret += x * this.theta;
+				break;
+			}
+		}
+		return ret;
+	}
+}
+
+GammaRandomVariable.G = 536870911;
+GammaRandomVariable.P = 2147483647;
+GammaRandomVariable.C = 1;
+
+try {
+	require('../../pm4js.js');
+	global.GammaRandomVariable = GammaRandomVariable;
+	module.exports = {GammaRandomVariable: GammaRandomVariable};
+}
+catch (err) {
+	// not in Node
+	//console.log(err);
+}
+
+
+class ExponentiallyModifiedGaussian {
+	constructor(mu, sig, lam) {
+		this.mu = mu;
+		this.sig = sig;
+		this.lam = lam;
+	}
+	
+	toString() {
+		return "ExponentiallyModifiedGaussian mu="+this.mu+" sig="+this.sig+" lam="+this.lam;
+	}
+	
+	static erf(x) {
+		let v = 1;
+		v = v + 0.278393*x;
+		let y = x * x;
+		v = v + 0.230389*y;
+		y = y * x;
+		v = v + 0.000972*y;
+		y = y * x;
+		v = v + 0.078108*y;
+		v = v * v;
+		v = v * v;
+		v = 1.0 / v;
+		v = 1.0 - v;
+		return v;
+	}
+	
+	static estimateParameters(arrayValues) {
+		let n = arrayValues.length;
+		let mu = 0.0;
+		for (let v of arrayValues) {
+			mu += v;
+		}
+		mu = mu / n;
+		let std = 0.0;
+		for (let v of arrayValues) {
+			std += (v - mu) * (v - mu);
+		}
+		std = std / n;
+		std = Math.sqrt(std);
+		let skew = 0.0;
+		for (let v of arrayValues) {
+			skew += v * v * v;
+		}
+		skew = skew / n;
+		skew = (skew - 3 * mu * std * std - mu * mu * mu) / (std * std * std);
+		let muDist = mu - std * Math.pow(Math.abs(skew) / 2.0, 2.0 / 3.0);
+		let stdDist = Math.sqrt(std * std * (1 - Math.pow((Math.abs(skew) / 2.0), 2.0 / 3.0)));
+		let tauDist = std * Math.pow((Math.abs(skew) / 2), 1.0 / 3.0);
+		return new ExponentiallyModifiedGaussian(muDist, stdDist, 1.0 / tauDist);
+	}
+	
+	getMean() {
+		return this.mu + 1.0 / this.lam;
+	}
+	
+	getVariance() {
+		return this.sig * this.sig + 1.0 / (this.lam * this.lam);
+	}
+	
+	pdf(x) {
+		return this.lam / 2.0 * Math.exp(this.lam / 2.0 * (2 * this.mu + this.lam * this.sig * this.sig - 2*x)) * (1 - ExponentiallyModifiedGaussian.erf((this.mu + this.lam * this.sig * this.sig - x)/(Math.sqrt(2) * this.sig)));
+	}
+	
+	cdf(x) {
+		let u = this.lam * (x - this.mu);
+		let v = this.lam * this.sig;
+		let rv1 = new NormalRandomVariable(0, v);
+		let rv2 = new NormalRandomVariable(v*v, v);
+		return rv1.cdf(u) - Math.exp(-(u + v*v)/(2 + Math.log(rv2.cdf(u))));
+	}
+	
+	logLikelihood(arrayValues) {
+		let ret = 0.0;
+		for (let v of arrayValues) {
+			ret += Math.log(this.pdf(v));
+		}
+		return ret;
+	}
+	
+	getValue() {
+		let rv1 = new NormalRandomVariable(this.mu, this.sig);
+		let rv2 = new ExponentialRandomVariable(this.lam);
+		return rv1.getValue() + rv2.getValue();
+	}
+}
+
+try {
+	require('../../pm4js.js');
+	global.ExponentiallyModifiedGaussian = ExponentiallyModifiedGaussian;
+	module.exports = {ExponentiallyModifiedGaussian: ExponentiallyModifiedGaussian};
+}
+catch (err) {
+	// not in Node
+	//console.log(err);
+}
+
+
+
+class UniformRandomVariable {
+	constructor(a, b) {
+		if (a >= b) {
+			throw "a must be lower than b";
+		}
+		this.a = a;
+		this.b = b;
+	}
+	
+	toString() {
+		return "UniformRandomVariable a="+this.a+" b="+this.b;
+	}
+	
+	pdf(x) {
+		if (x >= this.a && x <= this.b) {
+			return 1.0 / (this.b - this.a);
+		}
+		return 0.0;
+	}
+	
+	cdf(x) {
+		if (x <= this.a) {
+			return 0.0;
+		}
+		else if (x > this.a && x < this.b) {
+			return (x - this.a)/(this.b - this.a);
+		}
+		else {
+			return 1.0;
+		}
+	}
+	
+	static estimateParameters(arrayValues) {
+		let minValue = Number.MAX_VALUE;
+		let maxValue = -Number.MAX_VALUE;
+		for (let v of arrayValues) {
+			if (v < minValue) {
+				minValue = v;
+			}
+			if (v > maxValue) {
+				maxValue = v;
+			}
+		}
+		return new UniformRandomVariable(minValue, maxValue);
+	}
+	
+	getMean() {
+		return 0.5 * (this.a + this.b);
+	}
+	
+	getMedian() {
+		return 0.5 * (this.a + this.b);
+	}
+	
+	getMode() {
+		return 0.5 * (this.a + this.b);
+	}
+	
+	getVariance() {
+		return 1.0 / 12.0 * (this.b - this.a) * (this.b - this.a);
+	}
+	
+	logLikelihood(arrayValues) {
+		let ret = 0.0;
+		for (let v of arrayValues) {
+			ret += Math.log(this.pdf(v));
+		}
+		return ret;
+	}
+	
+	static gen() {
+		UniformRandomVariable.C = (UniformRandomVariable.C*UniformRandomVariable.G) % UniformRandomVariable.P;
+		return UniformRandomVariable.C / UniformRandomVariable.P;
+	}
+	
+	getValue() {
+		let val = UniformRandomVariable.gen();
+		return this.a + (this.b - this.a) * val;
+	}
+	
+	getQuantile(p) {
+		return this.a + p * (this.b - this.a);
+	}
+}
+
+UniformRandomVariable.G = 536870911;
+UniformRandomVariable.P = 2147483647;
+UniformRandomVariable.C = 1;
+
+try {
+	require('../../pm4js.js');
+	global.UniformRandomVariable = UniformRandomVariable;
+	module.exports = {UniformRandomVariable: UniformRandomVariable};
+}
+catch (err) {
+	// not in Node
+	//console.log(err);
+}
+
+
+
+class RandomVariableFitter {
+	static apply(arrayValues, debug=false) {
+		let rv = null;
+		let likelihood = -Number.MAX_VALUE;
+		if (debug) {
+			console.log("----- debug -----");
+		}
+		try {
+			let un = UniformRandomVariable.estimateParameters(arrayValues);
+			let unLikelihood = un.logLikelihood(arrayValues);
+			if (debug) {
+				console.log(un.toString() + " unLikelihood = "+unLikelihood);
+			}
+			if (unLikelihood > likelihood) {
+				rv = un;
+				likelihood = unLikelihood;
+			}
+		}
+		catch (err) {
+		}
+		try {
+			let nv = NormalRandomVariable.estimateParameters(arrayValues);
+			let nvLikelihood = nv.logLikelihood(arrayValues);
+			if (debug) {
+				console.log(nv.toString() + " nvLikelihood = "+nvLikelihood);
+			}
+			if (nvLikelihood > likelihood) {
+				rv = nv;
+				likelihood = nvLikelihood;
+			}
+		}
+		catch (err) {
+		}
+		try {
+			let lnv = LogNormalRandomVariable.estimateParameters(arrayValues);
+			let lnvLikelihood = lnv.logLikelihood(arrayValues);
+			if (debug) {
+				console.log(lnv.toString() + " lnvLikelihood = "+lnvLikelihood);
+			}
+			if (lnvLikelihood > likelihood) {
+				rv = lnv;
+				likelihood = lnvLikelihood;
+			}
+		}
+		catch (err) {
+		}
+		try {
+			let ev = ExponentialRandomVariable.estimateParameters(arrayValues);
+			let evLikelihood = ev.logLikelihood(arrayValues);
+			if (debug) {
+				console.log(ev.toString() + "evLikelihood = "+evLikelihood);
+			}
+			if (evLikelihood > likelihood) {
+				rv = ev;
+				likelihood = evLikelihood;
+			}
+		}
+		catch (err) {
+		}
+		try {
+			let gv = GammaRandomVariable.estimateParameters(arrayValues);
+			let gvLikelihood = gv.logLikelihood(arrayValues);
+			if (debug) {
+				console.log(gv.toString() + " gvLikelihood = "+gvLikelihood);
+			}
+			if (gvLikelihood > likelihood) {
+				rv = gv;
+				likelihood = gvLikelihood;
+			}
+		}
+		catch (err) {
+		}
+		try {
+			let emn = ExponentiallyModifiedGaussian.estimateParameters(arrayValues);
+			let emnLikelihood = emn.logLikelihood(arrayValues);
+			if (debug) {
+				console.log(emn.toString() + " emnLikelihood = "+emnLikelihood);
+			}
+			if (emnLikelihood > likelihood) {
+				rv = emn;
+				likelihood = emnLikelihood;
+			}
+		}
+		catch (err) {
+		}
+		if (debug) {
+			console.log("----- /debug -----");
+		}
+		return rv;
+	}
+}
+
+try {
+	require('../../pm4js.js');
+	global.RandomVariableFitter = RandomVariableFitter;
+	module.exports = {RandomVariableFitter: RandomVariableFitter};
+}
+catch (err) {
+	// not in Node
+	//console.log(err);
+}
+
+
+
+class PerformanceDfgSimulation {
+	static choiceFromProbDct(dct) {
+		let choices = [];
+		let prob = [];
+		let cumprob = 0.0;
+		for (let k in dct) {
+			choices.push(k);
+			cumprob += dct[k];
+			prob.push(cumprob);
+		}
+		let rr = Math.random();
+		let i = 0;
+		while (i < choices.length) {
+			if (prob[i] > rr) {
+				return choices[i];
+			}
+			i++;
+		}
+	}
+	
+	static apply(performanceDfg, numDesideredTraces=1000, activityKey="concept:name", timestampKey="time:timestamp", caseArrivalRate=1) {
+		let artificialDfg = performanceDfg.getArtificialDfg();
+		let outgoing = {};
+		for (let path0 in artificialDfg[1]) {
+			let path = path0.split(",");
+			if (!(path[0] in outgoing)) {
+				outgoing[path[0]] = {};
+			}
+			outgoing[path[0]][path[1]] = artificialDfg[1][path0] / artificialDfg[0][path[0]];
+		}
+		let eventLog = new EventLog();
+		let timestamp = 10000000;
+		let i = 0;
+		while (i < numDesideredTraces) {
+			timestamp += 1;
+			let currTraceTimestampTrace = 0 + timestamp;
+			let trace = new Trace();
+			eventLog.traces.push(trace);
+			let currActivity = "▶";
+			while (currActivity != "■") {
+				let nextActivity = PerformanceDfgSimulation.choiceFromProbDct(outgoing[currActivity]);
+				if (currActivity != "▶" && nextActivity != "■") {
+					let path = [currActivity, nextActivity];
+					let pathPerformance = performanceDfg.pathsPerformance[path];
+					if (pathPerformance > 0) {
+						let exp = new ExponentialRandomVariable(1.0 / pathPerformance);
+						currTraceTimestampTrace += exp.getValue();
+					}
+				}
+				if (nextActivity != "■") {
+					let eve = new Event();
+					eve.attributes[activityKey] = new Attribute(nextActivity);
+					eve.attributes[timestampKey] = new Attribute(new Date(currTraceTimestampTrace*1000));
+					trace.events.push(eve);
+				}
+				currActivity = nextActivity;
+			}
+			i++;
+		}
+		Pm4JS.registerObject(eventLog, "Simulated Event log (performance simulation from DFG)");
+		return eventLog;
+	}
+}
+
+try {
+	require("../../../../pm4js.js");
+	module.exports = {PerformanceDfgSimulation: PerformanceDfgSimulation};
+	global.PerformanceDfgSimulation = PerformanceDfgSimulation;
+}
+catch (err) {
+	// not in Node
+}
+
+Pm4JS.registerAlgorithm("PerformanceDfgSimulation", "apply", ["PerformanceDfg"], "EventLog", "Perform Playout on a Performance DFG (performance simulation)", "Alessandro Berti");
+
+
+class CelonisMapper {
+	constructor(baseUrl, apiKey) {
+		this.baseUrl = baseUrl;
+		this.apiKey = apiKey;
+		this.dataPools = null;
+		this.dataPoolsNames = null;
+		this.dataModels = null;
+		this.dataModelsNames = null;
+		this.dataPoolsDataModels = null;
+		this.dataModelsDataPools = null;
+		this.dataModelsTables = null;
+		this.analysis = null;
+		this.analysisNames = null;
+		this.analysisDataModel = null;
+		this.getDataPools();
+		this.getDataModels();
+		this.getAnalyses();
+		this.getAnalysesDataModel();
+		this.defaultAnalysis = null;
+	}
+	
+	getFirstAnalysis() {
+		if (this.defaultAnalysis != null) {
+			return this.defaultAnalysis;
+		}
+		let analysisIds = Object.keys(this.analysis).sort();
+		return analysisIds[0];
+	}
+	
+	getDataPools() {
+		this.dataPools = null;
+		this.dataPoolsNames = null;
+		this.dataPools = {};
+		this.dataPoolsNames = {};
+		let resp = this.performGet(this.baseUrl+"/integration/api/pools");
+		for (let obj of resp) {
+			this.dataPoolsNames[obj["name"]] = obj["id"];
+			this.dataPools[obj["id"]] = obj;
+		}
+	}
+	
+	getDataModels() {
+		this.dataModels = null;
+		this.dataPoolsDataModels = null;
+		this.dataModelsDataPools = null;
+		this.dataModelsNames = null;
+		this.dataModelsTables = null;
+		this.dataModels = {};
+		this.dataPoolsDataModels = {};
+		this.dataModelsDataPools = {};
+		this.dataModelsNames = {};
+		this.dataModelsTables = {};
+		for (let objId in this.dataPools) {
+			this.dataPoolsDataModels[objId] = {};
+			let resp = this.performGet(this.baseUrl+"/integration/api/pools/"+objId+"/data-models");
+			for (let model of resp) {
+				this.dataPoolsDataModels[objId][model["id"]] = model;
+				this.dataModels[model["id"]] = model;
+				this.dataModelsDataPools[model["id"]] = objId;
+				this.dataModelsNames[model["name"]] = model["id"];
+				this.dataModelsTables[model["id"]] = {};
+				for (let table of model.tables) {
+					this.dataModelsTables[model["id"]][table["id"]] = table["name"];
+				}
+			}
+		}
+	}
+	
+	getAnalyses() {
+		this.analysis = null;
+		this.analysisNames = null;
+		this.analysis = {};
+		this.analysisNames = {};
+		let resp = this.performGet(this.baseUrl+"/process-mining/api/analysis");
+		for (let ana of resp) {
+			this.analysis[ana["id"]] = ana;
+			this.analysisNames[ana["name"]] = ana["id"];
+		}
+	}
+	
+	getAnalysesDataModel() {
+		this.analysisDataModel = null;
+		this.analysisDataModel = {};
+		for (let anaId in this.analysis) {
+			let resp = this.performGet(this.baseUrl+"/process-mining/analysis/v1.2/api/analysis/"+anaId+"/data_model");
+			this.analysisDataModel[anaId] = resp["id"];
+		}
+	}
+	
+	pausecomp(millis)
+	{
+		var date = new Date();
+		var curDate = null;
+		do { curDate = new Date(); }
+		while(curDate-date < millis);
+	}
+	
+	performQueryAnalysis(analysisId, pqlQuery, waitingTime1=250, waitingTime2=750) {
+		let dataModel = this.dataModels[this.analysisDataModel[analysisId]];
+		let payload = {'dataCommandRequest': {'variables': [], 'request': {'commands': [{'queries': [pqlQuery], 'computationId': 0, 'isTransient': false}], 'cubeId': dataModel["id"]}}, 'exportType': 'CSV'};
+		let resp1 = this.performPostJson(this.baseUrl+"/process-mining/analysis/v1.2/api/analysis/"+analysisId+"/exporting/query", payload);
+		if (resp1["exportStatus"] == "WAITING" || resp1["exportStatus"] == "RUNNING" || resp1["exportStatus"] == "DONE") {
+			let downloadId = resp1["id"];
+			while (true) {
+				this.pausecomp(waitingTime1);
+				let resp2 = this.performGet(this.baseUrl+"/process-mining/analysis/v1.2/api/analysis/"+analysisId+"/exporting/query/"+downloadId+"/status");
+				if (resp2.exportStatus == "DONE") {
+					break;
+				}
+				this.pausecomp(waitingTime2);
+			}
+			let resp3 = this.performGet(this.baseUrl+"/process-mining/analysis/v1.2/api/analysis/"+analysisId+"/exporting/query/"+downloadId+"/download", false);
+			return resp3;
+		}
+		return resp1;
+	}
+	
+	performGet(url, isRequestJson=true) {
+		if (CelonisMapper.IS_NODE) {
+			let ret = retus(url, {headers: {"authorization": "Bearer "+this.apiKey}}).body;
+			if (isRequestJson) {
+				return JSON.parse(ret);
+			}
+			return ret;
+		}
+		else {
+			let ret = null;
+			let ajaxDict = {
+				url: CelonisMapper.PROXY_URL_GET,
+				data: {"access_token": this.apiKey, "url": url},
+				async: false,
+				success: function(data) {
+					ret = data;
+				}
+			}
+			$.ajax(ajaxDict);
+			if (isRequestJson) {
+				ret = JSON.parse(ret);
+			}
+			return ret;
+		}
+	}
+	
+	performPostJson(url, jsonContent) {
+		if (CelonisMapper.IS_NODE) {
+			return retus(url, {method: "post", headers: {"authorization": "Bearer "+this.apiKey}, json: jsonContent}).body;
+		}
+		else {
+			let ret = null;
+			jsonContent["access_token"] = this.apiKey;
+			jsonContent["url"] = url;
+			let ajaxDict = {
+				url: CelonisMapper.PROXY_URL_POST,
+				dataType: 'json',
+				type: 'post',
+				contentType: 'application/json',
+				data: JSON.stringify(jsonContent),
+				async: false,
+				success: function(data) {
+					ret = data;
+				}
+			}
+			$.ajax(ajaxDict);
+			return ret;
+		}
+	}
+	
+	static autoConfiguration() {
+		const queryString = window.location.search;
+		const urlParams = new URLSearchParams(queryString);
+		let targetUrl = ""+document.referrer;
+		targetUrl = targetUrl.substring(0, targetUrl.length - 1);
+		let apiKey = urlParams.get("key");
+		let analysis = urlParams.get("analysis");
+		let celonisMapper = new CelonisMapper(targetUrl, apiKey);
+		celonisMapper.defaultAnalysis = analysis;
+		return celonisMapper;
+	}
+	
+	toString() {
+		return "CelonisMapper url="+this.baseUrl+" key="+this.apiKey+" defaultAnalysis="+this.defaultAnalysis;
+	}
+}
+
+try {
+	global.retus = require("retus");
+	require('../../pm4js.js');
+	global.CelonisMapper = CelonisMapper;
+	module.exports = {CelonisMapper: CelonisMapper};
+	CelonisMapper.IS_NODE = true;
+}
+catch (err) {
+	// not in Node
+	CelonisMapper.IS_NODE = false;
+	CelonisMapper.PROXY_URL_GET = "http://localhost:5004/getWrapper";
+	CelonisMapper.PROXY_URL_POST = "http://localhost:5004/postWrapper";
+}
+
+class Celonis1DWrapper {
+	constructor(celonisMapper) {
+		this.celonisMapper = celonisMapper;
+	}
+	
+	getProcessConfiguration(dataModel, processConfigurationId=null) {
+		if (processConfigurationId == null) {
+			let ret = dataModel.processConfigurations[0];
+			return ret;
+		}
+		else {
+			let i = 0;
+			while (i < dataModel.processConfigurations.length) {
+				if (dataModel.processConfigurations[i].id == processConfigurationId) {
+					return dataModel.processConfigurations[i];
+				}
+				i++;
+			}
+		}
+	}
+	
+	downloadBaseEventLog(analysisId, processConfigurationId=null) {
+		if (analysisId == null) {
+			analysisId = this.celonisMapper.getFirstAnalysis();
+		}
+		let dataModel = this.celonisMapper.dataModels[this.celonisMapper.analysisDataModel[analysisId]];
+		let dataModelTables = this.celonisMapper.dataModelsTables[dataModel["id"]];
+		let processConfiguration = this.getProcessConfiguration(dataModel, processConfigurationId);
+		let activityTable = dataModelTables[processConfiguration["activityTableId"]];
+		let query = [];
+		query.push("TABLE(");
+		query.push("\""+activityTable+"\".\""+processConfiguration.caseIdColumn+"\" AS \"case:concept:name\", ");
+		query.push("\""+activityTable+"\".\""+processConfiguration.activityColumn+"\" AS \"concept:name\", ");
+		query.push("\""+activityTable+"\".\""+processConfiguration.timestampColumn+"\" AS \"time:timestamp\") NOLIMIT;");
+		query = query.join("");
+		return CsvImporter.apply(this.celonisMapper.performQueryAnalysis(analysisId, query));
+	}
+	
+	downloadStartActivities(analysisId, processConfigurationId=null) {
+		if (analysisId == null) {
+			analysisId = this.celonisMapper.getFirstAnalysis();
+		}
+		let dataModel = this.celonisMapper.dataModels[this.celonisMapper.analysisDataModel[analysisId]];
+		let dataModelTables = this.celonisMapper.dataModelsTables[dataModel["id"]];
+		let processConfiguration = this.getProcessConfiguration(dataModel, processConfigurationId);
+		let activityTable = dataModelTables[processConfiguration["activityTableId"]];
+		let query = [];
+		query.push("TABLE(");
+		query.push("ACTIVITY_LAG ( \""+activityTable+"\".\""+processConfiguration.activityColumn+"\", 1) AS \"PREV_ACTIVITY\", ");
+		query.push("\""+activityTable+"\".\""+processConfiguration.activityColumn+"\" AS \"CURR_ACTIVITY\",");
+		query.push("COUNT(\""+activityTable+"\".\""+processConfiguration.caseIdColumn+"\") AS \"COUNT\") NOLIMIT;");
+		query = query.join("");
+		let ret = CsvImporter.parseCSV(this.celonisMapper.performQueryAnalysis(analysisId, query));
+		let sa_dict = {};
+		for (let el of ret) {
+			if (el[0].length == 0) {
+				sa_dict[el[1]] = parseInt(el[2]);
+			}
+		}
+		return sa_dict;
+	}
+	
+	downloadEndActivities(analysisId, processConfigurationId=null) {
+		if (analysisId == null) {
+			analysisId = this.celonisMapper.getFirstAnalysis();
+		}
+		let dataModel = this.celonisMapper.dataModels[this.celonisMapper.analysisDataModel[analysisId]];
+		let dataModelTables = this.celonisMapper.dataModelsTables[dataModel["id"]];
+		let processConfiguration = this.getProcessConfiguration(dataModel, processConfigurationId);
+		let activityTable = dataModelTables[processConfiguration["activityTableId"]];
+		let query = [];
+		query.push("TABLE(");
+		query.push("ACTIVITY_LEAD ( \""+activityTable+"\".\""+processConfiguration.activityColumn+"\", 1) AS \"NEXT_ACTIVITY\", ");
+		query.push("\""+activityTable+"\".\""+processConfiguration.activityColumn+"\" AS \"CURR_ACTIVITY\",");
+		query.push("COUNT(\""+activityTable+"\".\""+processConfiguration.caseIdColumn+"\") AS \"COUNT\") NOLIMIT;");
+		query = query.join("");
+		let ret = CsvImporter.parseCSV(this.celonisMapper.performQueryAnalysis(analysisId, query));
+		let ea_dict = {};
+		for (let el of ret) {
+			if (el[0].length == 0) {
+				ea_dict[el[1]] = parseInt(el[2]);
+			}
+		}
+		return ea_dict;
+	}
+	
+	downloadActivities(analysisId, processConfigurationId=null) {
+		if (analysisId == null) {
+			analysisId = this.celonisMapper.getFirstAnalysis();
+		}
+		let dataModel = this.celonisMapper.dataModels[this.celonisMapper.analysisDataModel[analysisId]];
+		let dataModelTables = this.celonisMapper.dataModelsTables[dataModel["id"]];
+		let processConfiguration = this.getProcessConfiguration(dataModel, processConfigurationId);
+		let activityTable = dataModelTables[processConfiguration["activityTableId"]];
+		let query = [];
+		query.push("TABLE(");
+		query.push("\""+activityTable+"\".\""+processConfiguration.activityColumn+"\", ");
+		query.push("COUNT(\""+activityTable+"\".\""+processConfiguration.caseIdColumn+"\") AS \"ACTIVITY\") NOLIMIT;");
+		query = query.join("");
+		let ret = CsvImporter.parseCSV(this.celonisMapper.performQueryAnalysis(analysisId, query));
+		let activities = {};
+		let i = 1;
+		while (i < ret.length) {
+			activities[ret[i][0]] = parseInt(ret[i][1]);
+			i++;
+		}
+		return activities;
+	}
+	
+	downloadPathsFrequency(analysisId, processConfigurationId=null) {
+		if (analysisId == null) {
+			analysisId = this.celonisMapper.getFirstAnalysis();
+		}
+		let dataModel = this.celonisMapper.dataModels[this.celonisMapper.analysisDataModel[analysisId]];
+		let dataModelTables = this.celonisMapper.dataModelsTables[dataModel["id"]];
+		let processConfiguration = this.getProcessConfiguration(dataModel, processConfigurationId);
+		let activityTable = dataModelTables[processConfiguration["activityTableId"]];
+		let query = [];
+		query.push("TABLE(");
+		query.push("ACTIVITY_LEAD ( \""+activityTable+"\".\""+processConfiguration.activityColumn+"\", 1) AS \"NEXT_ACTIVITY\", ");
+		query.push("\""+activityTable+"\".\""+processConfiguration.activityColumn+"\" AS \"CURR_ACTIVITY\", ");
+		query.push("COUNT(\""+activityTable+"\".\""+processConfiguration.caseIdColumn+"\") AS \"COUNT\") NOLIMIT;")
+		query = query.join("");
+		let res = this.celonisMapper.performQueryAnalysis(analysisId, query);
+		let ret = CsvImporter.parseCSV(res);
+		let i = 1;
+		let pathsFrequency = {};
+		while (i < ret.length) {
+			if (ret[i][0].length > 0) {
+				pathsFrequency[[ret[i][1], ret[i][0]]] = parseInt(ret[i][2]);
+			}
+			i++;
+		}
+		return pathsFrequency;
+	}
+	
+	downloadVariants(analysisId, processConfigurationId=null) {
+		if (analysisId == null) {
+			analysisId = this.celonisMapper.getFirstAnalysis();
+		}
+		let dataModel = this.celonisMapper.dataModels[this.celonisMapper.analysisDataModel[analysisId]];
+		let dataModelTables = this.celonisMapper.dataModelsTables[dataModel["id"]];
+		let processConfiguration = this.getProcessConfiguration(dataModel, processConfigurationId);
+		let activityTable = dataModelTables[processConfiguration["activityTableId"]];
+		let query = [];
+		query.push("TABLE(");
+		query.push("VARIANT(\""+activityTable+"\".\""+processConfiguration.activityColumn+"\")");
+		query.push(", COUNT(\""+activityTable+"\".\""+processConfiguration.caseIdColumn+"\")");
+		query.push(") NOLIMIT;");
+		query = query.join("");
+		let res = this.celonisMapper.performQueryAnalysis(analysisId, query);
+		let ret = CsvImporter.parseCSV(res);
+		let variants = {};
+		let i = 1;
+		while (i < ret.length) {
+			variants[ret[i][0]] = parseInt(ret[i][1]);
+			i++;
+		}
+		return variants;
+	}
+	
+	downloadPathsPerformance(analysisId, processConfigurationId=null, relationship="ANY_OCCURRENCE [ ] TO ANY_OCCURRENCE [ ]") {
+		if (analysisId == null) {
+			analysisId = this.celonisMapper.getFirstAnalysis();
+		}
+		let dataModel = this.celonisMapper.dataModels[this.celonisMapper.analysisDataModel[analysisId]];
+		let dataModelTables = this.celonisMapper.dataModelsTables[dataModel["id"]];
+		let processConfiguration = this.getProcessConfiguration(dataModel, processConfigurationId);
+		let activityTable = dataModelTables[processConfiguration["activityTableId"]];
+		let query = [];
+		query.push("TABLE(");
+		query.push("SOURCE ( \""+activityTable+"\".\""+processConfiguration.activityColumn+"\", "+relationship+" ), ");
+		query.push("TARGET ( \""+activityTable+"\".\""+processConfiguration.activityColumn+"\" ), ");
+		query.push("AVG ( SECONDS_BETWEEN ( SOURCE ( \""+activityTable+"\".\""+processConfiguration.timestampColumn+"\" ) , TARGET ( \""+activityTable+"\".\""+processConfiguration.timestampColumn+"\" ) ) )");
+		query.push(") NOLIMIT;");
+		query = query.join("");
+		let res = this.celonisMapper.performQueryAnalysis(analysisId, query);
+		let ret = CsvImporter.parseCSV(res);
+		let pathsPerformance = {};
+		let i = 1;
+		while (i < ret.length) {
+			pathsPerformance[[ret[i][0], ret[i][1]]] = parseFloat(ret[i][2]);
+			i++;
+		}
+		return pathsPerformance;
+	}
+	
+	downloadSojournTimes(analysisId, processConfigurationId=null, timestampColumn=null, startTimestampColumn=null) {
+		if (analysisId == null) {
+			analysisId = this.celonisMapper.getFirstAnalysis();
+		}
+		let dataModel = this.celonisMapper.dataModels[this.celonisMapper.analysisDataModel[analysisId]];
+		let dataModelTables = this.celonisMapper.dataModelsTables[dataModel["id"]];
+		let processConfiguration = this.getProcessConfiguration(dataModel, processConfigurationId);
+		let activityTable = dataModelTables[processConfiguration["activityTableId"]];
+		let query = [];
+		if (timestampColumn == null) {
+			timestampColumn = processConfiguration.timestampColumn;
+		}
+		if (startTimestampColumn == null) {
+			startTimestampColumn = processConfiguration.timestampColumn;
+		}
+		timestampColumn = "\""+activityTable+"\".\""+timestampColumn+"\"";
+		startTimestampColumn = "\""+activityTable+"\".\""+startTimestampColumn+"\"";
+		query.push("TABLE(");
+		query.push("\""+activityTable+"\".\""+processConfiguration.activityColumn+"\", ");
+		query.push("AVG(SECONDS_BETWEEN("+startTimestampColumn+", "+timestampColumn+")) ");
+		query.push(") NOLIMIT;");
+		query = query.join("");
+		let res = this.celonisMapper.performQueryAnalysis(analysisId, query);
+		let ret = CsvImporter.parseCSV(res);
+		let sojournTime = {};
+		let i = 1;
+		while (i < ret.length) {
+			sojournTime[ret[i][0]] = parseFloat(ret[i][1]);
+			i++;
+		}
+		return sojournTime;
+	}
+	
+	downloadAllCaseDurations(analysisId, processConfigurationId=null) {
+		if (analysisId == null) {
+			analysisId = this.celonisMapper.getFirstAnalysis();
+		}
+		let dataModel = this.celonisMapper.dataModels[this.celonisMapper.analysisDataModel[analysisId]];
+		let dataModelTables = this.celonisMapper.dataModelsTables[dataModel["id"]];
+		let processConfiguration = this.getProcessConfiguration(dataModel, processConfigurationId);
+		let activityTable = dataModelTables[processConfiguration["activityTableId"]];
+		let query = [];
+		query.push("TABLE(");
+		query.push("\""+activityTable+"\".\""+processConfiguration.caseIdColumn+"\", ");
+		query.push("MAX ( CALC_THROUGHPUT ( CASE_START TO CASE_END, REMAP_TIMESTAMPS ( \""+activityTable+"\".\""+processConfiguration.timestampColumn+"\" , SECONDS ) ) )");
+		query.push(") NOLIMIT;");
+		query = query.join("");
+		let res = this.celonisMapper.performQueryAnalysis(analysisId, query);
+		let ret = CsvImporter.parseCSV(res);
+		let caseDurations = [];
+		let i = 1;
+		while (i < ret.length) {
+			if (ret[i][1].length > 0) {
+				caseDurations.push(parseFloat(ret[i][1]));
+			}
+			else {
+				caseDurations.push(0);
+			}
+			i++;
+		}
+		return caseDurations;
+	}
+	
+	downloadFrequencyDfg(analysisId, processConfigurationId=null) {
+		if (analysisId == null) {
+			analysisId = this.celonisMapper.getFirstAnalysis();
+		}
+		let activities = this.downloadActivities(analysisId, processConfigurationId);
+		let startActivities = this.downloadStartActivities(analysisId, processConfigurationId);
+		let endActivities = this.downloadEndActivities(analysisId, processConfigurationId);
+		let pathsFrequency = this.downloadPathsFrequency(analysisId, processConfigurationId);
+		return new FrequencyDfg(activities, startActivities, endActivities, pathsFrequency);
+	}
+	
+	downloadPerformanceDfg(analysisId, processConfigurationId=null, timestampColumn=null, startTimestampColumn=null) {
+		if (analysisId == null) {
+			analysisId = this.celonisMapper.getFirstAnalysis();
+		}
+		let activities = this.downloadActivities(analysisId, processConfigurationId);
+		let startActivities = this.downloadStartActivities(analysisId, processConfigurationId);
+		let endActivities = this.downloadEndActivities(analysisId, processConfigurationId);
+		let pathsFrequency = this.downloadPathsFrequency(analysisId, processConfigurationId);
+		let pathsPerformance = this.downloadPathsPerformance(analysisId, processConfigurationId);
+		let sojournTimes = this.downloadSojournTimes(analysisId, processConfigurationId);
+		return new PerformanceDfg(activities, startActivities, endActivities, pathsFrequency, pathsPerformance, sojournTimes);
+	}
+}
+
+try {
+	require('../../pm4js.js');
+	global.Celonis1DWrapper = Celonis1DWrapper;
+	module.exports = {Celonis1DWrapper: Celonis1DWrapper};
+}
+catch (err) {
+	// not in Node
+}
+
+
+class CelonisNDWrapper {
+	constructor(celonisMapper) {
+		this.celonisMapper = celonisMapper;
+		this.celonis1Dwrapper = new Celonis1DWrapper(this.celonisMapper);
+	}
+	
+	getMVPmodel(analysisId) {
+		if (analysisId == null) {
+			analysisId = this.celonisMapper.getFirstAnalysis();
+		}
+		let dataModel = this.celonisMapper.dataModels[this.celonisMapper.analysisDataModel[analysisId]];
+		let dataModelTables = this.celonisMapper.dataModelsTables[dataModel["id"]];
+		let mvp = {};
+		for (let configuration of dataModel.processConfigurations) {
+			let activityTable = dataModelTables[configuration["activityTableId"]];
+			mvp[activityTable] = this.celonis1Dwrapper.downloadFrequencyDfg(analysisId, configuration.id);
+		}
+		return mvp;
+	}
+	
+	static uuidv4() {
+	  return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
+		var r = Math.random() * 16 | 0, v = c == 'x' ? r : (r & 0x3 | 0x8);
+		return v.toString(16);
+	  });
+	}
+	
+	static nodeUuid() {
+		let uuid = CelonisNDWrapper.uuidv4();
+		return "n"+uuid.replace(/-/g, "");
+	}
+	
+	static stringToColour(str) {
+	  var hash = 0;
+	  for (var i = 0; i < str.length; i++) {
+		hash = str.charCodeAt(i) + ((hash << 5) - hash);
+	  }
+	  var colour = '#';
+	  for (var i = 0; i < 3; i++) {
+		var value = (hash >> (i * 8)) & 0xFF;
+		colour += ('00' + value.toString(16)).substr(-2);
+	  }
+	  return colour;
+	}
+	
+	static visualizationMVP(mvp) {
+		let ret = [];
+		let activities = {};
+		let startNodes = {};
+		let endNodes = {};
+		ret.push("digraph G {");
+		for (let persp in mvp) {
+			let perspCol = CelonisNDWrapper.stringToColour(persp);
+			for (let act in mvp[persp].activities) {
+				if (!(act in activities)) {
+					let nodeUuid = CelonisNDWrapper.nodeUuid();
+					activities[act] = nodeUuid;
+					ret.push(nodeUuid+" [shape=box, label=\""+act+"\"]");
+				}
+			}
+			let startNodeUuid = CelonisNDWrapper.nodeUuid();
+			startNodes[persp] = startNodeUuid;
+			ret.push(startNodeUuid+" [shape=ellipse, label=\""+persp+"\", color=\""+perspCol+"\", style=filled, fillcolor=\""+perspCol+"\"]");
+			let endNodeUuid = CelonisNDWrapper.nodeUuid();
+			endNodes[persp] = endNodeUuid;
+			ret.push(endNodeUuid+" [shape=ellipse, label=\""+persp+"\", color=\""+perspCol+"\", style=filled, fillcolor=\""+perspCol+"\"]");
+		}
+
+		for (let persp in mvp) {
+			let perspCol = CelonisNDWrapper.stringToColour(persp);
+			for (let edge0 in mvp[persp].pathsFrequency) {
+				let edge = edge0.split(",");
+				ret.push(activities[edge[0]]+" -> "+activities[edge[1]]+" [color=\""+perspCol+"\", label=\"TO="+mvp[persp].pathsFrequency[edge0]+"\"]")
+			}
+			for (let act in mvp[persp].startActivities) {
+				ret.push(startNodes[persp]+" -> "+activities[act]+" [color=\""+perspCol+"\", label=\"TO="+mvp[persp].startActivities[act]+"\"]");
+			}
+			for (let act in mvp[persp].endActivities) {
+				ret.push(activities[act]+" -> "+endNodes[persp]+" [color=\""+perspCol+"\", label=\"TO="+mvp[persp].endActivities[act]+"\"]");
+			}
+		}
+		ret.push("}");
+		return ret.join("\n");
+	}
+}
+
+try {
+	require('../../pm4js.js');
+	global.CelonisNDWrapper = CelonisNDWrapper;
+	module.exports = {CelonisNDWrapper: CelonisNDWrapper};
+}
+catch (err) {
+	// not in Node
+}
+
+
+class AlignmentsDfgGraphvizVisualizer {
+	static uuidv4() {
+	  return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
+		var r = Math.random() * 16 | 0, v = c == 'x' ? r : (r & 0x3 | 0x8);
+		return v.toString(16);
+	  });
+	}
+	
+	static nodeUuid() {
+		let uuid = FrequencyDfgGraphvizVisualizer.uuidv4();
+		return "n"+uuid.replace(/-/g, "");
+	}
+	
+	static apply(frequencyDfg, alignedTraces) {
+		let smCount = {};
+		let mmCount = {};
+		let lmCount = {};
+		for (let act in frequencyDfg.activities) {
+			smCount[act] = 0;
+			mmCount[act] = 0;
+			lmCount[act] = 0;
+		}
+		for (let move0 in alignedTraces.movesUsage) {
+			let move = move0.split(";");
+			move[0] = move[0].substring(1, move[0].length);
+			move[1] = move[1].substring(0, move[1].length-1);
+			if (move[0] == move[1]) {
+				// sync
+				smCount[move[0]] = alignedTraces.movesUsage[move0];
+			}
+			else if (move[1] == ">>") {
+				lmCount[move[0]] = alignedTraces.movesUsage[move0];
+			}
+			else if (move[0] == ">>") {
+				mmCount[move[1]] = alignedTraces.movesUsage[move0];
+			}
+		}
+		let ret = [];
+		let uidMap = {};
+		ret.push("digraph G {");
+		for (let act in frequencyDfg.activities) {
+			let nUid = FrequencyDfgGraphvizVisualizer.nodeUuid();
+			uidMap[act] = nUid;
+			ret.push(nUid+" [shape=box, label=\""+act+"\nSM="+smCount[act]+";MM="+mmCount[act]+";LM="+lmCount[act]+"\"]");
+		}
+		let startNodeUid = FrequencyDfgGraphvizVisualizer.nodeUuid();
+		let endNodeUid = FrequencyDfgGraphvizVisualizer.nodeUuid();
+		ret.push(startNodeUid+" [shape=circle, label=\" \", style=filled, fillcolor=green]");
+		ret.push(endNodeUid+" [shape=circle, label=\" \", style=filled, fillcolor=orange]");
+		for (let sa in frequencyDfg.startActivities) {
+			let occ = frequencyDfg.startActivities[sa];
+			let penwidth = 0.5 + Math.log10(occ);
+			ret.push(startNodeUid+" -> "+uidMap[sa]+" [penwidth=\""+penwidth+"\"]");
+		}
+		for (let ea in frequencyDfg.endActivities) {
+			let occ = frequencyDfg.endActivities[ea];
+			let penwidth = 0.5 + Math.log10(occ);
+			ret.push(uidMap[ea]+" -> "+endNodeUid+" [penwidth=\""+penwidth+"\"]");
+		}
+		for (let arc in frequencyDfg.pathsFrequency) {
+			let act1 = arc.split(",")[0];
+			let act2 = arc.split(",")[1];
+			let occ = frequencyDfg.pathsFrequency[arc];
+			let penwidth = 0.5 + Math.log10(occ);
+			ret.push(uidMap[act1]+" -> "+uidMap[act2]+" [penwidth=\""+penwidth+"\"]");
+		}
+		ret.push("}");
+		return ret.join("\n");
+	}
+}
+
+try {
+	require('../../pm4js.js');
+	require('../../objects/dfg/frequency/obj.js');
+	module.exports = {AlignmentsDfgGraphvizVisualizer: AlignmentsDfgGraphvizVisualizer};
+	global.AlignmentsDfgGraphvizVisualizer = AlignmentsDfgGraphvizVisualizer;
+}
+catch (err) {
+	// not in node
+}
 
