@@ -5,6 +5,8 @@ function connectToCelonis() {
 		celonisUrl = document.getElementById("celonis_url").value;
 		celonisApi = document.getElementById("celonis_api").value;
 		celonisMapper = new CelonisMapper(celonisUrl, celonisApi);
+		celonis1DWrapper = new Celonis1DWrapper(celonisMapper);
+		celonisNDWrapper = new CelonisNDWrapper(celonisMapper);
 		fillDataModelSelectionUpload();
 	}
 	catch (err) {
