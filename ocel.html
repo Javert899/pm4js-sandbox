@@ -26,6 +26,7 @@
 		<script src="scripts/ocel/plotly-graphs.js"></script>
 		<script src="scripts/ocel/celonis_connection.js"></script>
 		<script src="scripts/ocel/celonis_download.js"></script>
+		<script src="scripts/ocel/celonis_upload.js"></script>
 		<link rel="stylesheet" href="static/bootstrap.min.css"></link>
 		<link rel="stylesheet" href="static/bootstrap-grid.min.css"></link>
 		<link rel="stylesheet" href="static/bootstrap-reboot.min.css"></link>
@@ -34,925 +35,934 @@
 		<link rel="stylesheet" href="static/fontawesome-all.min.css"></link>
 	</head>
 	<body>
-		<script type="text/javascript">
-			let selectedActivity = null;
-			let selectedOt = null;
-			let selectedEdge = null;
-			let visualization = null;
-			let celonisUrl = null;
-			let celonisApi = null;
-			let celonisMapper = null;
-			let celonis1DWrapper = null;
-			let celonisNDWrapper = null;
-		</script>
-		<div id="uploadPart" style="display: ">
-			<!--<img src="static/pads_rwth.png" /><br />
-			<h3>OC-DFG visualization</h3>
-			Welcome! Please upload an object-centric event log in the OCEL-XML and/or the OCEL-JSON formats.
-			-->
-			<div class=" h-100 d-flex justify-content-center align-items-center">
-				<div>
-					<img src="static/ocpm.png"></img>
-					<div style="height: 5%;">
-					</div>
-					<div style="text-align: center;">
-						<div>OC-PM is a novel application for object-centric process mining.</div>
-						<div>Logs in the JSON/XML-OCEL formats can be ingested,
-						and advanced visualizations/statistics are provided.</div>
-						<div>Please start by uploading an event log in the application.</div>
-					</div>
-					
-					<div id="drop_zone" ondrop="handleFileSelect2(event)" ondragover="allowDrop(event)" style="height: 25%; width: 100%" class="d-flex justify-content-center align-items-center">
-					  <p>Drag an object-centric event log to this drop zone ...</p>
-					</div>
+		<div id="mainViewNoLoader" style="z-index: 100; display: ">
+			<script type="text/javascript">
+				let selectedActivity = null;
+				let selectedOt = null;
+				let selectedEdge = null;
+				let visualization = null;
+				let celonisUrl = null;
+				let celonisApi = null;
+				let celonisMapper = null;
+				let celonis1DWrapper = new Celonis1DWrapper(null);
+				let celonisNDWrapper = new CelonisNDWrapper(null);
+			</script>
+			<div id="uploadPart" style="display: ">
+				<!--<img src="static/pads_rwth.png" /><br />
+				<h3>OC-DFG visualization</h3>
+				Welcome! Please upload an object-centric event log in the OCEL-XML and/or the OCEL-JSON formats.
+				-->
+				<div class=" h-100 d-flex justify-content-center align-items-center">
+					<div>
+						<img src="static/ocpm.png"></img>
+						<div style="height: 5%;">
+						</div>
+						<div style="text-align: center;">
+							<div>OC-PM is a novel application for object-centric process mining.</div>
+							<div>Logs in the JSON/XML-OCEL formats can be ingested,
+							and advanced visualizations/statistics are provided.</div>
+							<div>Please start by uploading an event log in the application.</div>
+						</div>
+						
+						<div id="drop_zone" ondrop="handleFileSelect2(event)" ondragover="allowDrop(event)" style="height: 25%; width: 100%" class="d-flex justify-content-center align-items-center">
+						  <p>Drag an object-centric event log to this drop zone ...</p>
+						</div>
 
-					<div id="initial_upload" style="height: 20%; width: 100%; display: " class="d-flex justify-content-center align-items-center">
-						... Or upload it using the following button: &nbsp;&nbsp;&nbsp; <input type="file" id="upload" />
-					</div>
-					
-					<div id="celonis_connection_parameters" style="width: 100%; display: " style="text-align: center;">
-						<div>.. Or connect to Celonis and retrieve an analysis!</div>
-						<div>Celonis URL: <input id="celonis_url" type="text"></input> Celonis API: <input id="celonis_api" type="text"></input> <button class="btn btn-primary" onclick="javascript:connectToCelonis()">Connect</button></div>
-					</div>
+						<div id="initial_upload" style="height: 20%; width: 100%; display: " class="d-flex justify-content-center align-items-center">
+							... Or upload it using the following button: &nbsp;&nbsp;&nbsp; <input type="file" id="upload" />
+						</div>
+						
+						<div id="celonis_connection_parameters" style="width: 100%; display: " style="text-align: center;">
+							<div>.. Or connect to Celonis and retrieve an analysis!</div>
+							<div>Celonis URL: <input id="celonis_url" type="text"></input> Celonis API: <input id="celonis_api" type="text"></input> <button class="btn btn-primary" onclick="javascript:connectToCelonis()">Connect</button></div>
+						</div>
 
-					<div id="celonis_waiting_circle" style="display: none; text-align: center;">
-						<div>Please select the analysis to download:</div>
-						<div>
-							<select name="dataModelSelectionUpload" id="dataModelSelectionUpload">
-								
-							</select>
-							<button class="btn btn-primary" onclick="javascript:downloadDataModelFromCelonis()">Download</button>
+						<div id="celonis_waiting_circle" style="display: none; text-align: center;">
+							<div>Please select the analysis to download:</div>
+							<div>
+								<select name="dataModelSelectionUpload" id="dataModelSelectionUpload">
+									
+								</select>
+								<button class="btn btn-primary" onclick="javascript:downloadDataModelFromCelonis()">Download</button>
+							</div>
 						</div>
 					</div>
 				</div>
 			</div>
-		</div>
-		<div id="mainApplication" style="display: none" class="container-fluid">
-			<div id="header" style="background-color:" class="border-bottom">
-				<nav id="navigationHeader" class="navigation navigation-justified" style="background-image: url('static/top-background.png'); background-size:100% 100%;">
-					<div class="navigation-header">
+			<div id="mainApplication" style="display: none" class="container-fluid">
+				<div id="header" style="background-color:" class="border-bottom">
+					<nav id="navigationHeader" class="navigation navigation-justified" style="background-image: url('static/top-background.png'); background-size:100% 100%;">
+						<div class="navigation-header">
 
-					</div>
-					<div class="navigation-body">		
-						<ul class="navigation-menu">
-							<li class="navigation-item">
-								<a href="ocel.html"><img src="static/ocpm_red.png"></img></a>&nbsp;&nbsp;&nbsp;&nbsp;
-							</li>
-							<li class="navigation-item">
-								<a class="navigation-link" href="javascript:showProcessModelPage()"><i class="fas fa-project-diagram"></i>&nbsp;Process Schema</a>
-							</li>
+						</div>
+						<div class="navigation-body">		
+							<ul class="navigation-menu">
+								<li class="navigation-item">
+									<a href="ocel.html"><img src="static/ocpm_red.png"></img></a>&nbsp;&nbsp;&nbsp;&nbsp;
+								</li>
+								<li class="navigation-item">
+									<a class="navigation-link" href="javascript:showProcessModelPage()"><i class="fas fa-project-diagram"></i>&nbsp;Process Schema</a>
+								</li>
+								
+								<li class="navigation-item">
+									<a class="navigation-link" href="javascript:showEventsList()"><i class="fas fa-atom"></i>Events</a>
+								</li>
+								
+								<li class="navigation-item">
+									<a class="navigation-link" href="javascript:showObjectsList()"><i class="fas fa-database"></i>&nbsp;Objects</a>
+								</li>
+								
+								<li class="navigation-item">
+									<a class="navigation-link" href="javascript:showExecutions()"><i class="fab fa-mixer"></i>&nbsp;Executions</a>
+								</li>
+								
+								<li class="navigation-item">
+									<a class="navigation-link" href="javascript:showGraphs()"><i class="fas fa-chart-pie"></i>&nbsp;Statistics</a>
+								</li>
+								
+								<li class="navigation-item">
+									<a class="navigation-link" href="javascript:showConformance()"><i class="fas fa-bell"></i>&nbsp;Conformance</a>
+								</li>
 							
-							<li class="navigation-item">
-								<a class="navigation-link" href="javascript:showEventsList()"><i class="fas fa-atom"></i>Events</a>
-							</li>
-							
-							<li class="navigation-item">
-								<a class="navigation-link" href="javascript:showObjectsList()"><i class="fas fa-database"></i>&nbsp;Objects</a>
-							</li>
-							
-							<li class="navigation-item">
-								<a class="navigation-link" href="javascript:showExecutions()"><i class="fab fa-mixer"></i>&nbsp;Executions</a>
-							</li>
-							
-							<li class="navigation-item">
-								<a class="navigation-link" href="javascript:showGraphs()"><i class="fas fa-chart-pie"></i>&nbsp;Statistics</a>
-							</li>
-							
-							<li class="navigation-item">
-								<a class="navigation-link" href="javascript:showConformance()"><i class="fas fa-bell"></i>&nbsp;Conformance</a>
-							</li>
-						
-							<li class="navigation-item">
-								<a class="navigation-link" href="#"><i class="fas fa-download"></i>&nbsp;Download Log</a>
-								<div class="navigation-megamenu">
-									<div class="navigation-megamenu-container">
-										<div class="navigation-row">
-											<div><button id="downloadJsonOcel" onclick="downloadJsonOcel()" class="btn btn-primary">Download JSON Ocel</button>&nbsp;</div>
-											<div><button id="downloadXmlOcel" onclick="downloadXmlOcel()" class="btn btn-primary">Download XML Ocel</button>&nbsp;</div>
-											<div>
-												Flattening OT: <select id="flatteningOt" class="form-select">
-												</select>
-												<button id="flattenEventLog" onclick="flattenEventLog()" class="btn btn-primary">Flatten (XES)&nbsp;</button>
+								<li class="navigation-item">
+									<a class="navigation-link" href="#"><i class="fas fa-download"></i>&nbsp;Download Log</a>
+									<div class="navigation-megamenu">
+										<div class="navigation-megamenu-container">
+											<div class="navigation-row">
+												<div><button id="downloadJsonOcel" onclick="downloadJsonOcel()" class="btn btn-primary">Download JSON Ocel</button>&nbsp;</div>
+												<div><button id="downloadXmlOcel" onclick="downloadXmlOcel()" class="btn btn-primary">Download XML Ocel</button>&nbsp;</div>
+												<button id="celonisUploadOcel" onclick="uploadEntireToCelonis()" class="btn btn-primary" style="display: none">Celonis Upload&nbsp;</button>
+												<div>
+													Flattening OT: <select id="flatteningOt" class="form-select">
+													</select>
+													<button id="flattenEventLog" onclick="flattenEventLog()" class="btn btn-primary">Flatten (XES)&nbsp;</button>
+													<button id="flattenEventLogUploadCelonis" onclick="uploadFlattenedToCelonis()" class="btn btn-primary" style="display: none">Flattened to Celonis&nbsp;</button>
+												</div>
 											</div>
 										</div>
 									</div>
+								</li>
+							</ul>
+						</div>
+					</nav>
+				</div>
+				<div id="processModelPage" style="display:; overflow: hidden">
+					<div class="row" style="height: 85%">
+						<!-- style="background-image: url('static/left-background.png'); background-size:100% 100%;"-->
+						<div class="col-2 align-self-center text-center">
+							<div class="panel panel-default">
+								<div class="panel-heading"><h4>Statistics</h4></div>
+								<div class="panel-body">
+									<div>N. Events:</div>
+									<div id="numEvents0">
+									<span id="numEvents" style="font-family: geneva; font-weight: bold; font-size: 18pt">0</span>/<span id="numEventsOriginal" style="font-family: geneva; font-weight: bold; font-size: 18pt">0</span>
+									</div>
+									<div>N. Unique Objects:</div>
+									<div id="numUniqueObjects0">
+									<span id="numUniqObjects" style="font-family: geneva; font-weight: bold; font-size: 18pt">0</span>/<span id="numUniqObjectsOriginal" style="font-family: geneva; font-weight: bold; font-size: 18pt">0</span>
+									</div>
+									<div>N. Total Objects:</div>
+									<div id="numTotalObjects0">
+									<span id="numTotalObjects" style="font-family: geneva; font-weight: bold; font-size: 18pt">0</span>/<span id="numTotalObjectsOriginal" style="font-family: geneva; font-weight: bold; font-size: 18pt">0</span>
+									</div>
 								</div>
-							</li>
+							</div>
+							<div>&nbsp;</div>
+							<div class="panel panel-default">
+								<div class="panel-heading"><h4>Sliders</h4></div>
+								<div class="panel-body">
+									<div>% of Activities:</div>
+									<div><input id="af_slider" type="range" min="0" max="100" value="70" class="slider form-range"></div>
+									<div>% of Paths:</div>
+									<div><input id="pf_slider" type="range" min="0" max="100" value="70" class="slider form-range"></div>
+									<div>&nbsp;</div>
+									<div><button id="apply_changes" onclick="doVisualization()" class="btn btn-primary">Apply Changes</button></div>
+								</div>
+							</div>
+						</div>
+						<div class="col-10 border-left">
+							<div id="graphContainerHeader">
+								<nav id="navigationGraph" class="navigation navigation-justified border-bottom">
+									<div class="navigation-header">
+
+									</div>
+									<div class="navigation-body">		
+										<ul class="navigation-menu">
+
+											<li class="navigation-item">
+												<a class="navigation-link" href="#"><i class="fas fa-cog"></i>&nbsp;Options</a>
+												<div class="navigation-megamenu">
+													<div class="navigation-megamenu-container">
+														<div class="navigation-row">
+															<div>Visualization:
+															<select id="visualizationType" class="form-select">
+																<option value="dfg" selected>OC-DFG</option>
+																<option value="petriNet">OC-Petri Net</option>
+															</select></div>
+															<div>Annotation:
+															<select id="annotationSelector" class="form-select">
+																<option id="events" value="0">E/EC</option>
+																<option id="unique_objects" value="1" selected>UO</option>
+																<option id="total_objects" value="2">TO</option>
+															</select></div>
+															<div><button id="apply_changes2" onclick="doVisualization()" class="btn btn-primary">Apply Changes</button></div>
+														</div>
+													</div>
+												</div>
+											</li>
+										
+											<li class="navigation-item">
+												<a class="navigation-link" href="#"><i class="fab fa-superpowers"></i>&nbsp;Object Types</a>
+												<div class="navigation-megamenu">
+													<div class="navigation-megamenu-container">
+														<div class="navigation-row">
+															<div>
+															Select the object types: <select id="objectTypes" multiple style="height: 40px" class="form-select">
+															</select></div>
+															<div>
+															<button id="filterObjectTypes" onclick="filterObjectTypes()" class="btn btn-primary">Filter on Obj Types</button></div>
+															<div></div>
+														</div>
+													</div>
+												</div>
+											</li>
+											
+											<li class="navigation-item">
+												<a class="navigation-link" href="#"><i class="fas fa-filter"></i>&nbsp;Filters</a>
+												<div class="navigation-megamenu">
+													<div class="navigation-megamenu-container">
+														<div class="navigation-row">
+															Filters:
+															<span id="filtersList" style="font-weight: bold">
+																No filter is applied currently.&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+															</span>
+															<button id="reset_filters" onclick="resetFilters()" class="btn btn-primary">Reset All Filters</button>
+														</div>
+													</div>
+												</div>
+											</li>
+											
+										</ul>
+									</div>
+								</nav>
+							</div>
+							<div id="graphContainer"></div>
+						</div>
+						<ul id="menu" style="display: none">
 						</ul>
 					</div>
-				</nav>
-			</div>
-			<div id="processModelPage" style="display:; overflow: hidden">
-				<div class="row" style="height: 85%">
-					<!-- style="background-image: url('static/left-background.png'); background-size:100% 100%;"-->
-					<div class="col-2 align-self-center text-center">
-						<div class="panel panel-default">
-							<div class="panel-heading"><h4>Statistics</h4></div>
-							<div class="panel-body">
-								<div>N. Events:</div>
-								<div id="numEvents0">
-								<span id="numEvents" style="font-family: geneva; font-weight: bold; font-size: 18pt">0</span>/<span id="numEventsOriginal" style="font-family: geneva; font-weight: bold; font-size: 18pt">0</span>
-								</div>
-								<div>N. Unique Objects:</div>
-								<div id="numUniqueObjects0">
-								<span id="numUniqObjects" style="font-family: geneva; font-weight: bold; font-size: 18pt">0</span>/<span id="numUniqObjectsOriginal" style="font-family: geneva; font-weight: bold; font-size: 18pt">0</span>
-								</div>
-								<div>N. Total Objects:</div>
-								<div id="numTotalObjects0">
-								<span id="numTotalObjects" style="font-family: geneva; font-weight: bold; font-size: 18pt">0</span>/<span id="numTotalObjectsOriginal" style="font-family: geneva; font-weight: bold; font-size: 18pt">0</span>
-								</div>
-							</div>
-						</div>
-						<div>&nbsp;</div>
-						<div class="panel panel-default">
-							<div class="panel-heading"><h4>Sliders</h4></div>
-							<div class="panel-body">
-								<div>% of Activities:</div>
-								<div><input id="af_slider" type="range" min="0" max="100" value="70" class="slider form-range"></div>
-								<div>% of Paths:</div>
-								<div><input id="pf_slider" type="range" min="0" max="100" value="70" class="slider form-range"></div>
-								<div>&nbsp;</div>
-								<div><button id="apply_changes" onclick="doVisualization()" class="btn btn-primary">Apply Changes</button></div>
-							</div>
-						</div>
-					</div>
-					<div class="col-10 border-left">
-						<div id="graphContainerHeader">
-							<nav id="navigationGraph" class="navigation navigation-justified border-bottom">
-								<div class="navigation-header">
-
-								</div>
-								<div class="navigation-body">		
-									<ul class="navigation-menu">
-
-										<li class="navigation-item">
-											<a class="navigation-link" href="#"><i class="fas fa-cog"></i>&nbsp;Options</a>
-											<div class="navigation-megamenu">
-												<div class="navigation-megamenu-container">
-													<div class="navigation-row">
-														<div>Visualization:
-														<select id="visualizationType" class="form-select">
-															<option value="dfg" selected>OC-DFG</option>
-															<option value="petriNet">OC-Petri Net</option>
-														</select></div>
-														<div>Annotation:
-														<select id="annotationSelector" class="form-select">
-															<option id="events" value="0">E/EC</option>
-															<option id="unique_objects" value="1" selected>UO</option>
-															<option id="total_objects" value="2">TO</option>
-														</select></div>
-														<div><button id="apply_changes2" onclick="doVisualization()" class="btn btn-primary">Apply Changes</button></div>
-													</div>
-												</div>
-											</div>
-										</li>
-									
-										<li class="navigation-item">
-											<a class="navigation-link" href="#"><i class="fab fa-superpowers"></i>&nbsp;Object Types</a>
-											<div class="navigation-megamenu">
-												<div class="navigation-megamenu-container">
-													<div class="navigation-row">
-														<div>
-														Select the object types: <select id="objectTypes" multiple style="height: 40px" class="form-select">
-														</select></div>
-														<div>
-														<button id="filterObjectTypes" onclick="filterObjectTypes()" class="btn btn-primary">Filter on Obj Types</button></div>
-														<div></div>
-													</div>
-												</div>
-											</div>
-										</li>
-										
-										<li class="navigation-item">
-											<a class="navigation-link" href="#"><i class="fas fa-filter"></i>&nbsp;Filters</a>
-											<div class="navigation-megamenu">
-												<div class="navigation-megamenu-container">
-													<div class="navigation-row">
-														Filters:
-														<span id="filtersList" style="font-weight: bold">
-															No filter is applied currently.&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-														</span>
-														<button id="reset_filters" onclick="resetFilters()" class="btn btn-primary">Reset All Filters</button>
-													</div>
-												</div>
-											</div>
-										</li>
-										
-									</ul>
-								</div>
-							</nav>
-						</div>
-						<div id="graphContainer"></div>
-					</div>
-					<ul id="menu" style="display: none">
-					</ul>
-				</div>
-				<script type="text/javascript">
-					var navigationGraph = null;
-					var conformanceNavigation = null;
-					var allFilters = [];
-										
-					function doVisualization(initNavGraph=true) {
-						let af = document.getElementById("af_slider").value / 100.0;
-						let pf = document.getElementById("pf_slider").value / 100.0;
-						let annotation = parseInt(document.getElementById("annotationSelector").value);
-						visualization.ACTIVITY_FREQUENCY = af;
-						visualization.PATHS_FREQUENCY = pf;
-						visualization.IDX = annotation;
-						visualization.displayType = document.getElementById("visualizationType").value;
-						visualization.represent();
-						if (navigationGraph == null && initNavGraph) {
-							navigationGraph = new Navigation(document.getElementById("navigationGraph"));
-							navigationGraph = 1;
+					<script type="text/javascript">
+						var navigationGraph = null;
+						var conformanceNavigation = null;
+						var allFilters = [];
+											
+						function doVisualization(initNavGraph=true) {
+							let af = document.getElementById("af_slider").value / 100.0;
+							let pf = document.getElementById("pf_slider").value / 100.0;
+							let annotation = parseInt(document.getElementById("annotationSelector").value);
+							visualization.ACTIVITY_FREQUENCY = af;
+							visualization.PATHS_FREQUENCY = pf;
+							visualization.IDX = annotation;
+							visualization.displayType = document.getElementById("visualizationType").value;
+							visualization.represent();
+							if (navigationGraph == null && initNavGraph) {
+								navigationGraph = new Navigation(document.getElementById("navigationGraph"));
+								navigationGraph = 1;
+							}
 						}
-					}
-					
-					function resetFilters() {
-						resetPageFilters();
-						visualization.resetFilters();
-						doVisualization(false);
-					}
-					
-					function resetPageFilters() {
-						allFilters = [];
-						let filtersContainer = document.getElementById("filtersList");
-						filtersContainer.innerHTML = "No filter is applied currently.&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;";
-					}
-					
-					function deleteFilter(index) {
-						allFilters.splice(index, 1);
-						setFilters();
-						doVisualization(false);
-					}
-
-					function setFilters() {
-						visualization.resetFilters();
-						for (let filter of allFilters) {
-							addFilter(filter[0], filter[1], false);
+						
+						function resetFilters() {
+							resetPageFilters();
+							visualization.resetFilters();
+							doVisualization(false);
 						}
-						setFiltersOnPage();
-					}
-					
-					function addFilter(filterDescription, filterMethod, addToPage=true) {
-						if (addToPage) {
-							this.allFilters.push([filterDescription, filterMethod]);
-						}
-						setFiltersOnPage();
-						return eval(filterMethod);
-					}
-					
-					function setFiltersOnPage() {
-						let filtersContainer = document.getElementById("filtersList");
-						if (allFilters.length == 0) {
+						
+						function resetPageFilters() {
+							allFilters = [];
+							let filtersContainer = document.getElementById("filtersList");
 							filtersContainer.innerHTML = "No filter is applied currently.&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;";
 						}
-						else {
-							filtersContainer.innerHTML = "";
-							for (let filterId in allFilters) {
-								let filterLi = document.createElement("div");
-								filtersContainer.appendChild(filterLi);
-								filterLi.innerHTML = allFilters[filterId][0];
-								let cancelFilter = document.createElement("a");
-								cancelFilter.href = "javascript:deleteFilter("+filterId+")";
-								cancelFilter.innerHTML = "<i class=\"fas fa-trash\"></i>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;";
-								filterLi.appendChild(cancelFilter);
-							}
+						
+						function deleteFilter(index) {
+							allFilters.splice(index, 1);
+							setFilters();
+							doVisualization(false);
 						}
-					}
-					
-					function downloadJsonOcel() {
-						let jsonStri = JsonOcelExporter.exportLog(visualization.model.ocel);
-						download(jsonStri, "obj-centr-log.jsonocel", "text/json");
-					}
-					
-					function downloadXmlOcel() {
-						let xmlStri = XmlOcelExporter.exportLog(visualization.model.ocel);
-						download(xmlStri, "obj-centr-log.xmlocel", "text/xml");
-					}
-					
-					function flattenEventLog() {
-						let ot = document.getElementById("flatteningOt").value;
-						let eventLog = OcelFlattening.flatten(visualization.model.ocel, ot);
-						let xmlStri = XesExporter.apply(eventLog);
-						download(xmlStri, "flattened.xes", "text/xml");
-					}
-					
-					function expandActivity() {
-						visualization.doExpandActivity(selectedActivity);
-						visualization.represent();
-					}
-					
-					function expandEdge() {
-						visualization.expandedEdges[selectedEdge] = 0;
-						visualization.represent();
-					}
-					
-					function seeRelatedObjAct() {
-						let relObj = visualization.model.getRelObjActivity(selectedActivity, selectedOt);
-						let stru = relObj.toString();
-						if (stru.length > 1000) {
-							stru = stru.substring(0, 999) + "...";
-						}
-						Swal.fire({title: "Related Objects", confirmButton: "ok", html: stru});
-					}
-					
-					function filterRelatedObjectsActivity() {
-						return addFilter("<i class=\"fas fa-plus-circle\"></i>Related objects ("+selectedActivity+";"+selectedOt+")&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;", "filterRelatedObjectsActivitySpecific(\""+selectedActivity+"\", \""+selectedOt+"\")");
-					}
-					
-					function filterNonRelatedObjectsActivity() {
-						return addFilter("<i class=\"fas fa-minus-circle\"></i>&nbsp;Non related objects ("+selectedActivity+";"+selectedOt+")&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;", "filterNonRelatedObjectsActivitySpecific(\""+selectedActivity+"\", \""+selectedOt+"\")");
-					}
-					
-					function filterNonStartingWith() {
-						return addFilter("<i class=\"fas fa-chevron-right\"></i>&nbsp;Non starting with ("+selectedActivity+";"+selectedOt+")&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;", "filterNonStartingWithSpecific(\""+selectedActivity+"\", \""+selectedOt+"\")");
-					}
-					
-					function filterNonEndingWith() {
-						return addFilter("<i class=\"fas fa-chevron-left\"></i>&nbsp;Non ending with ("+selectedActivity+";"+selectedOt+")&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;", "filterNonEndingWithSpecific(\""+selectedActivity+"\", \""+selectedOt+"\")");
-					}
-					
-					function filterRelatedObjectsEdge() {
-						return addFilter("<i class=\"fas fa-user-plus\"></i>&nbsp;Related objects to edge ("+selectedEdge[0]+"->"+selectedEdge[1]+"@"+selectedEdge[2]+")&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;", "filterRelatedObjectsEdgeSpecific(\""+selectedEdge[0]+"\", \""+selectedEdge[1]+"\", \""+selectedEdge[2]+"\")");
-					}
-					
-					function filterNonRelatedObjectsEdge() {
-						return addFilter("<i class=\"fas fa-user-minus\"></i>&nbsp;Non related objects to edge ("+selectedEdge[0]+"->"+selectedEdge[1]+"@"+selectedEdge[2]+")&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;", "filterNonRelatedObjectsEdgeSpecific(\""+selectedEdge[0]+"\", \""+selectedEdge[1]+"\", \""+selectedEdge[2]+"\")");
-					}
-					
-					function filterObjectTypes() {
-						let selectedOptions = [];
-						for (let option of document.getElementById("objectTypes").children) {
-							if (option.selected) {
-								selectedOptions.push(option.value);
-							}
-						}
-						return addFilter("<i class=\"fab fa-superpowers\"></i>&nbsp;Object types filter&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;", "filterObjectsTypesSpecific(\""+selectedOptions.toString()+"\")");
-					}
-					
-					function filterRelatedObjectsActivitySpecific(selectedActivity, selectedOt) {
-						if (selectedOt == "null") {
-							selectedOt = null;
-						}
-						let relObj = visualization.model.getRelObjActivity(selectedActivity, selectedOt);
-						let filteredModel = visualization.model.filterRelatedObjects(relObj);
-						visualization.setFilteredModel(filteredModel);
-					}
-					
-					function filterNonRelatedObjectsActivitySpecific(selectedActivity, selectedOt) {
-						if (selectedOt == "null") {
-							selectedOt = null;
-						}
-						let relObj = visualization.model.getRelObjActivity(selectedActivity, selectedOt);
-						let allObjOt = Object.keys(visualization.model.otObjectsView[selectedOt].objectsIds);
-						let difference = allObjOt.filter(x => !relObj.includes(x));
-						let filteredModel = visualization.model.filterNonRelatedObjects(difference, relObj);
-						visualization.setFilteredModel(filteredModel); 
-					}
-					
-					function filterNonStartingWithSpecific(selectedActivity, selectedOt) {
-						if (selectedOt == "null") {
-							selectedOt = null;
-						}
-						let startingWith = visualization.model.otObjectsView[selectedOt].getStartingWith(selectedActivity);
-						let allObjOt = Object.keys(visualization.model.otObjectsView[selectedOt].objectsIds);
-						let difference = allObjOt.filter(x => !startingWith.includes(x));
-						let filteredModel = visualization.model.filterNonRelatedObjects(difference, startingWith);
-						visualization.setFilteredModel(filteredModel);
-					}
-					
-					function filterNonEndingWithSpecific(selectedActivity, selectedOt) {
-						if (selectedOt == "null") {
-							selectedOt = null;
-						}
-						let endingWith = visualization.model.otObjectsView[selectedOt].getEndingWith(selectedActivity);
-						let allObjOt = Object.keys(visualization.model.otObjectsView[selectedOt].objectsIds);
-						let difference = allObjOt.filter(x => !endingWith.includes(x));
-						let filteredModel = visualization.model.filterNonRelatedObjects(difference, endingWith);
-						visualization.setFilteredModel(filteredModel);
-					}
-					
-					function filterRelatedObjectsEdgeSpecific(sourceActivity, targetActivity, objectType) {
-						if (selectedOt == "null") {
-							selectedOt = null;
-						}
-						let relObj = visualization.model.getRelObjEdge([sourceActivity, targetActivity], objectType);
-						let filteredModel = visualization.model.filterRelatedObjects(relObj);
-						visualization.setFilteredModel(filteredModel);
-					}
-					
-					function filterNonRelatedObjectsEdgeSpecific(sourceActivity, targetActivity, objectType) {
-						if (selectedOt == "null") {
-							selectedOt = null;
-						}
-						let relObj = visualization.model.getRelObjEdge([selectedEdge[0], selectedEdge[1]], selectedEdge[2]);
-						let allObjOt = Object.keys(visualization.model.otObjectsView[selectedEdge[2]].objectsIds);
-						let difference = allObjOt.filter(x => !relObj.includes(x));
-						let filteredModel = visualization.model.filterNonRelatedObjects(difference, relObj);
-						visualization.setFilteredModel(filteredModel);
-					}
-					
-					function filterObjectsTypesSpecific(selectedOptions) {
-						selectedOptions = selectedOptions.split(",");
-						let filteredModel = visualization.model.filterObjectTypes(selectedOptions);
-						visualization.setFilteredModel(filteredModel);
-					}
-					
-					function seeRelatedObjEdge() {
-						let relObj = visualization.model.getRelObjEdge([selectedEdge[0], selectedEdge[1]], selectedEdge[2]);
-						let stru = relObj.toString();
-						if (stru.length > 1000) {
-							stru = stru.substring(0, 999) + "...";
-						}
-						Swal.fire({title: "Related Objects", confirmButton: "ok", html: stru});
-					}
-					
-					function callbackActivity(activity, ot) {
-						selectedActivity = activity;
-						selectedOt = ot;
-					}
-					
-					function callbackEdge(edge) {
-						selectedEdge = edge;
-					}
-					
-					function callbackStatistics(events, uo, to, originalEvents, originalUo, originalTo) {
-						document.getElementById("numEvents").innerHTML = events;
-						document.getElementById("numUniqObjects").innerHTML = uo;
-						document.getElementById("numTotalObjects").innerHTML = to;
-						document.getElementById("numEventsOriginal").innerHTML = originalEvents;
-						document.getElementById("numUniqObjectsOriginal").innerHTML = originalUo;
-						document.getElementById("numTotalObjectsOriginal").innerHTML = originalTo;
-					}
-					
-					function allowDrop(ev) {
-					  ev.preventDefault();
-					}
-					
-					function handleFileSelect2(evt) {
-						console.log(evt);
-						evt.preventDefault();
-						var files = evt.dataTransfer.files;
-						f = files[0];
-						var reader = new FileReader();
-						reader.onload = function(e) {
-							loadFileCommon(e, f);
-						}
-						reader.readAsText(f);
-					}
-					
-					function handleFileSelect(evt) {
-						var files = evt.target.files; // FileList object
-						// use the 1st file from the list
-						f = files[0];
-						var reader = new FileReader();
-						reader.onload = function(e) {
-							loadFileCommon(e, f);
-						}
-						reader.readAsText(f);
-					}
-					
-					function loadFileCommon(e, f) {
-						let contentStri = e.target.result;
-						if (f.name.endsWith(".xmlocel")) {
-							eventLog = XmlOcelImporter.importLog(contentStri);
-							createVisualization();
-						}
-						else {
-							eventLog = JsonOcelImporter.importLog(contentStri);
-							createVisualization();
-						}
-					}
-					
-					function createVisualization() {
-						document.getElementById("mainApplication").style.display = "";
-						document.getElementById("uploadPart").style.display = "none";
-						visualization = new OcdfgVisualization(new OcdfgModel(eventLog), "graphContainer");
-						visualization.callbackActivity = callbackActivity;
-						visualization.callbackEdge = callbackEdge;
-						visualization.callbackStatistics = callbackStatistics;
-						visualization.populateStatistics();
-						doVisualization();
-					}
-					
-					document.getElementById('upload').addEventListener('change', handleFileSelect, false);
-				</script>
-			</div>
-			<script type="text/javascript">
-				var numEvents = 0;
-				var currStart0 = 0;
-				var currEnd0 = 0;
-				var currStart = 0;
-				var currEnd = 0;
-				var pageSize = 500;
-			</script>
-			<div id="eventsListPage" style="display: none">
-				<p>The page shows the list of events of the log. Each event is distinguished by its fundamental properties (ID, activity and timestamp),
-				a list of related objects for each type, and values for some attributes. Clicking an object, it is possible to see the lifecycle
-				of the object.</p>
-				<div>
-					<b>Number of events:</b> <span id="numEventsEventsPage"></span>
-					&nbsp;&nbsp;<b>Current displayed range:</b> <span id="currStartEventsPage"></span>-<span id="currEndEventsPage"></span>
-					&nbsp;&nbsp;<button class="button" onclick="javascript:decreaseRange()">&#8592;</button><button class="button" onclick="javascript:increaseRange()">&#8594;</button>
-				</div>
-				<table id="eventsListTable" border="1"  class="table">
-				</table>
-			</div>
-			<div id="objectsListPage" style="display: none">
-				<p>The page shows the properties of the objects, after the selection of an object type. Each object is distinguished by the timestamp of the first
-				event of its lifecycle, the timestamp of the last event of its lifecycle, and the difference between them.</p>
-				<p>To start, please select an object type:
-				<select id="otObjListSelection" class="form-select">
-				</select>
-				<button id="showObjListOt" onclick="showObjListOt()" class="btn btn-primary">Show the list of Objects</button>
-				</p>
-				<div style="height: 80%; overflow-y: scroll">
-					<table id="objectsListTable" border="1" class="table">
-					</table>
-				</div>
-			</div>
-			<div id="executionsPage" style="display: none">
-				<p>An execution describes the connection between the lifecycle of different objects. Executions can be grouped together if they are equivalent in
-				the involved object types.</p>
-				<table id="executionsTable" border="1" class="table">
-				</table>
-			</div>
-			<div id="plotlyGraphsPage" style="display: none">
-				<div class="row" style="height: 85%">
-					<!--align-self-center text-center-->
-					<div class="col-2 border-right">
-						<h6>Select the statistic:</h6>
-						<div><i class="fas fa-chart-pie"></i>&nbsp;<a href="javascript:showSpecificGraph('plotlyOtGraph')">Objects per Type</a></div>
-						<div><i class="fas fa-chart-bar"></i>&nbsp;<a href="javascript:showSpecificGraph('plotlyActGraph')">Events per Activity</a></div>
-						<div><i class="fas fa-chart-bar"></i>&nbsp;<a href="javascript:showSpecificGraph('plotlyObjPerEveGraph')">N. Objects per Event</a></div>
-						<div><i class="fas fa-chart-bar"></i>&nbsp;<a href="javascript:showSpecificGraph('plotlyLifecycleLengthGraph')">Length of Object Lifecycle</a></div>
-						<div><i class="fas fa-chart-bar"></i>&nbsp;<a href="javascript:showSpecificGraph('plotlyEventsPerTimeGraph')">Events per Time</a></div>				
-						<div><i class="fas fa-box"></i>&nbsp;<a href="javascript:showSpecificGraph('plotlyLifecycleDurationGraph')">Lifecycle Duration (logarithmic)</a></div>
-						<div><i class="fas fa-chart-area"></i>&nbsp;<a href="javascript:showSpecificGraph('plotlyDottedChartColorActivity')">Dotted Chart (color: activity)</a></div>
-						<div><i class="fas fa-chart-area"></i>&nbsp;<a href="javascript:showSpecificGraph('plotlyDottedChartColorObjType')">Dotted Chart (color: object type)</a></div>				
-					</div>
-					<div class="col-10">
-						<div id="plotlyOtGraph" style="width: 100%; height: 100%; display: none">
-							
-						</div>
-						<div id="plotlyActGraph" style="width: 100%; height: 100%; display: none">
-							
-						</div>
-						<div id="plotlyObjPerEveGraph" style="width: 100%; height: 100%; display: none">
-							
-						</div>
-						<div id="plotlyLifecycleLengthGraph" style="width: 100%; height: 100%; display: none">
-							
-						</div>
-						<div id="plotlyLifecycleDurationGraph" style="width: 100%; height: 100%; display: none">
-							
-						</div>
-						<div id="plotlyEventsPerTimeGraph" style="width: 100%; height: 100%; display: none">
-							
-						</div>
-						<div id="plotlyDottedChartColorActivity" style="width: 100%; height: 100%; display: none">
-							
-						</div>
-						<div id="plotlyDottedChartColorObjType" style="width: 100%; height: 100%; display: none">
-							
-						</div>
-					</div>
-				</div>
-			</div>
-			<div id="conformancePage" style="display: none">
-				<nav id="conformanceNavigation" class="navigation navigation-justified border-bottom">
-					<div class="navigation-header">
 
+						function setFilters() {
+							visualization.resetFilters();
+							for (let filter of allFilters) {
+								addFilter(filter[0], filter[1], false);
+							}
+							setFiltersOnPage();
+						}
+						
+						function addFilter(filterDescription, filterMethod, addToPage=true) {
+							if (addToPage) {
+								this.allFilters.push([filterDescription, filterMethod]);
+							}
+							setFiltersOnPage();
+							return eval(filterMethod);
+						}
+						
+						function setFiltersOnPage() {
+							let filtersContainer = document.getElementById("filtersList");
+							if (allFilters.length == 0) {
+								filtersContainer.innerHTML = "No filter is applied currently.&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;";
+							}
+							else {
+								filtersContainer.innerHTML = "";
+								for (let filterId in allFilters) {
+									let filterLi = document.createElement("div");
+									filtersContainer.appendChild(filterLi);
+									filterLi.innerHTML = allFilters[filterId][0];
+									let cancelFilter = document.createElement("a");
+									cancelFilter.href = "javascript:deleteFilter("+filterId+")";
+									cancelFilter.innerHTML = "<i class=\"fas fa-trash\"></i>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;";
+									filterLi.appendChild(cancelFilter);
+								}
+							}
+						}
+						
+						function downloadJsonOcel() {
+							let jsonStri = JsonOcelExporter.exportLog(visualization.model.ocel);
+							download(jsonStri, "obj-centr-log.jsonocel", "text/json");
+						}
+						
+						function downloadXmlOcel() {
+							let xmlStri = XmlOcelExporter.exportLog(visualization.model.ocel);
+							download(xmlStri, "obj-centr-log.xmlocel", "text/xml");
+						}
+						
+						function flattenEventLog() {
+							let ot = document.getElementById("flatteningOt").value;
+							let eventLog = OcelFlattening.flatten(visualization.model.ocel, ot);
+							let xmlStri = XesExporter.apply(eventLog);
+							download(xmlStri, "flattened.xes", "text/xml");
+						}
+						
+						function expandActivity() {
+							visualization.doExpandActivity(selectedActivity);
+							visualization.represent();
+						}
+						
+						function expandEdge() {
+							visualization.expandedEdges[selectedEdge] = 0;
+							visualization.represent();
+						}
+						
+						function seeRelatedObjAct() {
+							let relObj = visualization.model.getRelObjActivity(selectedActivity, selectedOt);
+							let stru = relObj.toString();
+							if (stru.length > 1000) {
+								stru = stru.substring(0, 999) + "...";
+							}
+							Swal.fire({title: "Related Objects", confirmButton: "ok", html: stru});
+						}
+						
+						function filterRelatedObjectsActivity() {
+							return addFilter("<i class=\"fas fa-plus-circle\"></i>Related objects ("+selectedActivity+";"+selectedOt+")&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;", "filterRelatedObjectsActivitySpecific(\""+selectedActivity+"\", \""+selectedOt+"\")");
+						}
+						
+						function filterNonRelatedObjectsActivity() {
+							return addFilter("<i class=\"fas fa-minus-circle\"></i>&nbsp;Non related objects ("+selectedActivity+";"+selectedOt+")&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;", "filterNonRelatedObjectsActivitySpecific(\""+selectedActivity+"\", \""+selectedOt+"\")");
+						}
+						
+						function filterNonStartingWith() {
+							return addFilter("<i class=\"fas fa-chevron-right\"></i>&nbsp;Non starting with ("+selectedActivity+";"+selectedOt+")&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;", "filterNonStartingWithSpecific(\""+selectedActivity+"\", \""+selectedOt+"\")");
+						}
+						
+						function filterNonEndingWith() {
+							return addFilter("<i class=\"fas fa-chevron-left\"></i>&nbsp;Non ending with ("+selectedActivity+";"+selectedOt+")&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;", "filterNonEndingWithSpecific(\""+selectedActivity+"\", \""+selectedOt+"\")");
+						}
+						
+						function filterRelatedObjectsEdge() {
+							return addFilter("<i class=\"fas fa-user-plus\"></i>&nbsp;Related objects to edge ("+selectedEdge[0]+"->"+selectedEdge[1]+"@"+selectedEdge[2]+")&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;", "filterRelatedObjectsEdgeSpecific(\""+selectedEdge[0]+"\", \""+selectedEdge[1]+"\", \""+selectedEdge[2]+"\")");
+						}
+						
+						function filterNonRelatedObjectsEdge() {
+							return addFilter("<i class=\"fas fa-user-minus\"></i>&nbsp;Non related objects to edge ("+selectedEdge[0]+"->"+selectedEdge[1]+"@"+selectedEdge[2]+")&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;", "filterNonRelatedObjectsEdgeSpecific(\""+selectedEdge[0]+"\", \""+selectedEdge[1]+"\", \""+selectedEdge[2]+"\")");
+						}
+						
+						function filterObjectTypes() {
+							let selectedOptions = [];
+							for (let option of document.getElementById("objectTypes").children) {
+								if (option.selected) {
+									selectedOptions.push(option.value);
+								}
+							}
+							return addFilter("<i class=\"fab fa-superpowers\"></i>&nbsp;Object types filter&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;", "filterObjectsTypesSpecific(\""+selectedOptions.toString()+"\")");
+						}
+						
+						function filterRelatedObjectsActivitySpecific(selectedActivity, selectedOt) {
+							if (selectedOt == "null") {
+								selectedOt = null;
+							}
+							let relObj = visualization.model.getRelObjActivity(selectedActivity, selectedOt);
+							let filteredModel = visualization.model.filterRelatedObjects(relObj);
+							visualization.setFilteredModel(filteredModel);
+						}
+						
+						function filterNonRelatedObjectsActivitySpecific(selectedActivity, selectedOt) {
+							if (selectedOt == "null") {
+								selectedOt = null;
+							}
+							let relObj = visualization.model.getRelObjActivity(selectedActivity, selectedOt);
+							let allObjOt = Object.keys(visualization.model.otObjectsView[selectedOt].objectsIds);
+							let difference = allObjOt.filter(x => !relObj.includes(x));
+							let filteredModel = visualization.model.filterNonRelatedObjects(difference, relObj);
+							visualization.setFilteredModel(filteredModel); 
+						}
+						
+						function filterNonStartingWithSpecific(selectedActivity, selectedOt) {
+							if (selectedOt == "null") {
+								selectedOt = null;
+							}
+							let startingWith = visualization.model.otObjectsView[selectedOt].getStartingWith(selectedActivity);
+							let allObjOt = Object.keys(visualization.model.otObjectsView[selectedOt].objectsIds);
+							let difference = allObjOt.filter(x => !startingWith.includes(x));
+							let filteredModel = visualization.model.filterNonRelatedObjects(difference, startingWith);
+							visualization.setFilteredModel(filteredModel);
+						}
+						
+						function filterNonEndingWithSpecific(selectedActivity, selectedOt) {
+							if (selectedOt == "null") {
+								selectedOt = null;
+							}
+							let endingWith = visualization.model.otObjectsView[selectedOt].getEndingWith(selectedActivity);
+							let allObjOt = Object.keys(visualization.model.otObjectsView[selectedOt].objectsIds);
+							let difference = allObjOt.filter(x => !endingWith.includes(x));
+							let filteredModel = visualization.model.filterNonRelatedObjects(difference, endingWith);
+							visualization.setFilteredModel(filteredModel);
+						}
+						
+						function filterRelatedObjectsEdgeSpecific(sourceActivity, targetActivity, objectType) {
+							if (selectedOt == "null") {
+								selectedOt = null;
+							}
+							let relObj = visualization.model.getRelObjEdge([sourceActivity, targetActivity], objectType);
+							let filteredModel = visualization.model.filterRelatedObjects(relObj);
+							visualization.setFilteredModel(filteredModel);
+						}
+						
+						function filterNonRelatedObjectsEdgeSpecific(sourceActivity, targetActivity, objectType) {
+							if (selectedOt == "null") {
+								selectedOt = null;
+							}
+							let relObj = visualization.model.getRelObjEdge([selectedEdge[0], selectedEdge[1]], selectedEdge[2]);
+							let allObjOt = Object.keys(visualization.model.otObjectsView[selectedEdge[2]].objectsIds);
+							let difference = allObjOt.filter(x => !relObj.includes(x));
+							let filteredModel = visualization.model.filterNonRelatedObjects(difference, relObj);
+							visualization.setFilteredModel(filteredModel);
+						}
+						
+						function filterObjectsTypesSpecific(selectedOptions) {
+							selectedOptions = selectedOptions.split(",");
+							let filteredModel = visualization.model.filterObjectTypes(selectedOptions);
+							visualization.setFilteredModel(filteredModel);
+						}
+						
+						function seeRelatedObjEdge() {
+							let relObj = visualization.model.getRelObjEdge([selectedEdge[0], selectedEdge[1]], selectedEdge[2]);
+							let stru = relObj.toString();
+							if (stru.length > 1000) {
+								stru = stru.substring(0, 999) + "...";
+							}
+							Swal.fire({title: "Related Objects", confirmButton: "ok", html: stru});
+						}
+						
+						function callbackActivity(activity, ot) {
+							selectedActivity = activity;
+							selectedOt = ot;
+						}
+						
+						function callbackEdge(edge) {
+							selectedEdge = edge;
+						}
+						
+						function callbackStatistics(events, uo, to, originalEvents, originalUo, originalTo) {
+							document.getElementById("numEvents").innerHTML = events;
+							document.getElementById("numUniqObjects").innerHTML = uo;
+							document.getElementById("numTotalObjects").innerHTML = to;
+							document.getElementById("numEventsOriginal").innerHTML = originalEvents;
+							document.getElementById("numUniqObjectsOriginal").innerHTML = originalUo;
+							document.getElementById("numTotalObjectsOriginal").innerHTML = originalTo;
+						}
+						
+						function allowDrop(ev) {
+						  ev.preventDefault();
+						}
+						
+						function handleFileSelect2(evt) {
+							console.log(evt);
+							evt.preventDefault();
+							var files = evt.dataTransfer.files;
+							f = files[0];
+							var reader = new FileReader();
+							reader.onload = function(e) {
+								loadFileCommon(e, f);
+							}
+							reader.readAsText(f);
+						}
+						
+						function handleFileSelect(evt) {
+							var files = evt.target.files; // FileList object
+							// use the 1st file from the list
+							f = files[0];
+							var reader = new FileReader();
+							reader.onload = function(e) {
+								loadFileCommon(e, f);
+							}
+							reader.readAsText(f);
+						}
+						
+						function loadFileCommon(e, f) {
+							let contentStri = e.target.result;
+							if (f.name.endsWith(".xmlocel")) {
+								eventLog = XmlOcelImporter.importLog(contentStri);
+								createVisualization();
+							}
+							else {
+								eventLog = JsonOcelImporter.importLog(contentStri);
+								createVisualization();
+							}
+						}
+						
+						function createVisualization() {
+							document.getElementById("mainApplication").style.display = "";
+							document.getElementById("uploadPart").style.display = "none";
+							visualization = new OcdfgVisualization(new OcdfgModel(eventLog), "graphContainer");
+							visualization.callbackActivity = callbackActivity;
+							visualization.callbackEdge = callbackEdge;
+							visualization.callbackStatistics = callbackStatistics;
+							visualization.populateStatistics();
+							doVisualization();
+						}
+						
+						document.getElementById('upload').addEventListener('change', handleFileSelect, false);
+					</script>
+				</div>
+				<script type="text/javascript">
+					var numEvents = 0;
+					var currStart0 = 0;
+					var currEnd0 = 0;
+					var currStart = 0;
+					var currEnd = 0;
+					var pageSize = 500;
+				</script>
+				<div id="eventsListPage" style="display: none">
+					<p>The page shows the list of events of the log. Each event is distinguished by its fundamental properties (ID, activity and timestamp),
+					a list of related objects for each type, and values for some attributes. Clicking an object, it is possible to see the lifecycle
+					of the object.</p>
+					<div>
+						<b>Number of events:</b> <span id="numEventsEventsPage"></span>
+						&nbsp;&nbsp;<b>Current displayed range:</b> <span id="currStartEventsPage"></span>-<span id="currEndEventsPage"></span>
+						&nbsp;&nbsp;<button class="button" onclick="javascript:decreaseRange()">&#8592;</button><button class="button" onclick="javascript:increaseRange()">&#8594;</button>
 					</div>
-					<div class="navigation-body">
-						<ul class="navigation-menu">
-							
-							<li class="navigation-item">
-								<a class="navigation-link" href="javascript:showConformancePageNumObjects()"><i class="fas fa-sort-numeric-up-alt"></i>&nbsp;Number of Objects</a>
-							</li>
-							
-							<li class="navigation-item">
-								<a class="navigation-link" href="javascript:showConformancePageLifecycleObjects()"><i class="fas fa-life-ring"></i>&nbsp;Objects Lifecycle</a>
-							</li>
-							
-							<li class="navigation-item">
-								<a class="navigation-link" href="javascript:showConformancePageDurationsObjects()"><i class="fas fa-clock"></i>&nbsp;Objects Duration</a>
-							</li>							
-						</ul>
-					</div>
-				</nav>
-				<div id="conformanceCheckingNumObjects" style="display:">
-					<p>The page shows the objects of the given type which are related to events of the given activity in extraordinary number
-					(lower than avg - stdev, or higher than avg + stdev). It is offered a possibility to filter on the events related to such objects, to understand
-					the control flow in these situations.</p>
-					<table id="conformanceCheckingNumObjectsTable" class="table">
-						
+					<table id="eventsListTable" border="1"  class="table">
 					</table>
 				</div>
-				<div id="conformanceCheckingLifecycleObjects" style="display: none">
-					<p>The page shows the log skeleton constraints (default noise: 5%) that are violated by the objects of the given type. Each rule is reported
-					with a description, the overall number of violations, and a possibility to filter the events related to such objects.</p>
-					<table id="conformanceCheckingLifecycleObjectsTable" class="table">
-						
-					</table>
-				</div>
-				<div id="conformanceCheckingDurationObjects" style="display: none">
-					<p>The page identifies deviations in the duration of the lifecycle of the objects. Objects having an exceptional durations are here identified,
-					along with the number of deviations and a possibility to filter the events related to such objects.</p>
-					<table id="conformanceCheckingDurationObjectsTable" class="table">
-						
-					</table>
-				</div>
-			</div>
-			<div class="hover_bkgr_fricc">
-				<span class="helper"></span>
-				<div>
-					<div class="popupCloseButton">&times;</div>
-					<h4><b>Lifecycle of the Object:</b> <span id="popupObjId"></h4>
-					<div style="width: 100%; height: 85%; overflow: scroll">
-						<table id="customEventsListTable" border="1" class="table">
+				<div id="objectsListPage" style="display: none">
+					<p>The page shows the properties of the objects, after the selection of an object type. Each object is distinguished by the timestamp of the first
+					event of its lifecycle, the timestamp of the last event of its lifecycle, and the difference between them.</p>
+					<p>To start, please select an object type:
+					<select id="otObjListSelection" class="form-select">
+					</select>
+					<button id="showObjListOt" onclick="showObjListOt()" class="btn btn-primary">Show the list of Objects</button>
+					</p>
+					<div style="height: 80%; overflow-y: scroll">
+						<table id="objectsListTable" border="1" class="table">
 						</table>
 					</div>
 				</div>
+				<div id="executionsPage" style="display: none">
+					<p>An execution describes the connection between the lifecycle of different objects. Executions can be grouped together if they are equivalent in
+					the involved object types.</p>
+					<table id="executionsTable" border="1" class="table">
+					</table>
+				</div>
+				<div id="plotlyGraphsPage" style="display: none">
+					<div class="row" style="height: 85%">
+						<!--align-self-center text-center-->
+						<div class="col-2 border-right">
+							<h6>Select the statistic:</h6>
+							<div><i class="fas fa-chart-pie"></i>&nbsp;<a href="javascript:showSpecificGraph('plotlyOtGraph')">Objects per Type</a></div>
+							<div><i class="fas fa-chart-bar"></i>&nbsp;<a href="javascript:showSpecificGraph('plotlyActGraph')">Events per Activity</a></div>
+							<div><i class="fas fa-chart-bar"></i>&nbsp;<a href="javascript:showSpecificGraph('plotlyObjPerEveGraph')">N. Objects per Event</a></div>
+							<div><i class="fas fa-chart-bar"></i>&nbsp;<a href="javascript:showSpecificGraph('plotlyLifecycleLengthGraph')">Length of Object Lifecycle</a></div>
+							<div><i class="fas fa-chart-bar"></i>&nbsp;<a href="javascript:showSpecificGraph('plotlyEventsPerTimeGraph')">Events per Time</a></div>				
+							<div><i class="fas fa-box"></i>&nbsp;<a href="javascript:showSpecificGraph('plotlyLifecycleDurationGraph')">Lifecycle Duration (logarithmic)</a></div>
+							<div><i class="fas fa-chart-area"></i>&nbsp;<a href="javascript:showSpecificGraph('plotlyDottedChartColorActivity')">Dotted Chart (color: activity)</a></div>
+							<div><i class="fas fa-chart-area"></i>&nbsp;<a href="javascript:showSpecificGraph('plotlyDottedChartColorObjType')">Dotted Chart (color: object type)</a></div>				
+						</div>
+						<div class="col-10">
+							<div id="plotlyOtGraph" style="width: 100%; height: 100%; display: none">
+								
+							</div>
+							<div id="plotlyActGraph" style="width: 100%; height: 100%; display: none">
+								
+							</div>
+							<div id="plotlyObjPerEveGraph" style="width: 100%; height: 100%; display: none">
+								
+							</div>
+							<div id="plotlyLifecycleLengthGraph" style="width: 100%; height: 100%; display: none">
+								
+							</div>
+							<div id="plotlyLifecycleDurationGraph" style="width: 100%; height: 100%; display: none">
+								
+							</div>
+							<div id="plotlyEventsPerTimeGraph" style="width: 100%; height: 100%; display: none">
+								
+							</div>
+							<div id="plotlyDottedChartColorActivity" style="width: 100%; height: 100%; display: none">
+								
+							</div>
+							<div id="plotlyDottedChartColorObjType" style="width: 100%; height: 100%; display: none">
+								
+							</div>
+						</div>
+					</div>
+				</div>
+				<div id="conformancePage" style="display: none">
+					<nav id="conformanceNavigation" class="navigation navigation-justified border-bottom">
+						<div class="navigation-header">
+
+						</div>
+						<div class="navigation-body">
+							<ul class="navigation-menu">
+								
+								<li class="navigation-item">
+									<a class="navigation-link" href="javascript:showConformancePageNumObjects()"><i class="fas fa-sort-numeric-up-alt"></i>&nbsp;Number of Objects</a>
+								</li>
+								
+								<li class="navigation-item">
+									<a class="navigation-link" href="javascript:showConformancePageLifecycleObjects()"><i class="fas fa-life-ring"></i>&nbsp;Objects Lifecycle</a>
+								</li>
+								
+								<li class="navigation-item">
+									<a class="navigation-link" href="javascript:showConformancePageDurationsObjects()"><i class="fas fa-clock"></i>&nbsp;Objects Duration</a>
+								</li>							
+							</ul>
+						</div>
+					</nav>
+					<div id="conformanceCheckingNumObjects" style="display:">
+						<p>The page shows the objects of the given type which are related to events of the given activity in extraordinary number
+						(lower than avg - stdev, or higher than avg + stdev). It is offered a possibility to filter on the events related to such objects, to understand
+						the control flow in these situations.</p>
+						<table id="conformanceCheckingNumObjectsTable" class="table">
+							
+						</table>
+					</div>
+					<div id="conformanceCheckingLifecycleObjects" style="display: none">
+						<p>The page shows the log skeleton constraints (default noise: 5%) that are violated by the objects of the given type. Each rule is reported
+						with a description, the overall number of violations, and a possibility to filter the events related to such objects.</p>
+						<table id="conformanceCheckingLifecycleObjectsTable" class="table">
+							
+						</table>
+					</div>
+					<div id="conformanceCheckingDurationObjects" style="display: none">
+						<p>The page identifies deviations in the duration of the lifecycle of the objects. Objects having an exceptional durations are here identified,
+						along with the number of deviations and a possibility to filter the events related to such objects.</p>
+						<table id="conformanceCheckingDurationObjectsTable" class="table">
+							
+						</table>
+					</div>
+				</div>
+				<div class="hover_bkgr_fricc">
+					<span class="helper"></span>
+					<div>
+						<div class="popupCloseButton">&times;</div>
+						<h4><b>Lifecycle of the Object:</b> <span id="popupObjId"></h4>
+						<div style="width: 100%; height: 85%; overflow: scroll">
+							<table id="customEventsListTable" border="1" class="table">
+							</table>
+						</div>
+					</div>
+				</div>
+			</div>
+			<!--<script src="logs/example-jsonocel.js"></script>-->
+			<script type="text/javascript">
+				function filterDeviationsLifecycleObjects(objType, dev) {
+					let objectIdentifiers = visualization.model.conformanceLifecycleObjects.getRelatedObjects(objType, dev).toString();
+					showProcessModelPage();
+					addFilter("<i class=\"fab fa-mixer\"></i>&nbsp;Deviations on the Lifecycle&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;", "executionGraphFilterDescrSpecific(\""+objectIdentifiers+"\")");
+				}
+				
+				function filterDeviationsDurationObjects(objType) {
+					let objectIdentifiers = Object.keys(visualization.model.conformanceDurationObjects.deviations[objType]).toString();
+					showProcessModelPage();
+					addFilter("<i class=\"fab fa-mixer\"></i>&nbsp;Deviations on the Lifecycle Duration&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;", "executionGraphFilterDescrSpecific(\""+objectIdentifiers+"\")");
+				}
+				
+				function filterDeviationsNumObjects(activity, objType) {
+					let objectIdentifiers = Object.keys(visualization.model.conformanceNumObjs.deviatingObjects[activity][objType]).toString();
+					showProcessModelPage();
+					addFilter("<i class=\"fab fa-mixer\"></i>&nbsp;Deviations on the number of Objects&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;", "executionGraphFilterDescrSpecific(\""+objectIdentifiers+"\")");
+				}
+				
+				function executionGraphFilterDescr(descr) {
+					let objectIdentifiers = visualization.model.executionGraph.getObjectIdentifiers(descr).toString();
+					showProcessModelPage();
+					addFilter("<i class=\"fab fa-mixer\"></i>&nbsp;Executions Filter&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;", "executionGraphFilterDescrSpecific(\""+objectIdentifiers+"\")");
+				}
+				
+				function executionGraphFilterDescrSpecific(relObj) {
+					relObj = relObj.split(",");
+					let filteredModel = visualization.model.filterRelatedObjects(relObj);
+					visualization.setFilteredModel(filteredModel);
+				}
+				
+				function hideAllDivsPages() {
+					document.getElementById("processModelPage").style.display = "none";
+					document.getElementById("eventsListPage").style.display = "none";
+					document.getElementById("objectsListPage").style.display = "none";
+					document.getElementById("executionsPage").style.display = "none";
+					document.getElementById("plotlyGraphsPage").style.display = "none";
+					document.getElementById("conformancePage").style.display = "none";
+				}
+				
+				function showProcessModelPage() {
+					hideAllDivsPages();
+					document.getElementById("processModelPage").style.display = "";
+				}
+				
+				function showEventsList() {
+					hideAllDivsPages();
+					numEvents = Object.keys(visualization.model.ocel["ocel:events"]).length;
+					currStart0 = 0;
+					currEnd0 = pageSize - 1;
+					document.getElementById("eventsListPage").style.display = "";
+					populateNumEventsEventsPage();
+				}
+				
+				function populateNumEventsEventsPage() {
+					currStart = Math.max(0, Math.min(numEvents, currStart0));
+					currEnd = Math.max(0, Math.min(numEvents, currEnd0));
+					document.getElementById("numEventsEventsPage").innerHTML = numEvents;
+					document.getElementById("currStartEventsPage").innerHTML = currStart;
+					document.getElementById("currEndEventsPage").innerHTML = currEnd;
+					eventsListFactory = new EventsListFactory(visualization.model);
+					eventsListFactory.buildEventsTable(document.getElementById("eventsListTable"), null, true, null, currStart, currEnd);
+				}
+				
+				function increaseRange() {
+					currStart0 = currStart0 + pageSize;
+					currEnd0 = currEnd0 + pageSize;
+					populateNumEventsEventsPage();
+				}
+				
+				function decreaseRange() {
+					currStart0 = currStart0 - pageSize;
+					currEnd0 = currEnd0 - pageSize;
+					populateNumEventsEventsPage();
+				}
+				
+				function showObjectsList() {
+					visualization.model.calculateExecutions();
+					hideAllDivsPages();
+					document.getElementById("objectsListPage").style.display = "";
+				}
+				
+				function showExecutions() {
+					visualization.model.calculateExecutions();
+					hideAllDivsPages();
+					document.getElementById("executionsPage").style.display = "";
+					visualization.model.executionGraph.buildExecutionsTable(document.getElementById("executionsTable"));
+				}
+				
+				function showGraphs() {
+					hideAllDivsPages();
+					document.getElementById("plotlyGraphsPage").style.display = "";
+					plotlyOcelGraphs = new PlotlyOcelGraphs(visualization.model);
+					showSpecificGraph("plotlyOtGraph");
+				}
+				
+				function showConformance() {
+					hideAllDivsPages();
+					showConformancePageNumObjects();
+					document.getElementById("conformancePage").style.display = "";
+					if (conformanceNavigation == null) {
+						conformanceNavigation = new Navigation(document.getElementById("conformanceNavigation"));
+					}
+				}
+				
+				function hideAllConformancePages() {
+					document.getElementById("conformanceCheckingNumObjects").style.display = "none";
+					document.getElementById("conformanceCheckingLifecycleObjects").style.display = "none";
+					document.getElementById("conformanceCheckingDurationObjects").style.display = "none";
+				}
+				
+				function showConformancePageNumObjects() {
+					visualization.model.calculateConformanceNumObjs();
+					hideAllConformancePages();
+					document.getElementById("conformanceCheckingNumObjects").style.display = "";
+					visualization.model.conformanceNumObjs.populateTable(document.getElementById("conformanceCheckingNumObjectsTable"));
+				}
+				
+				function showConformancePageLifecycleObjects() {
+					visualization.model.calculateConformanceLifecycleObjects();
+					hideAllConformancePages();
+					document.getElementById("conformanceCheckingLifecycleObjects").style.display = "";
+					visualization.model.conformanceLifecycleObjects.populateTable(document.getElementById("conformanceCheckingLifecycleObjectsTable"));
+				}
+				
+				function showConformancePageDurationsObjects() {
+					visualization.model.calculateConformanceDurationObjects();
+					hideAllConformancePages();
+					document.getElementById("conformanceCheckingDurationObjects").style.display = "";
+					visualization.model.conformanceDurationObjects.populateTable(document.getElementById("conformanceCheckingDurationObjectsTable"));
+				}
+				
+				function showSpecificGraph(divName) {
+					document.getElementById("plotlyOtGraph").style.display = "none";
+					document.getElementById("plotlyActGraph").style.display = "none";
+					document.getElementById("plotlyObjPerEveGraph").style.display = "none";
+					document.getElementById("plotlyLifecycleLengthGraph").style.display = "none";
+					document.getElementById("plotlyLifecycleDurationGraph").style.display = "none";
+					document.getElementById("plotlyEventsPerTimeGraph").style.display = "none";
+					document.getElementById("plotlyDottedChartColorActivity").style.display = "none";
+					document.getElementById("plotlyDottedChartColorObjType").style.display = "none";				
+					
+					document.getElementById(divName).style.display = "";
+					if (divName == "plotlyOtGraph") {
+						plotlyOcelGraphs.buildOtGraph();
+					}
+					else if (divName == "plotlyActGraph") {
+						plotlyOcelGraphs.buildActivitiesGraph();
+					}
+					else if (divName == "plotlyObjPerEveGraph") {
+						plotlyOcelGraphs.buildObjectsPerEventGraph();
+					}
+					else if (divName == "plotlyLifecycleLengthGraph") {
+						plotlyOcelGraphs.buildLifecycleLength();
+					}
+					else if (divName == "plotlyLifecycleDurationGraph") {
+						plotlyOcelGraphs.buildObjectDuration();
+					}
+					else if (divName == "plotlyEventsPerTimeGraph") {
+						plotlyOcelGraphs.buildEventsPerTime();
+					}
+					else if (divName == "plotlyDottedChartColorActivity") {
+						plotlyOcelGraphs.buildDottedChartActivities();
+					}
+					else if (divName == "plotlyDottedChartColorObjType") {
+						plotlyOcelGraphs.buildDottedChartOtype();
+					}
+				}
+				
+				function clickedObjectInEveTable(obj) {
+					let relTuples = visualization.model.overallObjectsView.objectsIdsSorted[obj];
+					let relEvs = {};
+					for (let tup of relTuples) {
+						relEvs[tup[0]] = 0;
+					}
+					let eventsListFactory = new EventsListFactory(visualization.model);
+					eventsListFactory.buildEventsTable(document.getElementById("customEventsListTable"), events=relEvs, enable_click=false, target_obj=obj);
+					$('.hover_bkgr_fricc').show();
+					document.getElementById("popupObjId").innerHTML = obj;
+				}
+				
+				function showGraphvizExecutionObject(obj) {
+					let gv = visualization.model.executions[5][obj];
+					let svgXml = Viz(gv, { format: "svg"});
+					document.getElementById("customEventsListTable").innerHTML = svgXml;
+					$('.hover_bkgr_fricc').show();
+					document.getElementById("popupObjId").innerHTML = obj+" (execution)";
+				}
+				
+				function showObjListOt() {
+					let selectedOt = document.getElementById("otObjListSelection").value;
+					objectsListFactory = new ObjectsListFactory(visualization.model);
+					objectsListFactory.buildObjectsTable(document.getElementById("objectsListTable"), selectedOt);
+				}
+
+				$('.hover_bkgr_fricc').click(function(){
+					$('.hover_bkgr_fricc').hide();
+				});
+				$('.popupCloseButton').click(function(){
+					$('.hover_bkgr_fricc').hide();
+				});
+			</script>
+			<script type="text/javascript">
+	const menu = document.querySelector('#menu');
+	// hide the menu
+	//window.addEventListener('click', event => menu.style.display = 'none')
+	// show the menu when right-clicked
+	window.addEventListener('contextmenu', event => {
+	  event.preventDefault()
+	  menu.style.setProperty('--mouse-x', event.clientX + 'px')
+	  menu.style.setProperty('--mouse-y', event.clientY + 'px')
+	  menu.style.display = 'block'
+	});
+
+				var navigationHeader = new Navigation(document.getElementById("navigationHeader"));
+			</script>
+			<script type="text/javascript">
+				function ScrollZoom(container,max_scale,factor){
+					var target = container;
+					var size = {w:target.width(),h:target.height()}
+					var pos = {x:0,y:0}
+					var zoom_target = {x:0,y:0}
+					var zoom_point = {x:0,y:0}
+					var scale = 1
+					target.css('transform-origin','0 0')
+					target.on("mousewheel DOMMouseScroll",scrolled)
+
+					function scrolled(e){
+						var offset = container.offset()
+						zoom_point.x = e.pageX - offset.left
+						zoom_point.y = e.pageY - offset.top
+
+						e.preventDefault();
+						var delta = e.delta || e.originalEvent.wheelDelta;
+						if (delta === undefined) {
+						  //we are on firefox
+						  delta = e.originalEvent.detail;
+						}
+						delta = Math.max(-1,Math.min(1,delta)) // cap the delta to [-1,1] for cross browser consistency
+
+						// determine the point on where the slide is zoomed in
+						zoom_target.x = (zoom_point.x - pos.x)/scale
+						zoom_target.y = (zoom_point.y - pos.y)/scale
+
+						// apply zoom
+						scale += delta*factor * scale
+						scale = Math.max(1,Math.min(max_scale,scale))
+
+						// calculate x and y based on zoom
+						pos.x = -zoom_target.x * scale + zoom_point.x
+						pos.y = -zoom_target.y * scale + zoom_point.y
+
+
+						// Make sure the slide stays in its container area when zooming out
+						if(pos.x>0)
+							pos.x = 0
+						if(pos.x+size.w*scale<size.w)
+							pos.x = -size.w*(scale-1)
+						if(pos.y>0)
+							pos.y = 0
+						 if(pos.y+size.h*scale<size.h)
+							pos.y = -size.h*(scale-1)
+
+						update()
+					}
+
+					function update(){
+						target.css('transform','translate('+(pos.x)+'px,'+(pos.y)+'px) scale('+scale+','+scale+')')
+					}
+				}
+				
+				new ScrollZoom($('#graphContainer'), 4, 0.5);
+			</script>
+			
+			<script type="text/javascript">
+				//createVisualization();
+			</script>
+		</div>
+		<div id="htmlLoadView" style="z-index: 200; display: none">
+			<div class="row h-100 justify-content-center align-items-center">
+				<h1>Uploading to Target System ...</h1>
 			</div>
 		</div>
-		<!--<script src="logs/example-jsonocel.js"></script>-->
-		<script type="text/javascript">
-			function filterDeviationsLifecycleObjects(objType, dev) {
-				let objectIdentifiers = visualization.model.conformanceLifecycleObjects.getRelatedObjects(objType, dev).toString();
-				showProcessModelPage();
-				addFilter("<i class=\"fab fa-mixer\"></i>&nbsp;Deviations on the Lifecycle&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;", "executionGraphFilterDescrSpecific(\""+objectIdentifiers+"\")");
-			}
-			
-			function filterDeviationsDurationObjects(objType) {
-				let objectIdentifiers = Object.keys(visualization.model.conformanceDurationObjects.deviations[objType]).toString();
-				showProcessModelPage();
-				addFilter("<i class=\"fab fa-mixer\"></i>&nbsp;Deviations on the Lifecycle Duration&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;", "executionGraphFilterDescrSpecific(\""+objectIdentifiers+"\")");
-			}
-			
-			function filterDeviationsNumObjects(activity, objType) {
-				let objectIdentifiers = Object.keys(visualization.model.conformanceNumObjs.deviatingObjects[activity][objType]).toString();
-				showProcessModelPage();
-				addFilter("<i class=\"fab fa-mixer\"></i>&nbsp;Deviations on the number of Objects&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;", "executionGraphFilterDescrSpecific(\""+objectIdentifiers+"\")");
-			}
-			
-			function executionGraphFilterDescr(descr) {
-				let objectIdentifiers = visualization.model.executionGraph.getObjectIdentifiers(descr).toString();
-				showProcessModelPage();
-				addFilter("<i class=\"fab fa-mixer\"></i>&nbsp;Executions Filter&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;", "executionGraphFilterDescrSpecific(\""+objectIdentifiers+"\")");
-			}
-			
-			function executionGraphFilterDescrSpecific(relObj) {
-				relObj = relObj.split(",");
-				let filteredModel = visualization.model.filterRelatedObjects(relObj);
-				visualization.setFilteredModel(filteredModel);
-			}
-			
-			function hideAllDivsPages() {
-				document.getElementById("processModelPage").style.display = "none";
-				document.getElementById("eventsListPage").style.display = "none";
-				document.getElementById("objectsListPage").style.display = "none";
-				document.getElementById("executionsPage").style.display = "none";
-				document.getElementById("plotlyGraphsPage").style.display = "none";
-				document.getElementById("conformancePage").style.display = "none";
-			}
-			
-			function showProcessModelPage() {
-				hideAllDivsPages();
-				document.getElementById("processModelPage").style.display = "";
-			}
-			
-			function showEventsList() {
-				hideAllDivsPages();
-				numEvents = Object.keys(visualization.model.ocel["ocel:events"]).length;
-				currStart0 = 0;
-				currEnd0 = pageSize - 1;
-				document.getElementById("eventsListPage").style.display = "";
-				populateNumEventsEventsPage();
-			}
-			
-			function populateNumEventsEventsPage() {
-				currStart = Math.max(0, Math.min(numEvents, currStart0));
-				currEnd = Math.max(0, Math.min(numEvents, currEnd0));
-				document.getElementById("numEventsEventsPage").innerHTML = numEvents;
-				document.getElementById("currStartEventsPage").innerHTML = currStart;
-				document.getElementById("currEndEventsPage").innerHTML = currEnd;
-				eventsListFactory = new EventsListFactory(visualization.model);
-				eventsListFactory.buildEventsTable(document.getElementById("eventsListTable"), null, true, null, currStart, currEnd);
-			}
-			
-			function increaseRange() {
-				currStart0 = currStart0 + pageSize;
-				currEnd0 = currEnd0 + pageSize;
-				populateNumEventsEventsPage();
-			}
-			
-			function decreaseRange() {
-				currStart0 = currStart0 - pageSize;
-				currEnd0 = currEnd0 - pageSize;
-				populateNumEventsEventsPage();
-			}
-			
-			function showObjectsList() {
-				visualization.model.calculateExecutions();
-				hideAllDivsPages();
-				document.getElementById("objectsListPage").style.display = "";
-			}
-			
-			function showExecutions() {
-				visualization.model.calculateExecutions();
-				hideAllDivsPages();
-				document.getElementById("executionsPage").style.display = "";
-				visualization.model.executionGraph.buildExecutionsTable(document.getElementById("executionsTable"));
-			}
-			
-			function showGraphs() {
-				hideAllDivsPages();
-				document.getElementById("plotlyGraphsPage").style.display = "";
-				plotlyOcelGraphs = new PlotlyOcelGraphs(visualization.model);
-				showSpecificGraph("plotlyOtGraph");
-			}
-			
-			function showConformance() {
-				hideAllDivsPages();
-				showConformancePageNumObjects();
-				document.getElementById("conformancePage").style.display = "";
-				if (conformanceNavigation == null) {
-					conformanceNavigation = new Navigation(document.getElementById("conformanceNavigation"));
-				}
-			}
-			
-			function hideAllConformancePages() {
-				document.getElementById("conformanceCheckingNumObjects").style.display = "none";
-				document.getElementById("conformanceCheckingLifecycleObjects").style.display = "none";
-				document.getElementById("conformanceCheckingDurationObjects").style.display = "none";
-			}
-			
-			function showConformancePageNumObjects() {
-				visualization.model.calculateConformanceNumObjs();
-				hideAllConformancePages();
-				document.getElementById("conformanceCheckingNumObjects").style.display = "";
-				visualization.model.conformanceNumObjs.populateTable(document.getElementById("conformanceCheckingNumObjectsTable"));
-			}
-			
-			function showConformancePageLifecycleObjects() {
-				visualization.model.calculateConformanceLifecycleObjects();
-				hideAllConformancePages();
-				document.getElementById("conformanceCheckingLifecycleObjects").style.display = "";
-				visualization.model.conformanceLifecycleObjects.populateTable(document.getElementById("conformanceCheckingLifecycleObjectsTable"));
-			}
-			
-			function showConformancePageDurationsObjects() {
-				visualization.model.calculateConformanceDurationObjects();
-				hideAllConformancePages();
-				document.getElementById("conformanceCheckingDurationObjects").style.display = "";
-				visualization.model.conformanceDurationObjects.populateTable(document.getElementById("conformanceCheckingDurationObjectsTable"));
-			}
-			
-			function showSpecificGraph(divName) {
-				document.getElementById("plotlyOtGraph").style.display = "none";
-				document.getElementById("plotlyActGraph").style.display = "none";
-				document.getElementById("plotlyObjPerEveGraph").style.display = "none";
-				document.getElementById("plotlyLifecycleLengthGraph").style.display = "none";
-				document.getElementById("plotlyLifecycleDurationGraph").style.display = "none";
-				document.getElementById("plotlyEventsPerTimeGraph").style.display = "none";
-				document.getElementById("plotlyDottedChartColorActivity").style.display = "none";
-				document.getElementById("plotlyDottedChartColorObjType").style.display = "none";				
-				
-				document.getElementById(divName).style.display = "";
-				if (divName == "plotlyOtGraph") {
-					plotlyOcelGraphs.buildOtGraph();
-				}
-				else if (divName == "plotlyActGraph") {
-					plotlyOcelGraphs.buildActivitiesGraph();
-				}
-				else if (divName == "plotlyObjPerEveGraph") {
-					plotlyOcelGraphs.buildObjectsPerEventGraph();
-				}
-				else if (divName == "plotlyLifecycleLengthGraph") {
-					plotlyOcelGraphs.buildLifecycleLength();
-				}
-				else if (divName == "plotlyLifecycleDurationGraph") {
-					plotlyOcelGraphs.buildObjectDuration();
-				}
-				else if (divName == "plotlyEventsPerTimeGraph") {
-					plotlyOcelGraphs.buildEventsPerTime();
-				}
-				else if (divName == "plotlyDottedChartColorActivity") {
-					plotlyOcelGraphs.buildDottedChartActivities();
-				}
-				else if (divName == "plotlyDottedChartColorObjType") {
-					plotlyOcelGraphs.buildDottedChartOtype();
-				}
-			}
-			
-			function clickedObjectInEveTable(obj) {
-				let relTuples = visualization.model.overallObjectsView.objectsIdsSorted[obj];
-				let relEvs = {};
-				for (let tup of relTuples) {
-					relEvs[tup[0]] = 0;
-				}
-				let eventsListFactory = new EventsListFactory(visualization.model);
-				eventsListFactory.buildEventsTable(document.getElementById("customEventsListTable"), events=relEvs, enable_click=false, target_obj=obj);
-				$('.hover_bkgr_fricc').show();
-				document.getElementById("popupObjId").innerHTML = obj;
-			}
-			
-			function showGraphvizExecutionObject(obj) {
-				let gv = visualization.model.executions[5][obj];
-				let svgXml = Viz(gv, { format: "svg"});
-				document.getElementById("customEventsListTable").innerHTML = svgXml;
-				$('.hover_bkgr_fricc').show();
-				document.getElementById("popupObjId").innerHTML = obj+" (execution)";
-			}
-			
-			function showObjListOt() {
-				let selectedOt = document.getElementById("otObjListSelection").value;
-				objectsListFactory = new ObjectsListFactory(visualization.model);
-				objectsListFactory.buildObjectsTable(document.getElementById("objectsListTable"), selectedOt);
-			}
-
-			$('.hover_bkgr_fricc').click(function(){
-				$('.hover_bkgr_fricc').hide();
-			});
-			$('.popupCloseButton').click(function(){
-				$('.hover_bkgr_fricc').hide();
-			});
-		</script>
-		<script type="text/javascript">
-const menu = document.querySelector('#menu');
-// hide the menu
-//window.addEventListener('click', event => menu.style.display = 'none')
-// show the menu when right-clicked
-window.addEventListener('contextmenu', event => {
-  event.preventDefault()
-  menu.style.setProperty('--mouse-x', event.clientX + 'px')
-  menu.style.setProperty('--mouse-y', event.clientY + 'px')
-  menu.style.display = 'block'
-});
-
-			var navigationHeader = new Navigation(document.getElementById("navigationHeader"));
-		</script>
-		<script type="text/javascript">
-			function ScrollZoom(container,max_scale,factor){
-				var target = container;
-				var size = {w:target.width(),h:target.height()}
-				var pos = {x:0,y:0}
-				var zoom_target = {x:0,y:0}
-				var zoom_point = {x:0,y:0}
-				var scale = 1
-				target.css('transform-origin','0 0')
-				target.on("mousewheel DOMMouseScroll",scrolled)
-
-				function scrolled(e){
-					var offset = container.offset()
-					zoom_point.x = e.pageX - offset.left
-					zoom_point.y = e.pageY - offset.top
-
-					e.preventDefault();
-					var delta = e.delta || e.originalEvent.wheelDelta;
-					if (delta === undefined) {
-					  //we are on firefox
-					  delta = e.originalEvent.detail;
-					}
-					delta = Math.max(-1,Math.min(1,delta)) // cap the delta to [-1,1] for cross browser consistency
-
-					// determine the point on where the slide is zoomed in
-					zoom_target.x = (zoom_point.x - pos.x)/scale
-					zoom_target.y = (zoom_point.y - pos.y)/scale
-
-					// apply zoom
-					scale += delta*factor * scale
-					scale = Math.max(1,Math.min(max_scale,scale))
-
-					// calculate x and y based on zoom
-					pos.x = -zoom_target.x * scale + zoom_point.x
-					pos.y = -zoom_target.y * scale + zoom_point.y
-
-
-					// Make sure the slide stays in its container area when zooming out
-					if(pos.x>0)
-						pos.x = 0
-					if(pos.x+size.w*scale<size.w)
-						pos.x = -size.w*(scale-1)
-					if(pos.y>0)
-						pos.y = 0
-					 if(pos.y+size.h*scale<size.h)
-						pos.y = -size.h*(scale-1)
-
-					update()
-				}
-
-				function update(){
-					target.css('transform','translate('+(pos.x)+'px,'+(pos.y)+'px) scale('+scale+','+scale+')')
-				}
-			}
-			
-			new ScrollZoom($('#graphContainer'), 4, 0.5);
-		</script>
-		
-		<script type="text/javascript">
-			//createVisualization();
-		</script>
 	</body>
 </html>

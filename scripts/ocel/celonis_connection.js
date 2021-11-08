@@ -7,6 +7,8 @@ function connectToCelonis() {
 		celonisMapper = new CelonisMapper(celonisUrl, celonisApi);
 		celonis1DWrapper = new Celonis1DWrapper(celonisMapper);
 		celonisNDWrapper = new CelonisNDWrapper(celonisMapper);
+		document.getElementById("celonisUploadOcel").style.display = "";
+		document.getElementById("flattenEventLogUploadCelonis").style.display = "";		
 		fillDataModelSelectionUpload();
 	}
 	catch (err) {
