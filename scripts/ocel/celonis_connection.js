@@ -26,9 +26,15 @@ function fillDataModelSelectionUpload() {
 		let dataModel = celonisMapper.dataModels[dataModelId];
 		let dataPoolId = celonisMapper.dataModelsDataPools[dataModelId];
 		let dataPool = celonisMapper.dataPools[dataPoolId];
-		let option = document.createElement("option");
-		option.value = analysisId;
-		option.text = analysis["name"] + " (DP="+dataPool["name"]+"; DM="+dataModel["name"]+")";
-		dataModelSelectionUpload.appendChild(option);
+		try {
+			let option = document.createElement("option");
+			option.value = analysisId;
+			option.text = analysis["name"] + " (DP="+dataPool["name"]+"; DM="+dataModel["name"]+")";
+			dataModelSelectionUpload.appendChild(option);
+		}
+		catch (err) {
+			console.log("error fillDataModelSelectionUpload");
+			console.log(err);
+		}
 	}
 }

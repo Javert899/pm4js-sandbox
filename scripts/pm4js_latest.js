@@ -16273,6 +16273,9 @@ class CelonisMapper {
 		}
 		else {
 			let ret = null;
+			if (Array.isArray(jsonContent)) {
+				jsonContent = {"@@content": jsonContent};
+			}
 			jsonContent["access_token"] = this.apiKey;
 			jsonContent["url"] = url;
 			let ajaxDict = {
@@ -16665,16 +16668,20 @@ class Celonis1DWrapper {
 		let csvExport = CsvExporter.apply(eventLog, sep, quotechar, casePrefix, newline);
 		if (!(dummy)) {
 			dataPoolId = this.celonisMapper.createDataPool(baseName+"_POOL", false);
-			console.log("created data pool");
-			this.celonisMapper.pushCSV(dataPoolId, csvExport, baseName+"_ACTIVITIES", false, "time:timestamp", sep, quotechar, newline);
-			console.log("created activity table");
-			this.celonisMapper.pushCSV(dataPoolId, cases, baseName+"_CASES", false, null, sep, quotechar, newline);
-			console.log("created cases table");
 			this.celonisMapper.getDataPools();
 			dataModelId = this.celonisMapper.createDataModel(dataPoolId, baseName+"_DMODEL");
+			this.celonisMapper.getDataModels();
+			console.log("created data pool");
+			this.celonisMapper.pushCSV(dataPoolId, csvExport, baseName+"_ACTIVITIES", false, "time:timestamp", sep, quotechar, newline);
+			this.celonisMapper.getDataPools();
+			console.log("created activity table");
 			this.celonisMapper.addTableFromPool(dataModelId, baseName+"_ACTIVITIES", false);
+			console.log("created data model for activities");
+			this.celonisMapper.pushCSV(dataPoolId, cases, baseName+"_CASES", false, null, sep, quotechar, newline);
+			this.celonisMapper.getDataPools();
+			console.log("created cases table");
 			this.celonisMapper.addTableFromPool(dataModelId, baseName+"_CASES", false);
-			console.log("created data models");
+			console.log("created data model for cases");
 			this.celonisMapper.getDataModels();
 			this.celonisMapper.addForeignKey(dataModelId, baseName+"_ACTIVITIES", caseIdKey, baseName+"_CASES", caseIdKey, false);
 			console.log("added foreign key");
@@ -16892,13 +16899,13 @@ class CelonisNDWrapper {
 		let res = OcelToCelonis.apply(ocel, sep, quotechar, newline);
 		if (!(dummy)) {
 			dataPoolId = this.celonisMapper.createDataPool(baseName+"_POOL", false);
+			dataModelId = this.celonisMapper.createDataModel(dataPoolId, baseName+"_DMODEL");
+			this.celonisMapper.getDataPools();
+			this.celonisMapper.getDataModels();
 			for (let tab in res["coll"]) {
 				console.log("pushing table: "+tab+" "+res["timestampColumns"][tab]);
 				this.celonisMapper.pushCSV(dataPoolId, res["coll"][tab], tab, false, res["timestampColumns"][tab], sep, quotechar, newline);
-			}
-			this.celonisMapper.getDataPools();
-			dataModelId = this.celonisMapper.createDataModel(dataPoolId, baseName+"_DMODEL");
-			for (let tab in res["coll"]) {
+				this.celonisMapper.getDataPools();
 				console.log("adding table to data model: "+tab);
 				this.celonisMapper.addTableFromPool(dataModelId, tab, false);
 			}
