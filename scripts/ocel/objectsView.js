@@ -21,7 +21,7 @@ class ObjectsView {
 			this.objectsIdsSorted[objId] = [];
 			for (let evId in this.objectsIds[objId]) {
 				let eve = this.ocel["ocel:events"][evId];
-				this.objectsIdsSorted[objId].push([evId, eve["ocel:activity"], new Date(eve["ocel:timestamp"]).getTime()/1000.0]);
+				this.objectsIdsSorted[objId].push([evId, eve["ocel:activity"], eve["ocel:timestamp"].getTime()/1000.0]);
 			}
 			this.objectsIdsSorted[objId].sort(function(a, b) {
 					if (a[2] < b[2]) {

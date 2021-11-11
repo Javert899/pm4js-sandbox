@@ -59,7 +59,7 @@ class Pm4JS {
 	}
 }
 
-Pm4JS.VERSION = "0.0.13";
+Pm4JS.VERSION = "0.0.14";
 Pm4JS.registrationEnabled = false;
 Pm4JS.objects = [];
 Pm4JS.algorithms = [];
@@ -9472,6 +9472,130 @@ catch (err) {
 	// not in Node
 }
 
+class LtlFiltering {
+	static fourEyesPrinciple(log0, activity1, activity2, positive=false, activityKey="concept:name", resourceKey="org:resource") {
+		let log = LogGeneralFiltering.filterEventsHavingEventAttributeValues(log0, [activity1, activity2], true, true, activityKey);
+		let filteredLog = new EventLog();
+		let j = 0;
+		while (j < log0.traces.length) {
+			let trace = log.traces[j];
+			let i = 0;
+			let bo = false;
+			while (i < trace.events.length - 1) {
+				if (trace.events[i].attributes[activityKey].value == activity1 && trace.events[i+1].attributes[activityKey].value == activity2) {
+					if (!(positive) && (trace.events[i].attributes[resourceKey].value == trace.events[i+1].attributes[resourceKey].value)) {
+						bo = true;
+					}
+					else if (positive && (trace.events[i].attributes[resourceKey].value != trace.events[i+1].attributes[resourceKey].value)) {
+						bo = true;
+					}
+				}
+				i++;
+			}
+			if (bo) {
+				filteredLog.traces.push(log0.traces[j]);
+			}
+			j++;
+		}
+		return filteredLog;
+	}
+	
+	static eventuallyFollowsFilter(log0, activities, positive=true, activityKey="concept:name") {
+		let activitiesJoin = activities.join(",");
+		let log = LogGeneralFiltering.filterEventsHavingEventAttributeValues(log0, activities, true, true, activityKey);
+		let filteredLog = new EventLog();
+		let j = 0;
+		while (j < log0.traces.length) {
+			let trace = log.traces[j];
+			let i = 0;
+			let bo = false;
+			while (i < trace.events.length - activities.length + 1) {
+				let currActivities = [];
+				let z = i;
+				while (z < trace.events.length) {
+					currActivities.push(trace.events[z].attributes[activityKey].value);
+					z++;
+				}
+				let currActivitiesJoin = currActivities.join(",");
+				if (activitiesJoin == currActivitiesJoin) {
+					bo = true;
+					break;
+				}
+				i++;
+			}
+			if ((positive && bo) || !(positive || bo)) {
+				filteredLog.traces.push(log0.traces[j]);
+			}
+			j++;
+		}
+		return filteredLog;
+	}
+	
+	static directlyFollowsFilter(log0, activities, positive=true, activityKey="concept:name") {
+		let activitiesJoin = activities.join(",");
+		let log = log0;
+		let filteredLog = new EventLog();
+		let j = 0;
+		while (j < log0.traces.length) {
+			let trace = log.traces[j];
+			let i = 0;
+			let bo = false;
+			while (i < trace.events.length - activities.length + 1) {
+				let currActivities = [];
+				let z = i;
+				while (z < trace.events.length) {
+					currActivities.push(trace.events[z].attributes[activityKey].value);
+					z++;
+				}
+				let currActivitiesJoin = currActivities.join(",");
+				if (activitiesJoin == currActivitiesJoin) {
+					bo = true;
+					break;
+				}
+				i++;
+			}
+			if ((positive && bo) || !(positive || bo)) {
+				filteredLog.traces.push(log0.traces[j]);
+			}
+			j++;
+		}
+		return filteredLog;
+	}
+	
+	static activityDoneDifferentResources(log0, activity, positive=true, activityKey="concept:name", resourceKey="org:resource") {
+		let log = LogGeneralFiltering.filterEventsHavingEventAttributeValues(log0, [activity], true, true, activityKey);
+		let filteredLog = new EventLog();
+		let j = 0;
+		while (j < log0.traces.length) {
+			let trace = log.traces[j];
+			let i = 0;
+			let bo = false;
+			while (i < trace.events.length - 1) {
+				if (trace.events[i].attributes[resourceKey].value != trace.events[i+1].attributes[resourceKey].value) {
+					bo = true;
+					break;
+				}
+				i++;
+			}
+			if ((positive && bo) || !(positive || bo)) {
+				filteredLog.traces.push(log0.traces[j]);
+			}
+			j++;
+		}
+		return filteredLog;
+	}
+}
+
+try {
+	require('../../../pm4js.js');
+	module.exports = {LtlFiltering: LtlFiltering};
+	global.LtlFiltering = LtlFiltering;
+}
+catch (err) {
+	// not in Node
+}
+
+
 class FlowerMiner {
 	static apply(eventLog, activityKey="concept:name") {
 		let activities = GeneralLogStatistics.getAttributeValues(eventLog, activityKey);
@@ -12644,6 +12768,111 @@ catch (err) {
 
 
 
+class IntervalTreeBuilder {
+	static apply(log, timestampKey="time:timestamp") {
+		let tree = new IntervalTree();
+		for (let trace of log.traces) {
+			let i = 0;
+			while (i < trace.events.length - 1) {
+				let eve1 = trace.events[i];
+				let eve2 = trace.events[i+1];
+				tree.insert(eve1.attributes[timestampKey].value.getTime()/1000.0, eve2.attributes[timestampKey].value.getTime()/1000.0, [trace, i]);
+				i++;
+			}
+		}
+		let mintime = null;
+		for (let n of tree.ascending()) {
+			mintime = n.low;
+			break;
+		}
+		let maxtime = null;
+		for (let n of tree.descending()) {
+			maxtime = n.high;
+			break;
+		}
+		tree.mintime = mintime;
+		tree.maxtime = maxtime;
+		return tree;
+	}
+}
+
+class IntervalTreeAlgorithms {
+	static resourceWorkload(tree, pointOfTime=null, resourceKey="org:resource") {
+		if (pointOfTime == null) {
+			pointOfTime = (tree.mintime + tree.maxtime) / 2.0;
+		}
+		let contained = tree.queryPoint(pointOfTime);
+		let returned = {};
+		for (let p of contained) {
+			let trace = p.value[0];
+			let idx = p.value[1];
+			let eve = trace.events[idx+1];
+			let res = eve.attributes[resourceKey].value;
+			if (!(res in returned)) {
+				returned[res] = 1;
+			}
+			else {
+				returned[res] += 1;
+			}
+		}
+		return returned;
+	}
+	
+	static targetActivityWorkload(tree, pointOfTime=null, activityKey="concept:name") {
+		if (pointOfTime == null) {
+			pointOfTime = (tree.mintime + tree.maxtime) / 2.0;
+		}
+		let contained = tree.queryPoint(pointOfTime);
+		let returned = {};
+		for (let p of contained) {
+			let trace = p.value[0];
+			let idx = p.value[1];
+			let eve = trace.events[idx+1];
+			let act = eve.attributes[activityKey].value;
+			if (!(act in returned)) {
+				returned[act] = 1;
+			}
+			else {
+				returned[act] += 1;
+			}
+		}
+		return returned;
+	}
+	
+	static sourceActivityWorkload(tree, pointOfTime=null, activityKey="concept:name") {
+		if (pointOfTime == null) {
+			pointOfTime = (tree.mintime + tree.maxtime) / 2.0;
+		}
+		let contained = tree.queryPoint(pointOfTime);
+		let returned = {};
+		for (let p of contained) {
+			let trace = p.value[0];
+			let idx = p.value[1];
+			let eve = trace.events[idx];
+			let act = eve.attributes[activityKey].value;
+			if (!(act in returned)) {
+				returned[act] = 1;
+			}
+			else {
+				returned[act] += 1;
+			}
+		}
+		return returned;
+	}
+}
+
+try {
+	require('../../pm4js.js');
+	module.exports = {IntervalTreeBuilder: IntervalTreeBuilder, IntervalTreeAlgorithms: IntervalTreeAlgorithms};
+	global.IntervalTreeBuilder = IntervalTreeBuilder;
+	global.IntervalTreeAlgorithms = IntervalTreeAlgorithms;
+}
+catch (err) {
+	// not in node
+	//console.log(err);
+}
+
+
 const heapqTop = 0;
 const heapqParent = i => ((i + 1) >>> 1) - 1;
 const heapqLeft = i => (i << 1) + 1;
@@ -15419,7 +15648,11 @@ class JsonOcelImporter {
 	}
 	
 	static importLog(jsonString) {
-		return JSON.parse(jsonString);
+		let ret = JSON.parse(jsonString);
+		for (let evId in ret["ocel:events"]) {
+			ret["ocel:events"][evId]["ocel:timestamp"] = new Date(ret["ocel:events"][evId]["ocel:timestamp"]);
+		}
+		return ret;
 	}
 }
 
@@ -15467,7 +15700,7 @@ class XmlOcelImporter {
 							eveActivity = child2.getAttribute("value");
 						}
 						else if (child2.getAttribute("key") == "timestamp") {
-							eveTimestamp = child2.getAttribute("value");
+							eveTimestamp = new Date(child2.getAttribute("value"));
 						}
 						else if (child2.getAttribute("key") == "omap") {
 							for (let childId3 in child2.childNodes) {
@@ -15919,7 +16152,7 @@ class OcelToCelonis {
 			for (let objId of eve["ocel:omap"]) {
 				let objType = ocel["ocel:objects"][objId]["ocel:type"];
 				OcelToCelonis.pushElementIntoCollection(coll, [objId], objType+"_CASES", "objects", objType, null, sep, quotechar, newline);
-				OcelToCelonis.pushElementIntoCollection(coll, [evId+":"+objId, objId, eve["ocel:activity"], eve["ocel:timestamp"], evId], objType+"_EVENTS", "events", objType, null, sep, quotechar, newline);
+				OcelToCelonis.pushElementIntoCollection(coll, [evId+":"+objId, objId, eve["ocel:activity"], DateUtils.formatDateString(eve["ocel:timestamp"]), evId], objType+"_EVENTS", "events", objType, null, sep, quotechar, newline);
 				timestampColumns[objType+"_EVENTS"] = "TIME_"+objType;
 				objectTypes[objType] = 0;
 				for (let objId2 of eve["ocel:omap"]) {
@@ -16521,7 +16754,7 @@ class Celonis1DWrapper {
 		let query = [];
 		query.push("TABLE(");
 		query.push("VARIANT(\""+activityTable+"\".\""+processConfiguration.activityColumn+"\")");
-		query.push(", COUNT(\""+activityTable+"\".\""+processConfiguration.caseIdColumn+"\")");
+		query.push(", COUNT(VARIANT(\""+activityTable+"\".\""+processConfiguration.activityColumn+"\"))");
 		query.push(") NOLIMIT;");
 		query = query.join("");
 		let res = this.celonisMapper.performQueryAnalysis(analysisId, query);

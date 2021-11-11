@@ -119,7 +119,7 @@ class PlotlyOcelGraphs {
 		let minTimestamp = 9999999999999;
 		let maxTimestamp = -9999999999999;
 		for (let eveId in events) {
-			let timest = (new Date(events[eveId]["ocel:timestamp"])).getTime();
+			let timest = events[eveId]["ocel:timestamp"].getTime();
 			if (timest < minTimestamp) {
 				minTimestamp = timest;
 			}
@@ -131,7 +131,7 @@ class PlotlyOcelGraphs {
 		let step = (maxTimestamp - minTimestamp) / 20;
 		let stepsDictio = {};
 		for (let eveId in events) {
-			let timest = (new Date(events[eveId]["ocel:timestamp"])).getTime();
+			let timest = events[eveId]["ocel:timestamp"].getTime();
 			let thisStep = Math.floor((timest - minTimestamp)/step);
 			if (!(thisStep in stepsDictio)) {
 				stepsDictio[thisStep] = 1;

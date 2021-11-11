@@ -11,7 +11,7 @@ class OcdfgExecutionGraph {
 		let eventsWithTimest = [];
 		for (let eveId in this.model.ocel["ocel:events"]) {
 			let eve = this.model.ocel["ocel:events"][eveId];
-			let eveTimestamp = new Date(eve["ocel:timestamp"]).getTime();
+			let eveTimestamp = eve["ocel:timestamp"].getTime();
 			eventsWithTimest.push([eveId, eveTimestamp]);
 		}
 		eventsWithTimest.sort((a, b) => a[1] - b[1]);

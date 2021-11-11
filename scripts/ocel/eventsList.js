@@ -47,51 +47,53 @@ class EventsListFactory {
 		let i = currStart;
 		while (i <= currEnd) {
 			let eveId = eventKeys[i];
-			let eve = logEvents[eveId];
-			eventsHtmlRepr.push("<tr>");
-			eventsHtmlRepr.push("<td>"+eveId+"</td>");
-			eventsHtmlRepr.push("<td>"+eve["ocel:activity"]+"</td>");
-			eventsHtmlRepr.push("<td>"+eve["ocel:timestamp"]+"</td>");			
-			let vmap = eve["ocel:vmap"];
-			let omap = eve["ocel:omap"];
-			let omap_dictio = {};
-			for (let otype of otypes) {
-				omap_dictio[otype] = [];
-			}
-			for (let obj of omap) {
-				let thisObjType = objects[obj]["ocel:type"];
-				if (thisObjType in omap_dictio) {
-					omap_dictio[thisObjType].push(obj);
+			if (eveId != null) {
+				let eve = logEvents[eveId];
+				eventsHtmlRepr.push("<tr>");
+				eventsHtmlRepr.push("<td>"+eveId+"</td>");
+				eventsHtmlRepr.push("<td>"+eve["ocel:activity"]+"</td>");
+				eventsHtmlRepr.push("<td>"+eve["ocel:timestamp"]+"</td>");			
+				let vmap = eve["ocel:vmap"];
+				let omap = eve["ocel:omap"];
+				let omap_dictio = {};
+				for (let otype of otypes) {
+					omap_dictio[otype] = [];
 				}
-			}
-			for (let otype of otypes) {
-				eventsHtmlRepr.push("<td><ul>");
-				for (let obj of omap_dictio[otype]) {
-					eventsHtmlRepr.push("<li>");
-					if (enable_click) {
-						eventsHtmlRepr.push("<a href=\"javascript:clickedObjectInEveTable('"+obj+"')\">"+obj+"</a>");
+				for (let obj of omap) {
+					let thisObjType = objects[obj]["ocel:type"];
+					if (thisObjType in omap_dictio) {
+						omap_dictio[thisObjType].push(obj);
 					}
-					else {
-						if (obj == target_obj) {
-							eventsHtmlRepr.push("<b>"+obj+"</b>");
+				}
+				for (let otype of otypes) {
+					eventsHtmlRepr.push("<td><ul>");
+					for (let obj of omap_dictio[otype]) {
+						eventsHtmlRepr.push("<li>");
+						if (enable_click) {
+							eventsHtmlRepr.push("<a href=\"javascript:clickedObjectInEveTable('"+obj+"')\">"+obj+"</a>");
 						}
 						else {
-							eventsHtmlRepr.push(obj);
+							if (obj == target_obj) {
+								eventsHtmlRepr.push("<b>"+obj+"</b>");
+							}
+							else {
+								eventsHtmlRepr.push(obj);
+							}
 						}
+						eventsHtmlRepr.push("</li>");
 					}
-					eventsHtmlRepr.push("</li>");
+					eventsHtmlRepr.push("</ul></td>");
 				}
-				eventsHtmlRepr.push("</ul></td>");
+				for (let att of attributes) {
+					if (att in vmap) {
+						eventsHtmlRepr.push("<td>"+vmap[att]+"</td>");
+					}
+					else {
+						eventsHtmlRepr.push("<td></td>");
+					}
+				}
+				eventsHtmlRepr.push("</tr>");
 			}
-			for (let att of attributes) {
-				if (att in vmap) {
-					eventsHtmlRepr.push("<td>"+vmap[att]+"</td>");
-				}
-				else {
-					eventsHtmlRepr.push("<td></td>");
-				}
-			}
-			eventsHtmlRepr.push("</tr>");
 			i++;
 		}
 		tbody.innerHTML = eventsHtmlRepr.join("");
