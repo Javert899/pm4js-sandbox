@@ -17,7 +17,7 @@ class OcdfgVisualization {
 		this.callbackActivity = null;
 		this.callbackEdge = null;
 		this.callbackStatistics = null;
-		this.displayType = "dfg";
+		this.displayType = "petriNet";
 	}
 	
 	removeElements() {
@@ -396,9 +396,9 @@ class OcdfgVisualization {
 						let replayResult = this.model.otReplayedTraces[ot];
 						for (let placeId in acceptingPetriNet.net.places) {
 							let place = acceptingPetriNet.net.places[placeId];
-							let placeLabel = "p="+replayResult.totalProducedPerPlace[place]+";m="+replayResult.totalMissingPerPlace[place]+"\nc="+replayResult.totalConsumedPerPlace[place]+";r="+replayResult.totalRemainingPerPlace[place];
-							let placeSizeX = 130;
-							let placeSizeY = 90;
+							let placeLabel = "p="+replayResult.totalProducedPerPlace[place]+";m="+replayResult.totalMissingPerPlace[place]+"<br />c="+replayResult.totalConsumedPerPlace[place]+";r="+replayResult.totalRemainingPerPlace[place];
+							let placeSizeX = 70;
+							let placeSizeY = 70;
 							if (place in acceptingPetriNet.im.tokens) {
 								placeLabel = ot;
 								placeSizeX = 160;
@@ -412,7 +412,7 @@ class OcdfgVisualization {
 							let t = acceptingPetriNet.net.transitions[transId];
 							let transNode = null;
 							if (t.label == null) {
-								transNode = this.graph.insertVertex(parent, "netTrans@@"+t.name, "tau", 150, 150, 90, 60, "fontSize=11;shape=box;fillColor="+color+";fontColor=white");
+								transNode = this.graph.insertVertex(parent, "netTrans@@"+t.name, " ", 150, 150, 70, 30, "fontSize=11;shape=box;fillColor="+color+";fontColor=white");
 							}
 							else {
 								transNode = this.activitiesIndipendent[t.label];

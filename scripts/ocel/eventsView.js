@@ -115,7 +115,10 @@ class EventsView {
 	}
 	
 	toReducedString(acti, idx) {
-		let ret = acti+"\n"
+		let ret = "";
+		for (let piece of acti.split(" ")) {
+			ret += piece + "<br />";
+		}
 		if (idx == 0) {
 			ret += "E="+this.activitiesCounters[acti]["events"];
 		}
@@ -175,12 +178,17 @@ class EventsView {
 			return Math.max(acti.length, this.toIntermediateStringThis(acti).length);
 		}
 		else {
-			return this.toReducedString(acti, 2).length;
+			let maxLength = 0;
+			let redString = this.toReducedString(acti, 2);
+			for (let el of redString.split("<br />")) {
+				maxLength = Math.max(maxLength, el.length);
+			}
+			return maxLength + 1;
 		}
 	}
 	
 	getThisHeight(acti, isExpanded) {
-		let ret = 2;
+		let ret = this.toReducedString(acti, 2).split("<br />").length + 1;
 		if (isExpanded) {
 			ret = 4;
 			for (let ot in this.model.otEventsView) {
