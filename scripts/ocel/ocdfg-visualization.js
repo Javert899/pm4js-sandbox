@@ -18,6 +18,7 @@ class OcdfgVisualization {
 		this.callbackEdge = null;
 		this.callbackStatistics = null;
 		this.displayType = "petriNet";
+		this.petriNetEnableDecorations = false;
 	}
 	
 	removeElements() {
@@ -382,7 +383,7 @@ class OcdfgVisualization {
 					let activities = Object.keys(this.activitiesIndipendent);
 					let consideredLog = LogGeneralFiltering.filterEventsHavingEventAttributeValues(this.model.otEventLogs[ot], activities);
 					if (consideredLog.traces.length > 0) {
-						this.model.otInductiveModels[ot] = ProcessTreeToPetriNetConverter.apply(InductiveMiner.apply(consideredLog, "concept:name", this.PATHS_FREQUENCY));
+						this.model.otInductiveModels[ot] = ProcessTreeToPetriNetConverter.apply(InductiveMiner.apply(consideredLog, "concept:name", 0.0));
 						this.model.otReplayedTraces[ot] = TokenBasedReplay.apply(consideredLog, this.model.otInductiveModels[ot]);
 						this.model.otTransMap[ot] = {};
 						for (let tid in this.model.otInductiveModels[ot].net.transitions) {
@@ -396,15 +397,21 @@ class OcdfgVisualization {
 						let replayResult = this.model.otReplayedTraces[ot];
 						for (let placeId in acceptingPetriNet.net.places) {
 							let place = acceptingPetriNet.net.places[placeId];
-							let placeLabel = "p="+replayResult.totalProducedPerPlace[place]+";m="+replayResult.totalMissingPerPlace[place]+"<br />c="+replayResult.totalConsumedPerPlace[place]+";r="+replayResult.totalRemainingPerPlace[place];
-							let placeSizeX = 100;
-							let placeSizeY = 100;
-							let fontSize = "16"
-							if (place in acceptingPetriNet.im.tokens) {
-								placeLabel = ot;
-								placeSizeX = 170;
-								placeSizeY = 40;
+							let placeSizeX = 40;
+							let placeSizeY = 40;
+							let fontSize = "16";
+							let placeLabel = "";
+							if (this.petriNetEnableDecorations || place in acceptingPetriNet.im.tokens) {
+								placeLabel = "p="+replayResult.totalProducedPerPlace[place]+";m="+replayResult.totalMissingPerPlace[place]+"<br />c="+replayResult.totalConsumedPerPlace[place]+";r="+replayResult.totalRemainingPerPlace[place];
+								placeSizeX = 100;
+								placeSizeY = 100;
 								fontSize = "16";
+								if (place in acceptingPetriNet.im.tokens) {
+									placeLabel = ot;
+									placeSizeX = 170;
+									placeSizeY = 40;
+									fontSize = "16";
+								}
 							}
 							let placeNode = this.graph.insertVertex(parent, "netPlace@@"+place.name, placeLabel, 150, 150, placeSizeX, placeSizeY, "fontSize="+fontSize+";shape=ellipse;fillColor="+color+";fontColor=white");
 							this.placesDict[place] = placeNode;
