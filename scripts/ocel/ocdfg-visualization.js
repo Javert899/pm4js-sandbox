@@ -459,6 +459,14 @@ class OcdfgVisualization {
 			}
 			
 			var layout = new mxHierarchicalLayout(this.graph, mxConstants.DIRECTION_WEST);
+			layout.edgeStyle=2;
+			if (this.displayType == "petriNet") {
+				layout.intraCellSpacing=17;
+			}
+			else {
+				layout.intraCellSpacing=30;
+			}
+			layout.interRankCellSpacing=40;
 			this.graph.getModel().beginUpdate();
 			layout.execute(parent);
 			this.graph.getModel().endUpdate();
