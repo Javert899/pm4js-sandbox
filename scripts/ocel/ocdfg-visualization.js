@@ -397,14 +397,16 @@ class OcdfgVisualization {
 						for (let placeId in acceptingPetriNet.net.places) {
 							let place = acceptingPetriNet.net.places[placeId];
 							let placeLabel = "p="+replayResult.totalProducedPerPlace[place]+";m="+replayResult.totalMissingPerPlace[place]+"<br />c="+replayResult.totalConsumedPerPlace[place]+";r="+replayResult.totalRemainingPerPlace[place];
-							let placeSizeX = 70;
-							let placeSizeY = 70;
+							let placeSizeX = 100;
+							let placeSizeY = 100;
+							let fontSize = "16"
 							if (place in acceptingPetriNet.im.tokens) {
 								placeLabel = ot;
-								placeSizeX = 160;
+								placeSizeX = 170;
 								placeSizeY = 40;
+								fontSize = "16";
 							}
-							let placeNode = this.graph.insertVertex(parent, "netPlace@@"+place.name, placeLabel, 150, 150, placeSizeX, placeSizeY, "fontSize=11;shape=ellipse;fillColor="+color+";fontColor=white");
+							let placeNode = this.graph.insertVertex(parent, "netPlace@@"+place.name, placeLabel, 150, 150, placeSizeX, placeSizeY, "fontSize="+fontSize+";shape=ellipse;fillColor="+color+";fontColor=white");
 							this.placesDict[place] = placeNode;
 							this.invPlacesDict[placeNode] = place;
 						}
@@ -412,7 +414,7 @@ class OcdfgVisualization {
 							let t = acceptingPetriNet.net.transitions[transId];
 							let transNode = null;
 							if (t.label == null) {
-								transNode = this.graph.insertVertex(parent, "netTrans@@"+t.name, " ", 150, 150, 70, 30, "fontSize=11;shape=box;fillColor="+color+";fontColor=white");
+								transNode = this.graph.insertVertex(parent, "netTrans@@"+t.name, " ", 150, 150, 55, 30, "fontSize=11;shape=box;fillColor="+color+";fontColor=white");
 							}
 							else {
 								transNode = this.activitiesIndipendent[t.label];
@@ -450,7 +452,7 @@ class OcdfgVisualization {
 							let edgeLabel = "TO="+replayResult.arcExecutions[arc];
 							let strokeWidth = "1";
 							if (isDouble) {
-								strokeWidth = "3";
+								strokeWidth = "5";
 							}
 							this.graph.insertEdge(parent, arc.toString(), edgeLabel, source, target, "fontSize=10;strokeColor="+color+";fontColor="+color+";strokeWidth="+strokeWidth);
 						}
@@ -462,11 +464,12 @@ class OcdfgVisualization {
 			layout.edgeStyle=2;
 			if (this.displayType == "petriNet") {
 				layout.intraCellSpacing=17;
+				layout.interRankCellSpacing=40;
 			}
 			else {
-				layout.intraCellSpacing=30;
+				//layout.intraCellSpacing=40;
+				//layout.interRankCellSpacing=40;
 			}
-			layout.interRankCellSpacing=40;
 			this.graph.getModel().beginUpdate();
 			layout.execute(parent);
 			this.graph.getModel().endUpdate();
