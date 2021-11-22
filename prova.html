@@ -102,8 +102,8 @@
 			graph.insertEdge(parent, "", "", loopbackCustomer, sourceCustomer, "fontSize=16;strokeColor="+strokeColorCustomer);*/
 			
 			let loopbackCustomer = graph.insertVertex(parent, "loopbackCustomer", " ", 150, 150, 70, 30, "fontSize=18;shape=box;fillColor="+strokeColorCustomer);
-			graph.insertEdge(parent, "", "", sourceCustomer, loopbackCustomer, "rounded=1;fontSize=16;strokeColor="+strokeColorCustomer+";endArrow=block;");
-			graph.insertEdge(parent, "", "", loopbackCustomer, sinkCustomer, "rounded=1;fontSize=16;strokeColor="+strokeColorCustomer+";endArrow=block;");
+			graph.insertEdge(parent, "", "", sourceCustomer, loopbackCustomer, "rounded=1;endArrow=none;startArrow=block;markerSize=0;fontSize=16;strokeColor="+strokeColorCustomer);
+			graph.insertEdge(parent, "", "", loopbackCustomer, sinkCustomer, "rounded=1;endArrow=none;startArrow=block;markerSize=0;fontSize=16;strokeColor="+strokeColorCustomer);
 
 			var layout = new mxHierarchicalLayout(graph, mxConstants.DIRECTION_WEST);
 			//layout.edgeStyle=1;
