@@ -1,0 +1,112 @@
+<html>
+	<head>
+		<script src="scripts/generic/jquery.min.js"></script>
+		<script src="scripts/generic/mxClient.min.js"></script>
+	</head>
+	<body>
+		<div id="targetContainer">
+		</div>
+		<script type="text/javascript">
+			var graph = new mxGraph(document.getElementById("targetContainer"));
+			var parent = graph.getDefaultParent();
+			var strokeColorCampaign = "black";
+			var strokeColorCustomer = "blue";
+			var strokeColorOpportunity = "orange";
+			let sourceCampaign = graph.insertVertex(parent, "source_campaign", " ", 150, 150, 40, 40, "fontSize=18;shape=ellipse;fillColor="+strokeColorCampaign);
+			let sourceCustomer = graph.insertVertex(parent, "source_customer", " ", 150, 150, 40, 40, "fontSize=18;shape=ellipse;fillColor="+strokeColorCustomer);
+			let p1Campaign = graph.insertVertex(parent, "p1_campaign", " ", 150, 150, 40, 40, "fontSize=18;shape=ellipse;fillColor="+strokeColorCampaign);
+			let p1Customer = graph.insertVertex(parent, "p1_customer", " ", 150, 150, 40, 40, "fontSize=18;shape=ellipse;fillColor="+strokeColorCustomer);
+			let p2Campaign = graph.insertVertex(parent, "p2_campaign", " ", 150, 150, 40, 40, "fontSize=18;shape=ellipse;fillColor="+strokeColorCampaign);
+			let p2Customer = graph.insertVertex(parent, "p2_customer", " ", 150, 150, 40, 40, "fontSize=18;shape=ellipse;fillColor="+strokeColorCustomer);
+			let p3Customer = graph.insertVertex(parent, "p3_customer", " ", 150, 150, 40, 40, "fontSize=18;shape=ellipse;fillColor="+strokeColorCustomer);
+			let p4Customer = graph.insertVertex(parent, "p4_customer", " ", 150, 150, 40, 40, "fontSize=18;shape=ellipse;fillColor="+strokeColorCustomer);
+			let sinkCampaign = graph.insertVertex(parent, "sink_campaign", " ", 150, 150, 40, 40, "fontSize=18;shape=ellipse;fillColor="+strokeColorCampaign);
+			let sourceOpportunity = graph.insertVertex(parent, "source_opportunity", " ", 150, 150, 40, 40, "fontSize=18;shape=ellipse;fillColor="+strokeColorOpportunity);
+			let p1Opportunity = graph.insertVertex(parent, "p1_opportunity", " ", 150, 150, 40, 40, "fontSize=18;shape=ellipse;fillColor="+strokeColorOpportunity);
+			let p2Opportunity = graph.insertVertex(parent, "p2_opportunity", " ", 150, 150, 40, 40, "fontSize=18;shape=ellipse;fillColor="+strokeColorOpportunity);
+			let p3Opportunity = graph.insertVertex(parent, "p3_opportunity", " ", 150, 150, 40, 40, "fontSize=18;shape=ellipse;fillColor="+strokeColorOpportunity);
+			let p4Opportunity = graph.insertVertex(parent, "p4_opportunity", " ", 150, 150, 40, 40, "fontSize=18;shape=ellipse;fillColor="+strokeColorOpportunity);
+			let p5Opportunity = graph.insertVertex(parent, "p5_opportunity", " ", 150, 150, 40, 40, "fontSize=18;shape=ellipse;fillColor="+strokeColorOpportunity);
+			let p6Opportunity = graph.insertVertex(parent, "p6_opportunity", " ", 150, 150, 40, 40, "fontSize=18;shape=ellipse;fillColor="+strokeColorOpportunity);
+			let sinkOpportunity = graph.insertVertex(parent, "sink_opportunity", " ", 150, 150, 40, 40, "fontSize=18;shape=ellipse;fillColor="+strokeColorOpportunity);
+			let sinkCustomer = graph.insertVertex(parent, "sink_customer", " ", 150, 150, 40, 40, "fontSize=18;shape=ellipse;fillColor="+strokeColorCustomer);
+			let createCampaign = graph.insertVertex(parent, "Create Campaign", "Create\nCampaign", 150, 150, 100, 100, "fontSize=18;shape=box;fillColor=white");
+			let physicalAppointment = graph.insertVertex(parent, "Physical Appointment", "Physical\nAppointment", 150, 150, 100, 100, "fontSize=18;shape=box;fillColor=white");
+			let phoneCall = graph.insertVertex(parent, "Phone Call", "Phone\nCall", 150, 150, 100, 100, "fontSize=18;shape=box;fillColor=white");
+			let sendEmail = graph.insertVertex(parent, "Send E-Mail", "Send\nE-Mail", 150, 150, 100, 100, "fontSize=18;shape=box;fillColor=white");
+			let createOpportunity = graph.insertVertex(parent, "Create Opportunity", "Create\nOpportunity", 150, 150, 100, 100, "fontSize=18;shape=box;fillColor=white");
+			let createQuotation = graph.insertVertex(parent, "Create Quotation", "Create\nQuotation", 150, 150, 100, 100, "fontSize=18;shape=box;fillColor=white");
+			let sendQuotation = graph.insertVertex(parent, "Send Quotation", "Send\nQuotation", 150, 150, 100, 100, "fontSize=18;shape=box;fillColor=white");
+			let invisibleChoiceOpp = graph.insertVertex(parent, "invisibleChoiceOpp", " ", 150, 150, 70, 30, "fontSize=18;shape=box;fillColor="+strokeColorOpportunity);
+			let loopbackCustomer = graph.insertVertex(parent, "loopbackCustomer", " ", 150, 150, 70, 30, "fontSize=18;shape=box;fillColor="+strokeColorCustomer);
+			let loopbackCampaign1 = graph.insertVertex(parent, "loopbackCampaign1", " ", 150, 150, 70, 30, "fontSize=18;shape=box;fillColor="+strokeColorCampaign);
+			let loopbackCampaign2 = graph.insertVertex(parent, "loopbackCampaign2", " ", 150, 150, 70, 30, "fontSize=18;shape=box;fillColor="+strokeColorCampaign);
+			let skipOpportunityCreation = graph.insertVertex(parent, "skipOpportunityCreation", " ", 150, 150, 70, 30, "fontSize=18;shape=box;fillColor="+strokeColorCampaign);
+			let skipOpportunityCreation2 = graph.insertVertex(parent, "skipOpportunityCreation2", " ", 150, 150, 70, 30, "fontSize=18;shape=box;fillColor="+strokeColorCustomer);
+			let updateCustomerRecord = graph.insertVertex(parent, "Update Customer Record", "Update\nCustomer\nRecord", 150, 150, 100, 100, "fontSize=18;shape=box;fillColor=white");
+			let opportunityWon = graph.insertVertex(parent, "Opportunity Won", "Opportunity\nWon", 150, 150, 100, 100, "fontSize=18;shape=box;fillColor=white");
+			let opportunityLost = graph.insertVertex(parent, "Opportunity Lost", "Opportunity\nLost", 150, 150, 100, 100, "fontSize=18;shape=box;fillColor=white");
+			graph.insertEdge(parent, "", "", sourceCampaign, createCampaign, "fontSize=16;strokeColor="+strokeColorCampaign);
+			graph.insertEdge(parent, "", "", sourceCustomer, createCampaign, "fontSize=16;strokeColor="+strokeColorCustomer);
+			graph.insertEdge(parent, "", "", createCampaign, p1Campaign, "fontSize=16;strokeColor="+strokeColorCampaign);
+			graph.insertEdge(parent, "", "", createCampaign, p1Customer, "fontSize=16;strokeColor="+strokeColorCustomer);
+			graph.insertEdge(parent, "", "", p1Campaign, physicalAppointment, "fontSize=16;strokeColor="+strokeColorCampaign);
+			graph.insertEdge(parent, "", "", p1Campaign, phoneCall, "fontSize=16;strokeColor="+strokeColorCampaign);
+			graph.insertEdge(parent, "", "", p1Campaign, sendEmail, "fontSize=16;strokeColor="+strokeColorCampaign);
+			graph.insertEdge(parent, "", "", p1Customer, physicalAppointment, "fontSize=16;strokeColor="+strokeColorCustomer);
+			graph.insertEdge(parent, "", "", p1Customer, phoneCall, "fontSize=16;strokeColor="+strokeColorCustomer);
+			graph.insertEdge(parent, "", "", p1Customer, sendEmail, "fontSize=16;strokeColor="+strokeColorCustomer);
+			graph.insertEdge(parent, "", "", physicalAppointment, p2Campaign, "fontSize=16;strokeColor="+strokeColorCampaign);
+			graph.insertEdge(parent, "", "", phoneCall, p2Campaign, "fontSize=16;strokeColor="+strokeColorCampaign);
+			graph.insertEdge(parent, "", "", sendEmail, p2Campaign, "fontSize=16;strokeColor="+strokeColorCampaign);
+			graph.insertEdge(parent, "", "", physicalAppointment, p2Customer, "fontSize=16;strokeColor="+strokeColorCustomer);
+			graph.insertEdge(parent, "", "", phoneCall, p2Customer, "fontSize=16;strokeColor="+strokeColorCustomer);
+			graph.insertEdge(parent, "", "", sendEmail, p2Customer, "fontSize=16;strokeColor="+strokeColorCustomer);
+			graph.insertEdge(parent, "", "", p2Campaign, createOpportunity, "fontSize=16;strokeColor="+strokeColorCampaign);
+			graph.insertEdge(parent, "", "", sourceOpportunity, createOpportunity, "fontSize=16;strokeColor="+strokeColorOpportunity);
+			graph.insertEdge(parent, "", "", p2Customer, createOpportunity, "fontSize=16;strokeColor="+strokeColorCustomer);
+			graph.insertEdge(parent, "", "", createOpportunity, sinkCampaign, "fontSize=16;strokeColor="+strokeColorCampaign);
+			graph.insertEdge(parent, "", "", createOpportunity, p1Opportunity, "fontSize=16;strokeColor="+strokeColorOpportunity);
+			graph.insertEdge(parent, "", "", createOpportunity, p2Opportunity, "fontSize=16;strokeColor="+strokeColorOpportunity);
+			graph.insertEdge(parent, "", "", createOpportunity, p3Customer, "fontSize=16;strokeColor="+strokeColorCustomer);
+			graph.insertEdge(parent, "", "", p1Opportunity, createQuotation, "fontSize=16;strokeColor="+strokeColorOpportunity);
+			graph.insertEdge(parent, "", "", createQuotation, p3Opportunity, "fontSize=16;strokeColor="+strokeColorOpportunity);
+			graph.insertEdge(parent, "", "", p3Opportunity, sendQuotation, "fontSize=16;strokeColor="+strokeColorOpportunity);
+			graph.insertEdge(parent, "", "", p3Customer, updateCustomerRecord, "fontSize=16;strokeColor="+strokeColorCustomer);
+			graph.insertEdge(parent, "", "", p2Opportunity, updateCustomerRecord, "fontSize=16;strokeColor="+strokeColorOpportunity);
+			graph.insertEdge(parent, "", "", sendQuotation, p4Opportunity, "fontSize=16;strokeColor="+strokeColorOpportunity);
+			graph.insertEdge(parent, "", "", updateCustomerRecord, p5Opportunity, "fontSize=16;strokeColor="+strokeColorOpportunity);
+			graph.insertEdge(parent, "", "", updateCustomerRecord, p4Customer, "fontSize=16;strokeColor="+strokeColorCustomer);
+			graph.insertEdge(parent, "", "", p4Opportunity, invisibleChoiceOpp, "fontSize=16;strokeColor="+strokeColorOpportunity);
+			graph.insertEdge(parent, "", "", p5Opportunity, invisibleChoiceOpp, "fontSize=16;strokeColor="+strokeColorOpportunity);
+			graph.insertEdge(parent, "", "", invisibleChoiceOpp, p6Opportunity, "fontSize=16;strokeColor="+strokeColorOpportunity);
+			graph.insertEdge(parent, "", "", p6Opportunity, opportunityWon, "fontSize=16;strokeColor="+strokeColorOpportunity);
+			graph.insertEdge(parent, "", "", p6Opportunity, opportunityLost, "fontSize=16;strokeColor="+strokeColorOpportunity);
+			graph.insertEdge(parent, "", "", p4Customer, opportunityWon, "fontSize=16;strokeColor="+strokeColorCustomer);
+			graph.insertEdge(parent, "", "", p4Customer, opportunityLost, "fontSize=16;strokeColor="+strokeColorCustomer);
+			graph.insertEdge(parent, "", "", opportunityWon, sinkOpportunity, "fontSize=16;strokeColor="+strokeColorOpportunity);
+			graph.insertEdge(parent, "", "", opportunityWon, sinkCustomer, "fontSize=16;strokeColor="+strokeColorCustomer);
+			graph.insertEdge(parent, "", "", opportunityLost, sinkOpportunity, "fontSize=16;strokeColor="+strokeColorOpportunity);
+			graph.insertEdge(parent, "", "", opportunityLost, sinkCustomer, "fontSize=16;strokeColor="+strokeColorCustomer);
+			graph.insertEdge(parent, "", "", sinkCustomer, loopbackCustomer, "fontSize=16;strokeColor="+strokeColorCustomer);
+			graph.insertEdge(parent, "", "", loopbackCustomer, sourceCustomer, "fontSize=16;strokeColor="+strokeColorCustomer);
+			graph.insertEdge(parent, "", "", loopbackCampaign1, p2Campaign, "fontSize=16;strokeColor="+strokeColorCampaign);
+			graph.insertEdge(parent, "", "", sinkCampaign, loopbackCampaign1, "fontSize=16;strokeColor="+strokeColorCampaign);
+			graph.insertEdge(parent, "", "", loopbackCampaign2, p1Campaign, "fontSize=16;strokeColor="+strokeColorCampaign);
+			graph.insertEdge(parent, "", "", p2Campaign, loopbackCampaign2, "fontSize=16;strokeColor="+strokeColorCampaign);
+			graph.insertEdge(parent, "", "", p2Campaign, skipOpportunityCreation, "fontSize=16;strokeColor="+strokeColorCampaign);
+			graph.insertEdge(parent, "", "", skipOpportunityCreation, sinkCampaign, "fontSize=16;strokeColor="+strokeColorCampaign);
+			graph.insertEdge(parent, "", "", skipOpportunityCreation2, sinkCustomer, "fontSize=16;strokeColor="+strokeColorCustomer);
+			graph.insertEdge(parent, "", "", p2Customer, skipOpportunityCreation2, "fontSize=16;strokeColor="+strokeColorCustomer);
+
+			var layout = new mxHierarchicalLayout(graph, mxConstants.DIRECTION_WEST);
+			//layout.edgeStyle=1;
+			graph.getModel().beginUpdate();
+			layout.execute(parent);
+			graph.getModel().endUpdate();
+			graph.fit();
+			graph.view.rendering = true;
+			graph.refresh();
+		</script>
+	</body>
+</html>
