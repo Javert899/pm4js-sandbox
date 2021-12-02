@@ -1,0 +1,128 @@
+<html>
+	<head>
+		<script src="scripts/generic/jquery.min.js"></script>
+		<script src="scripts/generic/mxClient.min.js"></script>
+	</head>
+	<body>
+		<div id="targetContainer">
+		</div>
+		<script type="text/javascript"> 
+			var graph = new mxGraph(document.getElementById("targetContainer"));
+			var parent = graph.getDefaultParent();
+			
+			var strokeColorCampaign = "green";
+			var strokeColorCustomer = "blue";
+			var strokeColorOpportunity = "orange";
+			
+			var strokeColorCampaign2 = "green";
+			var strokeColorCustomer2 = "blue";
+			var strokeColorOpportunity2 = "orange";
+			
+			var strokeColor1 = "gray";
+			var strokeColor2 = "gray";
+			var strokeColor3 = "gray";
+			var strokeColor4 = "gray";
+			
+			var fontColor1 = "black";
+			var fontColor2 = "black";
+			var fontColor3 = "black";
+			var fontColor4 = "black";
+			
+			var endArrowCampaign = "block";
+			var endArrowCustomer = "block";
+			var endArrowOpportunity = "block";
+			
+			var enableCampaign = true;
+			var enableCustomer = true;
+			var enableOpportunity = true;
+			
+			if (!(enableCampaign)) {
+				strokeColorCampaign = "white";
+				strokeColorCampaign2 = "white";
+				endArrowCampaign = "block";
+			}
+			
+			if (!(enableCustomer)) {
+				strokeColorCustomer = "white";
+				strokeColorCustomer2 = "white";
+				endArrowCustomer = "block";
+			}
+			
+			if (!(enableOpportunity)) {
+				strokeColorOpportunity = "white";
+				strokeColorOpportunity2 = "white";
+				endArrowOpportunity = "block";
+				fontColor2 = "white";
+				strokeColor2 = "white";
+			}
+			
+			if (!(enableCampaign || enableCustomer)) {
+				strokeColor1 = "white";
+				fontColor1 = "white";
+			}
+						
+			if (!(enableCampaign || enableCustomer || enableOpportunity)) {
+				strokeColor4 = "white";
+				fontColor4 = "white";
+			}
+			
+			if (!(enableCustomer || enableOpportunity)) {
+				strokeColor3 = "white";
+				fontColor3 = "white";
+			}
+			
+			let sourceCampaign = graph.insertVertex(parent, "source_campaign", " ", 150, 150, 40, 40, "fontSize=18;shape=ellipse;fillColor="+strokeColorCampaign+";strokeColor="+strokeColorCampaign2+";fontColor=white");
+			let sinkCampaign = graph.insertVertex(parent, "sink_campaign", " ", 150, 150, 40, 40, "fontSize=18;shape=ellipse;fillColor="+strokeColorCampaign+";strokeColor="+strokeColorCampaign2+";fontColor=white");
+			let sourceCustomer = graph.insertVertex(parent, "source_customer", " ", 150, 150, 40, 40, "fontSize=18;shape=ellipse;fillColor="+strokeColorCustomer+";strokeColor="+strokeColorCustomer2+";fontColor=white");
+			let sinkCustomer = graph.insertVertex(parent, "sink_customer", " ", 150, 150, 40, 40, "fontSize=18;shape=ellipse;fillColor="+strokeColorCustomer+";strokeColor="+strokeColorCustomer2+";fontColor=white");
+			let sourceOpportunity = graph.insertVertex(parent, "source_opportunity", " ", 150, 150, 40, 40, "fontSize=18;shape=ellipse;fillColor="+strokeColorOpportunity+";strokeColor="+strokeColorOpportunity2+";fontColor=white");
+			let sinkOpportunity = graph.insertVertex(parent, "source_opportunity", " ", 150, 150, 40, 40, "fontSize=18;shape=ellipse;fillColor="+strokeColorOpportunity+";strokeColor="+strokeColorOpportunity2+";fontColor=white");
+
+			let createCampaign = graph.insertVertex(parent, "Create Campaign", "Create\nCampaign", 150, 150, 100, 68, "fontSize=18;shape=box;fillColor=white;fontColor="+fontColor1+";strokeColor="+strokeColor1+";");
+			let physicalAppointment = graph.insertVertex(parent, "Physical Appointment", "Physical\nAppointment", 150, 150, 120, 68, "fontSize=18;shape=box;fillColor=white;fontColor="+fontColor1+";strokeColor="+strokeColor1+";");
+			let phoneCall = graph.insertVertex(parent, "Phone Call", "Phone\nCall", 150, 150, 100, 68, "fontSize=18;shape=box;fillColor=white;fontColor="+fontColor1+";strokeColor="+strokeColor1+";");
+			let sendEmail = graph.insertVertex(parent, "Send E-Mail", "Send\nE-Mail", 150, 150, 100, 68, "fontSize=18;shape=box;fillColor=white;fontColor="+fontColor1+";strokeColor="+strokeColor1+";");
+			let createOpportunity = graph.insertVertex(parent, "Create Opportunity", "Create\nOpportunity", 150, 150, 120, 68, "fontSize=18;shape=box;fillColor=white;fontColor="+fontColor4+";strokeColor="+strokeColor4+";");
+			let createQuotation = graph.insertVertex(parent, "Create Quotation", "Create\nQuotation", 150, 150, 100, 68, "fontSize=18;shape=box;fillColor=white;fontColor="+fontColor2+";strokeColor="+strokeColor2+";");
+			let sendQuotation = graph.insertVertex(parent, "Send Quotation", "Send\nQuotation", 150, 150, 100, 68, "fontSize=18;shape=box;fillColor=white;fontColor="+fontColor2+";strokeColor="+strokeColor2+";");
+			let updateCustomerRecord = graph.insertVertex(parent, "Update Customer Record", "Update\nCustomer\nRecord", 150, 150, 100, 100, "fontSize=18;shape=box;fillColor=white;fontColor="+fontColor3+";strokeColor="+strokeColor3+";");
+			let opportunityWon = graph.insertVertex(parent, "Opportunity Won", "Opportunity\nWon", 150, 150, 120, 68, "fontSize=18;shape=box;fillColor=white;fontColor="+fontColor3+";strokeColor="+strokeColor3+";");
+			let opportunityLost = graph.insertVertex(parent, "Opportunity Lost", "Opportunity\nLost", 150, 150, 120, 68, "fontSize=18;shape=box;fillColor=white;fontColor="+fontColor3+";strokeColor="+strokeColor3+";");
+
+			graph.insertEdge(parent, "campaigncreateCampaignSendEMail", " ", createCampaign, sendEmail, "rounded=1;fontSize=16;strokeColor="+strokeColorCampaign2+";endArrow="+endArrowCampaign+";fontColor="+strokeColorCampaign);
+			graph.insertEdge(parent, "createCampaignPhysicalAppointment", " ", createCampaign, physicalAppointment, "rounded=1;fontSize=16;strokeColor="+strokeColorCampaign2+";endArrow="+endArrowCampaign+";fontColor="+strokeColorCampaign);
+			graph.insertEdge(parent, "createCampaignPhoneCall", " ", createCampaign, phoneCall, "rounded=1;fontSize=16;strokeColor="+strokeColorCampaign2+";endArrow="+endArrowCampaign+";fontColor="+strokeColorCampaign);
+			graph.insertEdge(parent, "physicalAppointmentCreateOpportunity", " ", physicalAppointment, createOpportunity, "rounded=1;fontSize=16;strokeColor="+strokeColorCampaign2+";endArrow="+endArrowCampaign+";fontColor="+strokeColorCampaign);
+			graph.insertEdge(parent, "sendEmailCreateOpportunity", " ", sendEmail, createOpportunity, "rounded=1;fontSize=16;strokeColor="+strokeColorCampaign2+";endArrow="+endArrowCampaign+";fontColor="+strokeColorCampaign);
+			graph.insertEdge(parent, "phoneCallPhysicalAppointment", " ", phoneCall, physicalAppointment, "rounded=1;fontSize=16;strokeColor="+strokeColorCampaign2+";endArrow="+endArrowCampaign+";fontColor="+strokeColorCampaign);
+			graph.insertEdge(parent, "sourceCampaignCreateCampaign", " ", sourceCampaign, createCampaign, "rounded=1;fontSize=16;strokeColor="+strokeColorCampaign2+";endArrow="+endArrowCampaign+";fontColor="+strokeColorCampaign);
+			graph.insertEdge(parent, "createOpportunitySinkCampaign", " ", createOpportunity, sinkCampaign, "rounded=1;fontSize=16;strokeColor="+strokeColorCampaign2+";endArrow="+endArrowCampaign+";fontColor="+strokeColorCampaign);
+			graph.insertEdge(parent, "sendEmailSinkCampaign", " ", sendEmail, sinkCampaign, "rounded=1;fontSize=16;strokeColor="+strokeColorCampaign2+";endArrow="+endArrowCampaign+";fontColor="+strokeColorCampaign);
+
+			graph.insertEdge(parent, "sourceCustomerCreateCampaign", " ", sourceCustomer, createCampaign, "rounded=1;fontSize=16;strokeColor="+strokeColorCustomer2+";endArrow="+endArrowCustomer+";fontColor="+strokeColorCustomer);
+			graph.insertEdge(parent, "sendEmailSinkCustomer", " ", sendEmail, sinkCustomer, "rounded=1;fontSize=16;strokeColor="+strokeColorCustomer2+";endArrow="+endArrowCustomer+";fontColor="+strokeColorCustomer);
+			graph.insertEdge(parent, "createCampaignSendEmail", " ", createCampaign, sendEmail, "rounded=1;fontSize=16;strokeColor="+strokeColorCustomer2+";endArrow="+endArrowCustomer+";fontColor="+strokeColorCustomer);
+			graph.insertEdge(parent, "createCampaignPhoneCall", " ", createCampaign, phoneCall, "rounded=1;fontSize=16;strokeColor="+strokeColorCustomer2+";endArrow="+endArrowCustomer+";fontColor="+strokeColorCustomer);
+			graph.insertEdge(parent, "createCampaignPhysicalAppointment", " ", createCampaign, physicalAppointment, "rounded=1;fontSize=16;strokeColor="+strokeColorCustomer2+";endArrow="+endArrowCustomer+";fontColor="+strokeColorCustomer);
+			graph.insertEdge(parent, "sendEmailCreateOpportunity", " ", sendEmail, createOpportunity, "rounded=1;fontSize=16;strokeColor="+strokeColorCustomer2+";endArrow="+endArrowCustomer+";fontColor="+strokeColorCustomer);
+			graph.insertEdge(parent, "phoneCallCreateOpportunity", " ", phoneCall, createOpportunity, "rounded=1;fontSize=16;strokeColor="+strokeColorCustomer2+";endArrow="+endArrowCustomer+";fontColor="+strokeColorCustomer);
+			graph.insertEdge(parent, "physicalAppointmentCreateOpportunity", " ", physicalAppointment, createOpportunity, "rounded=1;fontSize=16;strokeColor="+strokeColorCustomer2+";endArrow="+endArrowCustomer+";fontColor="+strokeColorCustomer);
+			graph.insertEdge(parent, "opportunityLostSinkCustomer", " ", opportunityLost, sinkCustomer, "rounded=1;fontSize=16;strokeColor="+strokeColorCustomer2+";endArrow="+endArrowCustomer+";fontColor="+strokeColorCustomer);
+			graph.insertEdge(parent, "opportunityWonSinkCustomer", " ", opportunityWon, sinkCustomer, "rounded=1;fontSize=16;strokeColor="+strokeColorCustomer2+";endArrow="+endArrowCustomer+";fontColor="+strokeColorCustomer);
+
+			graph.insertEdge(parent, "opportunityLostsinkOpportunity", " ", opportunityLost, sinkOpportunity, "rounded=1;fontSize=16;strokeColor="+strokeColorOpportunity2+";endArrow="+endArrowOpportunity+";fontColor="+strokeColorOpportunity);
+			graph.insertEdge(parent, "opportunityWonsinkOpportunity", " ", opportunityWon, sinkOpportunity, "rounded=1;fontSize=16;strokeColor="+strokeColorOpportunity2+";endArrow="+endArrowOpportunity+";fontColor="+strokeColorOpportunity);
+
+
+			var layout = new mxHierarchicalLayout(graph, mxConstants.DIRECTION_WEST);
+
+			layout.interRankCellSpacing=65;
+			graph.getModel().beginUpdate();
+			layout.execute(parent);
+			graph.getModel().endUpdate();
+			graph.fit();
+			graph.view.rendering = true;
+			graph.refresh();
+		</script>
+	</body>
+</html>

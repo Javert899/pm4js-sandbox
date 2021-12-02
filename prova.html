@@ -10,11 +10,11 @@
 			var graph = new mxGraph(document.getElementById("targetContainer"));
 			var parent = graph.getDefaultParent();
 			
-			var strokeColorCampaign = "black";
+			var strokeColorCampaign = "green";
 			var strokeColorCustomer = "blue";
 			var strokeColorOpportunity = "orange";
 			
-			var strokeColorCampaign2 = "black";
+			var strokeColorCampaign2 = "green";
 			var strokeColorCustomer2 = "blue";
 			var strokeColorOpportunity2 = "orange";
 
@@ -34,10 +34,14 @@
 			var fontColor4 = "black";
 			
 			var enableCampaign = true;
-			var enableCustomer = false;
-			var enableOpportunity = false;
+			var enableCustomer = true;
+			var enableOpportunity = true;
+			var enableOpportunityCreationSkip = true;
 			
-			var graify = true;
+			var multiArcDashed = "1";
+			var multiArcStrokeWidth = "3";
+			
+			var graify = false;
 			
 			if (graify) {
 				strokeColorCampaign = "white";
@@ -46,6 +50,9 @@
 				strokeColorCampaign2 = "black";
 				strokeColorCustomer2 = "black";
 				strokeColorOpportunity2 = "black";
+				multiArcDashed = "0";
+				multiArcStrokeWidth = "1";
+				//enableOpportunityCreationSkip = false;
 			}
 			
 			if (!(enableCampaign)) {
@@ -94,17 +101,16 @@
 			/*statistics["p3_customer"] = "P=4088;M=0\nC=4050;R=38";
 			statistics["p4_customer"] = "P=4050;M=38\nC=4088;R=0";*/
 			
-			//statistics["createCampaignp1Customer"] = "\n\n\n\n\nMin. Obj. = 8\nMax. Obj = 10";
+			//statistics["createCampaignp1Customer"] = "\n\n\n\n\nMin. Obj. = 2\nMax. Obj = 10";
 			
 			/*statistics["p1OpportunitycreateQuotation"] = "\n\n\nAvg.Time=1D";
 			statistics["p3OpportunitysendQuotation"] = "\n\n\nAvg.Time=1W";
 			*/
 			
-			/*
-			*/
-			/*statistics["createCampaignp1Customer"] = "\n\n\n\n\nMin. Obj. = 8\nMax. Obj = 10";
+			//statistics["createCampaignp1Customer"] = "\n\n\n\n\nMin. Obj. = 8\nMax. Obj = 10";
+			
 			statistics["p1OpportunitycreateQuotation"] = "\n\n\nAvg.Time=1D";
-			statistics["p3OpportunitysendQuotation"] = "\n\n\nAvg.Time=1W";*/
+			statistics["p3OpportunitysendQuotation"] = "\n\n\nAvg.Time=1W";
 
 			let sourceCampaign = null;
 			if ("source_campaign" in statistics) {
@@ -170,7 +176,10 @@
 			let invisibleChoiceOpp = graph.insertVertex(parent, "invisibleChoiceOpp", " ", 150, 150, 70, 30, "fontSize=18;shape=box;fillColor="+strokeColorOpportunity2+";strokeColor="+strokeColorOpportunity2);
 			let loopbackCampaign1 = graph.insertVertex(parent, "loopbackCampaign1", " ", 150, 150, 70, 30, "fontSize=18;shape=box;fillColor="+strokeColorCampaign2+";strokeColor="+strokeColorCampaign2);
 			let loopbackCampaign2 = graph.insertVertex(parent, "loopbackCampaign2", " ", 150, 150, 70, 30, "fontSize=18;shape=box;fillColor="+strokeColorCampaign2+";strokeColor="+strokeColorCampaign2);
-			let skipOpportunityCreation = graph.insertVertex(parent, "skipOpportunityCreation", " ", 150, 150, 70, 30, "fontSize=18;shape=box;fillColor="+strokeColorCampaign2+";strokeColor="+strokeColorCampaign2);
+			let skipOpportunityCreation = false;
+			if (enableOpportunityCreationSkip) {
+				skipOpportunityCreation = graph.insertVertex(parent, "skipOpportunityCreation", " ", 150, 150, 70, 30, "fontSize=18;shape=box;fillColor="+strokeColorCampaign2+";strokeColor="+strokeColorCampaign2);
+			}
 			let skipOpportunityCreation2 = graph.insertVertex(parent, "skipOpportunityCreation2", " ", 150, 150, 70, 30, "fontSize=18;shape=box;fillColor="+strokeColorCustomer2+";strokeColor="+strokeColorCustomer2);
 			let updateCustomerRecord = graph.insertVertex(parent, "Update Customer Record", "Update\nCustomer\nRecord", 150, 150, 100, 100, "fontSize=18;shape=box;fillColor=white;fontColor="+fontColor3+";strokeColor="+strokeColor3+";");
 			let opportunityWon = graph.insertVertex(parent, "Opportunity Won", "Opportunity\nWon", 150, 150, 120, 68, "fontSize=18;shape=box;fillColor=white;fontColor="+fontColor3+";strokeColor="+strokeColor3+";");
@@ -178,21 +187,21 @@
 			let loopbackCustomer = graph.insertVertex(parent, "loopbackCustomer", " ", 150, 150, 70, 30, "fontSize=18;shape=box;fillColor="+strokeColorCustomer2+";strokeColor="+strokeColorCustomer2);
 
 			graph.insertEdge(parent, "sourceCampaigncreateCampaign", statistics["sourceCampaigncreateCampaign"], sourceCampaign, createCampaign, "rounded=1;fontSize=16;strokeColor="+strokeColorCampaign2+";endArrow="+endArrowCampaign+";fontColor="+strokeColorCampaign);
-			graph.insertEdge(parent, "sourceCustomercreateCampaign", statistics["sourceCustomercreateCampaign"], sourceCustomer, createCampaign, "strokeWidth=3;dashed=1;rounded=1;fontSize=16;strokeColor="+strokeColorCustomer2+";fontColor="+strokeColorCustomer);
+			graph.insertEdge(parent, "sourceCustomercreateCampaign", statistics["sourceCustomercreateCampaign"], sourceCustomer, createCampaign, "strokeWidth="+multiArcStrokeWidth+";dashed="+multiArcDashed+";rounded=1;fontSize=16;strokeColor="+strokeColorCustomer2+";fontColor="+strokeColorCustomer);
 			graph.insertEdge(parent, "createCampaignp1Campaign", statistics["createCampaignp1Campaign"], createCampaign, p1Campaign, "rounded=1;fontSize=16;strokeColor="+strokeColorCampaign2+";endArrow="+endArrowCampaign+";fontColor="+strokeColorCampaign);
-			graph.insertEdge(parent, "createCampaignp1Customer", statistics["createCampaignp1Customer"], createCampaign, p1Customer, "strokeWidth=3;dashed=1;rounded=1;fontSize=16;strokeColor="+strokeColorCustomer2+";fontColor="+strokeColorCustomer);
+			graph.insertEdge(parent, "createCampaignp1Customer", statistics["createCampaignp1Customer"], createCampaign, p1Customer, "strokeWidth="+multiArcStrokeWidth+";dashed="+multiArcDashed+";rounded=1;fontSize=16;strokeColor="+strokeColorCustomer2+";fontColor="+strokeColorCustomer);
 			graph.insertEdge(parent, "p1CampaignphysicalAppointment", statistics["p1CampaignphysicalAppointment"], p1Campaign, physicalAppointment, "rounded=1;fontSize=16;strokeColor="+strokeColorCampaign2+";endArrow="+endArrowCampaign+";fontColor="+strokeColorCampaign);
 			graph.insertEdge(parent, "p1CampaignphoneCall", statistics["p1CampaignphoneCall"], p1Campaign, phoneCall, "rounded=1;fontSize=16;strokeColor="+strokeColorCampaign2+";endArrow="+endArrowCampaign+";fontColor="+strokeColorCampaign);
 			graph.insertEdge(parent, "p1CampaignsendEmail", statistics["p1CampaignsendEmail"], p1Campaign, sendEmail, "rounded=1;fontSize=16;strokeColor="+strokeColorCampaign2+";endArrow="+endArrowCampaign+";fontColor="+strokeColorCampaign);
 			graph.insertEdge(parent, "p1CustomerphysicalAppointment", statistics["p1CustomerphysicalAppointment"], p1Customer, physicalAppointment, "rounded=1;fontSize=16;strokeColor="+strokeColorCustomer2+";endArrow="+endArrowCustomer+";fontColor="+strokeColorCustomer);
 			graph.insertEdge(parent, "p1CustomerphoneCall", statistics["p1CustomerphoneCall"], p1Customer, phoneCall, "rounded=1;fontSize=16;strokeColor="+strokeColorCustomer2+";endArrow="+endArrowCampaign+";fontColor="+strokeColorCustomer);
-			graph.insertEdge(parent, "p1CustomersendEmail", statistics["p1CustomersendEmail"], p1Customer, sendEmail, "strokeWidth=3;dashed=1;rounded=1;fontSize=16;strokeColor="+strokeColorCustomer2+";endArrow="+endArrowCustomer+";fontColor="+strokeColorCustomer);
+			graph.insertEdge(parent, "p1CustomersendEmail", statistics["p1CustomersendEmail"], p1Customer, sendEmail, "strokeWidth="+multiArcStrokeWidth+";dashed="+multiArcDashed+";rounded=1;fontSize=16;strokeColor="+strokeColorCustomer2+";endArrow="+endArrowCustomer+";fontColor="+strokeColorCustomer);
 			graph.insertEdge(parent, "physicalAppointmentp2Campaign", statistics["physicalAppointmentp2Campaign"], physicalAppointment, p2Campaign, "rounded=1;fontSize=16;strokeColor="+strokeColorCampaign2+";endArrow="+endArrowCampaign+";fontColor="+strokeColorCampaign);
 			graph.insertEdge(parent, "phoneCallp2Campaign", statistics["phoneCallp2Campaign"], phoneCall, p2Campaign, "rounded=1;fontSize=16;strokeColor="+strokeColorCampaign2+";endArrow="+endArrowCampaign+";fontColor="+strokeColorCampaign);
 			graph.insertEdge(parent, "sendEmailp2Campaign", statistics["sendEmailp2Campaign"], sendEmail, p2Campaign, "rounded=1;fontSize=16;strokeColor="+strokeColorCampaign2+";endArrow="+endArrowCampaign+";fontColor="+strokeColorCampaign);
 			graph.insertEdge(parent, "physicalAppointmentp2Customer", statistics["physicalAppointmentp2Customer"], physicalAppointment, p2Customer, "rounded=1;fontSize=16;strokeColor="+strokeColorCustomer2+";endArrow="+endArrowCustomer+";fontColor="+strokeColorCustomer);
 			graph.insertEdge(parent, "phoneCallp2Customer", statistics["phoneCallp2Customer"], phoneCall, p2Customer, "rounded=1;fontSize=16;strokeColor="+strokeColorCustomer2+";endArrow="+endArrowCustomer+";endArrow="+endArrowCustomer+";fontColor="+strokeColorCustomer);
-			graph.insertEdge(parent, "sendEmailp2Customer", statistics["sendEmailp2Customer"], sendEmail, p2Customer, "strokeWidth=3;dashed=1;rounded=1;fontSize=16;strokeColor="+strokeColorCustomer2+";endArrow="+endArrowCustomer+";fontColor="+strokeColorCustomer);
+			graph.insertEdge(parent, "sendEmailp2Customer", statistics["sendEmailp2Customer"], sendEmail, p2Customer, "strokeWidth="+multiArcStrokeWidth+";dashed="+multiArcDashed+";rounded=1;fontSize=16;strokeColor="+strokeColorCustomer2+";endArrow="+endArrowCustomer+";fontColor="+strokeColorCustomer);
 			graph.insertEdge(parent, "p2CampaigncreateOpportunity", statistics["p2CampaigncreateOpportunity"], p2Campaign, createOpportunity, "rounded=1;fontSize=16;strokeColor="+strokeColorCampaign2+";endArrow="+endArrowCampaign+";fontColor="+strokeColorCampaign);
 			graph.insertEdge(parent, "sourceOpportunitycreateOpportunity", statistics["sourceOpportunitycreateOpportunity"], sourceOpportunity, createOpportunity, "rounded=1;fontSize=16;strokeColor="+strokeColorOpportunity2+";endArrow="+endArrowOpportunity+";fontColor="+strokeColorOpportunity);
 			graph.insertEdge(parent, "p2CustomercreateOpportunity", statistics["p2CustomercreateOpportunity"], p2Customer, createOpportunity, "rounded=1;fontSize=16;strokeColor="+strokeColorCustomer2+";endArrow="+endArrowCustomer+";fontColor="+strokeColorCustomer);
@@ -223,8 +232,10 @@
 			graph.insertEdge(parent, "loopbackCampaign1sinkCampaign", statistics["loopbackCampaign1sinkCampaign"], loopbackCampaign1, sinkCampaign, "rounded=1;endArrow=none;startArrow=block;fontSize=16;strokeColor="+strokeColorCampaign2+";fontColor="+strokeColorCampaign);
 			graph.insertEdge(parent, "p1CampaignloopbackCampaign2", statistics["p1CampaignloopbackCampaign2"], p1Campaign, loopbackCampaign2, "rounded=1;endArrow=none;startArrow=block;fontSize=16;strokeColor="+strokeColorCampaign2+";fontColor="+strokeColorCampaign);
 			graph.insertEdge(parent, "loopbackCampaign2p2Campaign", statistics["loopbackCampaign2p2Campaign"], loopbackCampaign2, p2Campaign, "rounded=1;endArrow=none;startArrow=block;fontSize=16;strokeColor="+strokeColorCampaign2+";fontColor="+strokeColorCampaign);
-			graph.insertEdge(parent, "p2CampaignskipOpportunityCreation", statistics["p2CampaignskipOpportunityCreation"], p2Campaign, skipOpportunityCreation, "rounded=1;fontSize=16;strokeColor="+strokeColorCampaign2+";fontColor="+strokeColorCampaign);
-			graph.insertEdge(parent, "skipOpportunityCreationsinkCampaign", statistics["skipOpportunityCreationsinkCampaign"], skipOpportunityCreation, sinkCampaign, "rounded=1;fontSize=16;strokeColor="+strokeColorCampaign2+";fontColor="+strokeColorCampaign);
+			if (enableOpportunityCreationSkip) {
+				graph.insertEdge(parent, "p2CampaignskipOpportunityCreation", statistics["p2CampaignskipOpportunityCreation"], p2Campaign, skipOpportunityCreation, "rounded=1;fontSize=16;strokeColor="+strokeColorCampaign2+";fontColor="+strokeColorCampaign);
+				graph.insertEdge(parent, "skipOpportunityCreationsinkCampaign", statistics["skipOpportunityCreationsinkCampaign"], skipOpportunityCreation, sinkCampaign, "rounded=1;fontSize=16;strokeColor="+strokeColorCampaign2+";fontColor="+strokeColorCampaign);
+			}
 			graph.insertEdge(parent, "skipOpportunityCreation2sinkCustomer", statistics["skipOpportunityCreation2sinkCustomer"], skipOpportunityCreation2, sinkCustomer, "rounded=1;fontSize=16;strokeColor="+strokeColorCustomer2+";fontColor="+strokeColorCustomer);
 			graph.insertEdge(parent, "p2CustomerskipOpportunityCreation2", statistics["p2CustomerskipOpportunityCreation2"], p2Customer, skipOpportunityCreation2, "rounded=1;fontSize=16;strokeColor="+strokeColorCustomer2+";fontColor="+strokeColorCustomer);
 			graph.insertEdge(parent, "sourceCustomerloopbackCustomer", statistics["sourceCustomerloopbackCustomer"], sourceCustomer, loopbackCustomer, "rounded=1;endArrow=none;startArrow=block;markerSize=0;fontSize=16;strokeColor="+strokeColorCustomer2+";fontColor="+strokeColorCustomer);
