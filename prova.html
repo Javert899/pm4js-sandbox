@@ -109,8 +109,8 @@
 			
 			//statistics["createCampaignp1Customer"] = "\n\n\n\n\nMin. Obj. = 8\nMax. Obj = 10";
 			
-			statistics["p1OpportunitycreateQuotation"] = "\n\n\nAvg.Time=1D";
-			statistics["p3OpportunitysendQuotation"] = "\n\n\nAvg.Time=1W";
+			//statistics["p1OpportunitycreateQuotation"] = "\n\n\nAvg.Time=1D";
+			//statistics["p3OpportunitysendQuotation"] = "\n\n\nAvg.Time=1W";
 
 			let sourceCampaign = null;
 			if ("source_campaign" in statistics) {
@@ -173,18 +173,18 @@
 			let createOpportunity = graph.insertVertex(parent, "Create Opportunity", "Create\nOpportunity", 150, 150, 120, 68, "fontSize=18;shape=box;fillColor=white;fontColor="+fontColor4+";strokeColor="+strokeColor4+";");
 			let createQuotation = graph.insertVertex(parent, "Create Quotation", "Create\nQuotation", 150, 150, 100, 68, "fontSize=18;shape=box;fillColor=white;fontColor="+fontColor2+";strokeColor="+strokeColor2+";");
 			let sendQuotation = graph.insertVertex(parent, "Send Quotation", "Send\nQuotation", 150, 150, 100, 68, "fontSize=18;shape=box;fillColor=white;fontColor="+fontColor2+";strokeColor="+strokeColor2+";");
-			let invisibleChoiceOpp = graph.insertVertex(parent, "invisibleChoiceOpp", " ", 150, 150, 70, 30, "fontSize=18;shape=box;fillColor="+strokeColorOpportunity2+";strokeColor="+strokeColorOpportunity2);
-			let loopbackCampaign1 = graph.insertVertex(parent, "loopbackCampaign1", " ", 150, 150, 70, 30, "fontSize=18;shape=box;fillColor="+strokeColorCampaign2+";strokeColor="+strokeColorCampaign2);
-			let loopbackCampaign2 = graph.insertVertex(parent, "loopbackCampaign2", " ", 150, 150, 70, 30, "fontSize=18;shape=box;fillColor="+strokeColorCampaign2+";strokeColor="+strokeColorCampaign2);
+			let invisibleChoiceOpp = graph.insertVertex(parent, "invisibleChoiceOpp", " ", 150, 150, 25, 35, "fontSize=18;shape=box;fillColor="+strokeColorOpportunity2+";strokeColor="+strokeColorOpportunity2);
+			let loopbackCampaign1 = graph.insertVertex(parent, "loopbackCampaign1", " ", 150, 150, 25, 35, "fontSize=18;shape=box;fillColor="+strokeColorCampaign2+";strokeColor="+strokeColorCampaign2);
+			let loopbackCampaign2 = graph.insertVertex(parent, "loopbackCampaign2", " ", 150, 150, 25, 35, "fontSize=18;shape=box;fillColor="+strokeColorCampaign2+";strokeColor="+strokeColorCampaign2);
 			let skipOpportunityCreation = false;
 			if (enableOpportunityCreationSkip) {
-				skipOpportunityCreation = graph.insertVertex(parent, "skipOpportunityCreation", " ", 150, 150, 70, 30, "fontSize=18;shape=box;fillColor="+strokeColorCampaign2+";strokeColor="+strokeColorCampaign2);
+				skipOpportunityCreation = graph.insertVertex(parent, "skipOpportunityCreation", " ", 150, 150, 25, 35, "fontSize=18;shape=box;fillColor="+strokeColorCampaign2+";strokeColor="+strokeColorCampaign2);
 			}
-			let skipOpportunityCreation2 = graph.insertVertex(parent, "skipOpportunityCreation2", " ", 150, 150, 70, 30, "fontSize=18;shape=box;fillColor="+strokeColorCustomer2+";strokeColor="+strokeColorCustomer2);
+			let skipOpportunityCreation2 = graph.insertVertex(parent, "skipOpportunityCreation2", " ", 150, 150, 25, 35, "fontSize=18;shape=box;fillColor="+strokeColorCustomer2+";strokeColor="+strokeColorCustomer2);
 			let updateCustomerRecord = graph.insertVertex(parent, "Update Customer Record", "Update\nCustomer\nRecord", 150, 150, 100, 100, "fontSize=18;shape=box;fillColor=white;fontColor="+fontColor3+";strokeColor="+strokeColor3+";");
 			let opportunityWon = graph.insertVertex(parent, "Opportunity Won", "Opportunity\nWon", 150, 150, 120, 68, "fontSize=18;shape=box;fillColor=white;fontColor="+fontColor3+";strokeColor="+strokeColor3+";");
 			let opportunityLost = graph.insertVertex(parent, "Opportunity Lost", "Opportunity\nLost", 150, 150, 120, 68, "fontSize=18;shape=box;fillColor=white;fontColor="+fontColor3+";strokeColor="+strokeColor3+";");
-			let loopbackCustomer = graph.insertVertex(parent, "loopbackCustomer", " ", 150, 150, 70, 30, "fontSize=18;shape=box;fillColor="+strokeColorCustomer2+";strokeColor="+strokeColorCustomer2);
+			let loopbackCustomer = graph.insertVertex(parent, "loopbackCustomer", " ", 150, 150, 25, 35, "fontSize=18;shape=box;fillColor="+strokeColorCustomer2+";strokeColor="+strokeColorCustomer2);
 
 			graph.insertEdge(parent, "sourceCampaigncreateCampaign", statistics["sourceCampaigncreateCampaign"], sourceCampaign, createCampaign, "rounded=1;fontSize=16;strokeColor="+strokeColorCampaign2+";endArrow="+endArrowCampaign+";fontColor="+strokeColorCampaign);
 			graph.insertEdge(parent, "sourceCustomercreateCampaign", statistics["sourceCustomercreateCampaign"], sourceCustomer, createCampaign, "strokeWidth="+multiArcStrokeWidth+";dashed="+multiArcDashed+";rounded=1;fontSize=16;strokeColor="+strokeColorCustomer2+";fontColor="+strokeColorCustomer);
