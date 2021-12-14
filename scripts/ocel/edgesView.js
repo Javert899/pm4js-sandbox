@@ -7,6 +7,7 @@ class EdgesView {
 		this.edgesRealizationsObjects = {};
 		this.edgesRealizationsEo = {};
 		this.edgesStatistics = {};
+		this.edgesPerformance = [];
 		this.findEdges();
 		this.calculateStatistics();
 	}
@@ -24,13 +25,33 @@ class EdgesView {
 					this.edgesRealizationsObjects[actTuple] = {};
 					this.edgesRealizationsEo[actTuple] = {};
 					this.edgesStatistics[actTuple] = {};
+					this.edgesPerformance[actTuple] = [];
 				}
 				this.edgesRealizationsEvents[actTuple][[ev1[0], ev2[0]]] = 0;
 				this.edgesRealizationsObjects[actTuple][objId] = 0;
-				this.edgesRealizationsEo[actTuple][[ev1[0], ev2[0], objId]] = 0;				
+				this.edgesRealizationsEo[actTuple][[ev1[0], ev2[0], objId]] = 0;
+				this.edgesPerformance[actTuple].push(ev2[2] - ev1[2]);
 				i++;
 			}
 		}
+	}
+	
+	calculateAvg(vect) {
+		if (vect.length > 0) {
+			let sum = 0;
+			for (let elem of vect) {
+				sum += elem;
+			}
+			return sum / vect.length;
+		}
+		return 0;
+	}
+	
+	calculateMedian(vect) {
+		if (vect.length > 0) {
+			return vect[Math.floor(vect.length) / 2];
+		}
+		return 0;
 	}
 	
 	calculateStatistics() {
@@ -40,6 +61,9 @@ class EdgesView {
 			this.edgesStatistics[actCouple]["total_objects"] = Object.keys(this.edgesRealizationsEo[actCouple]).length;
 			this.edgesStatistics[actCouple]["perc_source"] = (100.0 * this.edgesStatistics[actCouple]["unique_objects"]) / (this.eventsView.activitiesCounters[actCouple.split(",")[0]]["unique_objects"]);
 			this.edgesStatistics[actCouple]["perc_target"] = (100.0 * this.edgesStatistics[actCouple]["unique_objects"]) / (this.eventsView.activitiesCounters[actCouple.split(",")[1]]["unique_objects"]);
+			this.edgesPerformance[actCouple] = this.edgesPerformance[actCouple].sort(function (a, b) { return b - a; }); 
+			this.edgesStatistics[actCouple]["avg_performance"] = this.calculateAvg(this.edgesPerformance[actCouple]);
+			this.edgesStatistics[actCouple]["median_performance"] = this.calculateMedian(this.edgesPerformance[actCouple]);
 		}
 	}
 	
@@ -88,6 +112,8 @@ class EdgesView {
 		ret += "total objects = "+this.edgesStatistics[actCouple]["total_objects"]+"<br />";
 		ret += "perc source = "+this.edgesStatistics[actCouple]["perc_source"]+"<br />";
 		ret += "perc target = "+this.edgesStatistics[actCouple]["perc_target"]+"<br />";
+		ret += "avg performance = "+this.edgesStatistics[actCouple]["avg_performance"]+" s<br />";
+		ret += "median performance = "+this.edgesStatistics[actCouple]["median_performance"]+" s<br />";
 		return ret;
 	}
 	
