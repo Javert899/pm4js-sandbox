@@ -8535,8 +8535,8 @@ class PetriNetReduction {
 					let arc = trans.outArcs[arcId];
 					targetPlaces.push(arc.target);
 				}
-				//if (Object.keys(sourcePlace.inArcs).length == 1 && Object.keys(sourcePlace.outArcs).length == 1) {
-				if (Object.keys(sourcePlace.inArcs).length > 0 && Object.keys(sourcePlace.outArcs).length == 1) {
+				if (Object.keys(sourcePlace.inArcs).length == 1 && Object.keys(sourcePlace.outArcs).length == 1) {
+				//if (Object.keys(sourcePlace.inArcs).length > 0 && Object.keys(sourcePlace.outArcs).length == 1) {
 					for (let arcId in sourcePlace.inArcs) {
 						let sourceTransition = sourcePlace.inArcs[arcId].source;
 						for (let p of targetPlaces) {
@@ -8574,8 +8574,8 @@ class PetriNetReduction {
 					let arc = trans.inArcs[arcId];
 					sourcePlaces.push(arc.source);
 				}
-				//if (Object.keys(targetPlace.inArcs).length == 1 && Object.keys(targetPlace.outArcs).length == 1) {
-				if (Object.keys(targetPlace.inArcs).length == 1 && Object.keys(targetPlace.outArcs).length > 0) {
+				if (Object.keys(targetPlace.inArcs).length == 1 && Object.keys(targetPlace.outArcs).length == 1) {
+				//if (Object.keys(targetPlace.inArcs).length == 1 && Object.keys(targetPlace.outArcs).length > 0) {
 					for (let arcId in targetPlace.outArcs) {
 						let targetTransition = targetPlace.outArcs[arcId].target;
 						for (let p of sourcePlaces) {
@@ -9669,8 +9669,10 @@ class TokenBasedReplayResult {
 		this.totalProducedPerPlace = {};
 		this.totalMissingPerPlace = {};
 		this.totalRemainingPerPlace = {};
+		this.transExecutionPerformance = {};
 		for (let t in acceptingPetriNet.net.transitions) {
 			this.transExecutions[t] = 0;
+			this.transExecutionPerformance[t] = [];
 		}
 		for (let a in acceptingPetriNet.net.arcs) {
 			this.arcExecutions[a] = 0;
@@ -9706,6 +9708,14 @@ class TokenBasedReplayResult {
 				for (let a in t.outArcs) {
 					this.arcExecutions[a]++;
 				}
+			}
+			let i = 0;
+			while (i < res["visitedTransitions"].length) {
+				let trans = res["visitedTransitions"][i];
+				let transTime = res["visitedTransitionsTimes"][i];
+				let markTime = res["visitedMarkingsTimes"][i];
+				this.transExecutionPerformance[trans].push((transTime - markTime));
+				i = i + 1;
 			}
 			for (let p in this.acceptingPetriNet.net.places) {
 				this.totalConsumedPerPlace[p] += res["consumedPerPlace"][p];
