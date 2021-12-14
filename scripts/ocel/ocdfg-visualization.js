@@ -11,6 +11,7 @@ class OcdfgVisualization {
 		this.IDX = 0;
 		this.expandedActivities = {};
 		this.expandedEdges = {};
+		this.elementStatistics = {};
 		this.resetVariables();
 		this.addListeners();
 		this.populateObjectTypes();
@@ -204,6 +205,9 @@ class OcdfgVisualization {
 					menu.style.setProperty('--mouse-y', evt.properties.event.clientY + 'px');
 					menu.style.display = 'block';
 				}
+				else if (cell.id in self.elementStatistics) {
+					Swal.fire({confirmButton: 'Ok', html: self.elementStatistics[cell.id]});
+				}
 			}
 			catch (err) {
 				console.log(err);
@@ -327,7 +331,7 @@ class OcdfgVisualization {
 								if (edgeVect in this.expandedEdges) {
 									label = otEdges.toIntermediateString(edge, this.IDX);
 								}
-								let arc = this.graph.insertEdge(parent, edgeVect.toString(), label, obj1, obj2, "fontSize=16;strokeWidth="+penwidth+";strokeColor="+color+";fontColor="+color);
+								let arc = this.graph.insertEdge(parent, edgeVect.toString(), label, obj1, obj2, "curved=1;fontSize=16;strokeWidth="+penwidth+";strokeColor="+color+";fontColor="+color);
 								this.graphEdges[edgeVect] = arc;
 								this.invGraphEdges[arc.id] = edgeVect;
 								/*if (edgeVect in this.expandedEdges) {
@@ -361,7 +365,7 @@ class OcdfgVisualization {
 						for (let act in otSa) {
 							let value = otSa[act];
 							let penwidth = Math.floor(1 + Math.log(1 + value)/2);
-							let arc = this.graph.insertEdge(parent, null, "UO="+value, saNode, this.activitiesIndipendent[act], "fontSize=16;strokeColor="+color+";fontColor="+color+";strokeWidth="+penwidth);
+							let arc = this.graph.insertEdge(parent, null, "UO="+value, saNode, this.activitiesIndipendent[act], "curved=1;fontSize=16;strokeColor="+color+";fontColor="+color+";strokeWidth="+penwidth);
 						}
 					}
 					let otEa = otObjects.filteredEa(minEdgeCount, this.activitiesIndipendent);
@@ -373,7 +377,7 @@ class OcdfgVisualization {
 						for (let act in otEa) {
 							let value = otEa[act];
 							let penwidth = Math.floor(1 + Math.log(1 + value)/2);
-							let arc = this.graph.insertEdge(parent, null, "UO="+value, this.activitiesIndipendent[act], eaNode, "fontSize=16;strokeColor="+color+";fontColor="+color+";strokeWidth="+penwidth);
+							let arc = this.graph.insertEdge(parent, null, "UO="+value, this.activitiesIndipendent[act], eaNode, "curved=1;fontSize=16;strokeColor="+color+";fontColor="+color+";strokeWidth="+penwidth);
 						}
 					}
 				}
@@ -395,14 +399,17 @@ class OcdfgVisualization {
 						let color = this.stringToColour(ot);
 						let acceptingPetriNet = this.model.otInductiveModels[ot];
 						let replayResult = this.model.otReplayedTraces[ot];
+						console.log("replayResult");
+						console.log(replayResult);
 						for (let placeId in acceptingPetriNet.net.places) {
 							let place = acceptingPetriNet.net.places[placeId];
 							let placeSizeX = 40;
 							let placeSizeY = 40;
 							let fontSize = "16";
 							let placeLabel = "";
+							let tokensPlaceEnum = "p="+replayResult.totalProducedPerPlace[place]+";m="+replayResult.totalMissingPerPlace[place]+"<br />c="+replayResult.totalConsumedPerPlace[place]+";r="+replayResult.totalRemainingPerPlace[place];
 							if (this.petriNetEnableDecorations || place in acceptingPetriNet.im.tokens) {
-								placeLabel = "p="+replayResult.totalProducedPerPlace[place]+";m="+replayResult.totalMissingPerPlace[place]+"<br />c="+replayResult.totalConsumedPerPlace[place]+";r="+replayResult.totalRemainingPerPlace[place];
+								placeLabel = tokensPlaceEnum;
 								placeSizeX = 100;
 								placeSizeY = 100;
 								fontSize = "16";
@@ -416,12 +423,14 @@ class OcdfgVisualization {
 							let placeNode = this.graph.insertVertex(parent, "netPlace@@"+place.name, placeLabel, 150, 150, placeSizeX, placeSizeY, "fontSize="+fontSize+";shape=ellipse;fillColor="+color+";fontColor=white");
 							this.placesDict[place] = placeNode;
 							this.invPlacesDict[placeNode] = place;
+							this.elementStatistics[placeNode.id] = tokensPlaceEnum;
 						}
 						for (let transId in acceptingPetriNet.net.transitions) {
 							let t = acceptingPetriNet.net.transitions[transId];
 							let transNode = null;
 							if (t.label == null) {
-								transNode = this.graph.insertVertex(parent, "netTrans@@"+t.name, " ", 150, 150, 55, 30, "fontSize=11;shape=box;fillColor="+color+";fontColor=white");
+								transNode = this.graph.insertVertex(parent, "netTrans@@"+t.name, " ", 150, 150, 25, 30, "fontSize=11;shape=box;fillColor="+color+";fontColor=white");
+								this.elementStatistics[transNode.id] = "number of executions for invisible = " + replayResult.transExecutions[transId];
 							}
 							else {
 								transNode = this.activitiesIndipendent[t.label];
@@ -461,7 +470,7 @@ class OcdfgVisualization {
 							if (isDouble) {
 								strokeWidth = "5";
 							}
-							this.graph.insertEdge(parent, arc.toString(), edgeLabel, source, target, "fontSize=10;strokeColor="+color+";fontColor="+color+";strokeWidth="+strokeWidth);
+							this.graph.insertEdge(parent, arc.toString(), edgeLabel, source, target, "curved=1;fontSize=10;strokeColor="+color+";fontColor="+color+";strokeWidth="+strokeWidth);
 						}
 					}
 				}
