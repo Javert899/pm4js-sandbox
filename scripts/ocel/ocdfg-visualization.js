@@ -399,8 +399,6 @@ class OcdfgVisualization {
 						let color = this.stringToColour(ot);
 						let acceptingPetriNet = this.model.otInductiveModels[ot];
 						let replayResult = this.model.otReplayedTraces[ot];
-						console.log("replayResult");
-						console.log(replayResult);
 						for (let placeId in acceptingPetriNet.net.places) {
 							let place = acceptingPetriNet.net.places[placeId];
 							let placeSizeX = 40;
