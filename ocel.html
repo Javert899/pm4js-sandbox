@@ -113,7 +113,7 @@
 								</li>
 								
 								<li class="navigation-item">
-									<a class="navigation-link" href="javascript:showExecutions()"><i class="fab fa-mixer"></i>&nbsp;Executions</a>
+									<a class="navigation-link" href="javascript:showNetworkAnalysis()"><i class="fab fa-mixer"></i>&nbsp;Network Analysis</a>
 								</li>
 								
 								<li class="navigation-item">
@@ -581,6 +581,84 @@
 					<table id="executionsTable" border="1" class="table">
 					</table>
 				</div>
+				<div id="networkAnalysisPage" style="display: none">
+					<table id="networkAnalysisContainer" style="width: 100%; height: 85%">
+						<tr>
+							<td style="width: 15%; font-size: 9pt">
+								<p>
+									Link Method<br />
+									<select id="NAlinkMethod" name="NAlinkMethod">
+										<option value="graph" selected>Graph-based</option>
+										<option value="outIn">OUT-IN attribute</option>
+									</select>
+								</p>
+								<p>
+									Graph Link<br />
+									<select id="NAgraphLink" name="NAgraphLink">
+										<option value="descendants" selected>Descendants Graph</option>
+									</select>
+								</p>
+								<p>
+									OUT-attribute<br />
+									<select id="NAoutAttribute" name="NAoutAttribute">
+										<option value="ocel:activity" selected>ocel:activity</option>
+									</select>
+								</p>
+								<p>
+									IN-attribute<br />
+									<select id="NAinAttribute" name="NAinAttribute">
+										<option value="ocel:activity" selected>ocel:activity</option>
+									</select>
+								</p>
+								<p>
+									<input type="checkbox" id="NAkeepFirst" name="NAkeepFirst" checked></input>
+									<label for="NAkeepFirst">Keep First Link</label>
+								</p>
+								<p>
+									<input type="checkbox" id="NAexpandLinks" name="NAexpandLinks"></input>
+									<label for="NAexpandLinks">Expand Links</label>
+								</p>
+								<p>
+									SN aggregation<br />
+									<select id="NAsnAttribute" name="NAsnAttribute">
+										<option value="ocel:activity" selected>ocel:activity</option>
+									</select>
+								</p>
+								<p>
+									TN aggregation<br />
+									<select id="NAtnAttribute" name="NAtnAttribute">
+										<option value="ocel:activity" selected>ocel:activity</option>
+									</select>
+								</p>
+								<p>
+									E agg. place<br />
+									<select id="NAedgeAggPlace" name="NAedgeAggPlace">
+										<option value="source" selected>Source Node</option>
+										<option value="target">Target Node</option>
+									</select>
+								</p>
+								<p>
+									E agg. attr.<br />
+									<select id="NAedgeAggAttribute" name="NAedgeAggAttribute">
+										<option value="ocel:activity" selected>ocel:activity</option>
+									</select>
+								</p>
+								<p>
+									Annotation<br />
+									<select id="NAannotation" name="NAannotation">
+										<option value="frequency" selected>Frequency</option>
+										<option value="performance">Performance</option>
+									</select>
+								</p>
+								<button class="btn btn-primary" id="NAapply" name="NAapply" onclick="javascript:applyNetworkAnalysisConfiguration()">Apply Configuration</button>
+							</td>
+							<td style="width: 85%;">
+								<div id="naGraphvizContainer">
+								</div>
+							</td>
+						</tr>
+					</table>
+				</div>
 				<div id="plotlyGraphsPage" style="display: none">
 					<div class="row" style="height: 85%">
 						<!--align-self-center text-center-->
@@ -680,8 +758,93 @@
 					</div>
 				</div>
 			</div>
-			<!--<script src="logs/example-jsonocel.js"></script>-->
+			<script src="logs/example-jsonocel.js"></script>
 			<script type="text/javascript">
+				function fillAttributesLinkNetworkAnalysis() {
+					let attributesList = StreamAttrWrapper.attributesList(Object.values(visualization.model.ocel["ocel:events"]));
+					console.log(attributesList);
+					let option = null;
+					for (let att of attributesList) {
+						if (att != "ocel:activity") {
+							option = document.createElement("option");
+							option.value = att;
+							option.text = att;
+							document.getElementById("NAoutAttribute").appendChild(option);
+							option = document.createElement("option");
+							option.value = att;
+							option.text = att;
+							document.getElementById("NAinAttribute").appendChild(option);
+							option = document.createElement("option");
+							option.value = att;
+							option.text = att;
+							document.getElementById("NAsnAttribute").appendChild(option);
+							option = document.createElement("option");
+							option.value = att;
+							option.text = att;
+							document.getElementById("NAtnAttribute").appendChild(option);
+							option = document.createElement("option");
+							option.value = att;
+							option.text = att;
+							document.getElementById("NAedgeAggAttribute").appendChild(option);
+						}
+					}
+				}
+				
+				function applyNetworkAnalysisConfiguration() {
+					let linkMethod = document.getElementById("NAlinkMethod").value;
+					let graphLink = document.getElementById("NAgraphLink").value;
+					let outAttribute = document.getElementById("NAoutAttribute").value;
+					let inAttribute = document.getElementById("NAinAttribute").value;
+					let keepFirst = document.getElementById("NAkeepFirst").checked;
+					let expandLinks = document.getElementById("NAexpandLinks").checked;
+					let snAggregation = document.getElementById("NAsnAttribute").value;
+					let tnAggregation = document.getElementById("NAtnAttribute").value;
+					let aggPlace = document.getElementById("NAedgeAggPlace").value;
+					let aggAttr = document.getElementById("NAedgeAggAttribute").value;
+					let annotation = document.getElementById("NAannotation").value;
+					
+					let links = null;
+					if (linkMethod == "graph") {
+						let graph = null;
+						if (graphLink == "descendants") {
+							graph = OcelGraphs.objectDescendantsGraph(visualization.model.ocel);
+						}
+						else if (graphLink == "cobirth") {
+							graph = OcelGraphs.objectCobirthGraph(visualization.model.ocel);
+						}
+						else if (graphLink == "codeath") {
+							graph = OcelGraphs.objectCodeathGraph(visualization.model.ocel);
+						}
+						else if (graphLink == "inheritance") {
+							graph = OcelGraphs.objectInheritanceGraph(visualization.model.ocel);
+						}
+						links = OcelLinkAnalysis.linkEventsWithObjGraph(visualization.model.ocel, graph);
+					}
+					else {
+						links = OcelLinkAnalysis.linkAnalysisAttributeOutIn(visualization.model.ocel, outAttribute, inAttribute);
+						links = OcelLinkAnalysis.filterLinksByTimestamp(visualization.model.ocel, links);
+					}
+					if (keepFirst) {
+						links = OcelLinkAnalysis.filterFirstLink(visualization.model.ocel, links);
+					}
+					if (expandLinks) {
+						links = OcelLinkAnalysis.expandLinks(visualization.model.ocel, links);
+					}
+					links = OcelLinkAnalysis.linksToFinalForm(visualization.model.ocel, links);
+					let aggPlace1 = false;
+					if (aggPlace == "source") {
+						aggPlace1 = true;
+					}
+					let performance = false;
+					if (annotation == "performance") {
+						performance = true;
+					}
+					let naResult = NetworkAnalysis.apply(links, snAggregation, tnAggregation, aggAttr, aggPlace1);
+					let naVis = NetworkAnalysisGraphvizVisualizer.apply(naResult, performance);
+					let svgXml = Viz(naVis, { format: "svg"});
+					document.getElementById("naGraphvizContainer").innerHTML = svgXml;
+				}
+				
 				function filterDeviationsLifecycleObjects(objType, dev) {
 					let objectIdentifiers = visualization.model.conformanceLifecycleObjects.getRelatedObjects(objType, dev).toString();
 					showProcessModelPage();
@@ -719,6 +882,7 @@
 					document.getElementById("executionsPage").style.display = "none";
 					document.getElementById("plotlyGraphsPage").style.display = "none";
 					document.getElementById("conformancePage").style.display = "none";
+					document.getElementById("networkAnalysisPage").style.display = "none";
 				}
 				
 				function showProcessModelPage() {
@@ -768,6 +932,13 @@
 					hideAllDivsPages();
 					document.getElementById("executionsPage").style.display = "";
 					visualization.model.executionGraph.buildExecutionsTable(document.getElementById("executionsTable"));
+				}
+				
+				function showNetworkAnalysis() {
+					fillAttributesLinkNetworkAnalysis();
+					applyNetworkAnalysisConfiguration();
+					hideAllDivsPages();
+					document.getElementById("networkAnalysisPage").style.display = "";
 				}
 				
 				function showGraphs() {
@@ -956,10 +1127,10 @@
 			</script>
 			
 			<script type="text/javascript">
-				/*for (let evId in eventLog["ocel:events"]) {
+				for (let evId in eventLog["ocel:events"]) {
 					eventLog["ocel:events"][evId]["ocel:timestamp"] = new Date(eventLog["ocel:events"][evId]["ocel:timestamp"]);
 				}
-				createVisualization();*/
+				createVisualization();
 			</script>
 		</div>
 		<div id="htmlLoadView" style="z-index: 200; display: none">
