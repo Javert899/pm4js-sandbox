@@ -596,6 +596,10 @@
 									Graph Link<br />
 									<select id="NAgraphLink" name="NAgraphLink">
 										<option value="descendants" selected>Descendants Graph</option>
+										<option value="interaction">Interaction Graph</option>
+										<option value="cobirth">Cobirth Graph</option>
+										<option value="codeath">Codeath Graph</option>
+										<option value="inheritance">Inheritance Graph</option>
 									</select>
 								</p>
 								<p>
@@ -809,6 +813,9 @@
 						if (graphLink == "descendants") {
 							graph = OcelGraphs.objectDescendantsGraph(visualization.model.ocel);
 						}
+						else if (graphLink == "interaction") {
+							graph = OcelGraphs.objectInteractionGraph(visualization.model.ocel);
+						}
 						else if (graphLink == "cobirth") {
 							graph = OcelGraphs.objectCobirthGraph(visualization.model.ocel);
 						}
@@ -922,7 +929,7 @@
 				}
 				
 				function showObjectsList() {
-					visualization.model.calculateExecutions();
+					//visualization.model.calculateExecutions();
 					hideAllDivsPages();
 					document.getElementById("objectsListPage").style.display = "";
 				}

@@ -24,12 +24,12 @@ class ObjectsListFactory {
 		let tdDuration = document.createElement("th");
 		tdDuration.innerHTML = "Lifecycle Duration (s)";
 		header.appendChild(tdDuration);
-		let tdExecutionDuration = document.createElement("th");
+		/*let tdExecutionDuration = document.createElement("th");
 		tdExecutionDuration.innerHTML = "Execution Duration (s)";
 		header.appendChild(tdExecutionDuration);
 		let tdShowExecution = document.createElement("th");
 		tdShowExecution.innerHTML = "";
-		header.appendChild(tdShowExecution);
+		header.appendChild(tdShowExecution);*/
 		let objectsHtmlRepr = [];
 		for (let objId in otObjects) {
 			if (otObjects[objId].length > 0) {
@@ -38,14 +38,14 @@ class ObjectsListFactory {
 				objectsHtmlRepr.push("<td>"+new Date(otObjects[objId][0][2]*1000).toISOString()+"</td>");
 				objectsHtmlRepr.push("<td>"+new Date(otObjects[objId][otObjects[objId].length - 1][2]*1000).toISOString()+"</td>");
 				objectsHtmlRepr.push("<td>"+(otObjects[objId][otObjects[objId].length - 1][2] - otObjects[objId][0][2])+"</td>");
-				try {
+				/*try {
 					objectsHtmlRepr.push("<td>"+this.model.executions[3][objId]+"</td>");
 				}
 				catch (err) {
 					console.log(err);
 					objectsHtmlRepr.push("<td>"+(otObjects[objId][otObjects[objId].length - 1][2] - otObjects[objId][0][2])+"</td>");
 				}
-				objectsHtmlRepr.push("<td><a href=\"javascript:showGraphvizExecutionObject('"+objId+"')\"><i class=\"fas fa-eye\"></i></a></td>");
+				objectsHtmlRepr.push("<td><a href=\"javascript:showGraphvizExecutionObject('"+objId+"')\"><i class=\"fas fa-eye\"></i></a></td>");*/
 				objectsHtmlRepr.push("</tr>");
 			}
 		}
