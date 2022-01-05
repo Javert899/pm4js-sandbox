@@ -59,7 +59,7 @@ class Pm4JS {
 	}
 }
 
-Pm4JS.VERSION = "0.0.17";
+Pm4JS.VERSION = "0.0.18";
 Pm4JS.registrationEnabled = false;
 Pm4JS.objects = [];
 Pm4JS.algorithms = [];
@@ -12647,6 +12647,82 @@ class CaseFeaturesOutput {
 		this.data = data;
 		this.features = features;
 	}
+	
+	scaling(fea) {
+		let j = 0;
+		while (j < this.features.length) {
+			let minValue = 99999999999;
+			let maxValue = -99999999999;
+			let i = 0;
+			while (i < this.data.length) {
+				minValue = Math.min(minValue, this.data[i][j]);
+				maxValue = Math.max(maxValue, this.data[i][j]);
+				i++;
+			}
+			i = 0;
+			while (i < this.data.length) {
+				if (minValue != maxValue) {
+					this.data[i][j] = (this.data[i][j] - minValue)/(maxValue - minValue);
+				}
+				else {
+					this.data[i][j] = 1;
+				}
+				i++;
+			}
+			j++;
+		}
+	}
+	
+	variancePerFea() {
+		let ret = [];
+		let j = 0;
+		while (j < this.data[0].length) {
+			let avg = 0.0;
+			let i = 0;
+			while (i < this.data.length) {
+				avg += this.data[i][j];
+				i++;
+			}
+			avg = avg / this.data.length;
+			let vr = 0.0;
+			i = 0;
+			while (i < this.data.length) {
+				vr += (this.data[i][j] - avg)*(this.data[i][j] - avg)
+				i++;
+			}
+			vr = vr / this.data.length;
+			ret.push(vr);
+			j++;
+		}
+		return ret;
+	}
+	
+	filterOnVariance(threshold) {
+		let varPerFea = OcelObjectFeatures.variancePerFea(this.data);
+		let data = [];
+		let featureNames = [];
+		let i = 0;
+		while (i < this.features.length) {
+			if (varPerFea[i] > threshold) {
+				featureNames.push(this.features[i]);
+			}
+			i++;
+		}
+		i = 0;
+		while (i < this.data.length) {
+			let j = 0;
+			let arr = [];
+			while (j < this.data[i].length) {
+				if (varPerFea[j] > threshold) {
+					arr.push(this.data[i][j]);
+				}
+				j++;
+			}
+			data.push(arr);
+			i++;
+		}
+		return new CaseFeaturesOutput(data, featureNames);
+	}
 }
 
 class CaseFeatures {
@@ -17932,7 +18008,12 @@ class OcelEventFeatures {
 			}
 			i = 0;
 			while (i < fea["data"].length) {
-				fea["data"][i][j] = (fea["data"][i][j] - minValue)/(maxValue - minValue);
+				if (minValue != maxValue) {
+					fea["data"][i][j] = (fea["data"][i][j] - minValue)/(maxValue - minValue);
+				}
+				else {
+					fea["data"][i][j] = 1;
+				}
 				i++;
 			}
 			j++;
@@ -18308,7 +18389,12 @@ class OcelObjectFeatures {
 			}
 			i = 0;
 			while (i < fea["data"].length) {
-				fea["data"][i][j] = (fea["data"][i][j] - minValue)/(maxValue - minValue);
+				if (minValue != maxValue) {
+					fea["data"][i][j] = (fea["data"][i][j] - minValue)/(maxValue - minValue);
+				}
+				else {
+					fea["data"][i][j] = 1;
+				}
 				i++;
 			}
 			j++;
