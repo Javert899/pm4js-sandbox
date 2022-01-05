@@ -1,11 +1,33 @@
 function calculateEventFeatures() {
 	evFeatures = OcelEventFeatures.apply(visualization.model.ocel, strAttributesForExtraction, numAttributesForExtraction);
 	evFeaturesTable = OcelEventFeatures.produceTable(visualization.model.ocel, evFeatures);
+	evFeaturesNormalizedFiltered = OcelEventFeatures.apply(visualization.model.ocel, strAttributesForExtraction, numAttributesForExtraction);
+	evFeaturesNormalizedFiltered = OcelEventFeatures.scaling(evFeaturesNormalizedFiltered);
+	evFeaturesNormalizedFiltered = OcelEventFeatures.filterOnVariance(evFeaturesNormalizedFiltered, featVarianceThreshold);
+	evFeaturesCorrDct = null;
+	evFeaturesCorrDct = {};
+	let i = 0;
+	while (i < evFeatures["featureNames"].length) {
+		evFeaturesCorrDct[evFeatures["featureNames"][i]] = i;
+		i++;
+	}
+	console.log(evFeaturesCorrDct);
 }
 
 function calculateObjectFeatures() {
 	objFeatures = OcelObjectFeatures.apply(visualization.model.ocel, strAttributesForExtraction, numAttributesForExtraction);
 	objFeaturesTable = OcelObjectFeatures.produceTable(visualization.model.ocel, objFeatures);
+	objFeaturesNormalizedFiltered = OcelObjectFeatures.apply(visualization.model.ocel, strAttributesForExtraction, numAttributesForExtraction);
+	objFeaturesNormalizedFiltered = OcelObjectFeatures.scaling(objFeaturesNormalizedFiltered);
+	objFeaturesNormalizedFiltered = OcelObjectFeatures.filterOnVariance(objFeaturesNormalizedFiltered, featVarianceThreshold);
+	objFeaturesCorrDct = null;
+	objFeaturesCorrDct = {};
+	let i = 0;
+	while (i < objFeatures["featureNames"].length) {
+		objFeaturesCorrDct[objFeatures["featureNames"][i]] = i;
+		i++;
+	}
+	console.log(objFeaturesCorrDct);
 }
 
 function prepareSQLDatabase() {

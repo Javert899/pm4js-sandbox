@@ -17842,6 +17842,104 @@ catch (err) {
 }
 
 class OcelEventFeatures {
+	static apply(ocel, strAttributes=null, numAttributes=null) {
+		let activitiesEncoding = OcelEventFeatures.encodeActivity(ocel);
+		let timestampEncoding = OcelEventFeatures.encodeTimestamp(ocel);
+		let numRelObjEncoding = OcelEventFeatures.encodeNumRelObj(ocel);
+		let numRelObjStartEncoding = OcelEventFeatures.encodeNumRelObjStart(ocel);
+		let numRelObjEndEncoding = OcelEventFeatures.encodeNumRelObjEnd(ocel);
+		let strAttrEncoding = OcelEventFeatures.encodeStrAttrEv(ocel, strAttributes);
+		let numAttrEncoding = OcelEventFeatures.encodeNumAttrEv(ocel, numAttributes);
+		let featureNames = [...activitiesEncoding["featureNames"], ...timestampEncoding["featureNames"], ...numRelObjEncoding["featureNames"], ...numRelObjStartEncoding["featureNames"], ...numRelObjEndEncoding["featureNames"], ...strAttrEncoding["featureNames"], ...numAttrEncoding["featureNames"]];
+		let data = [];
+		let count = 0;
+		for (let evId in ocel["ocel:events"]) {
+			data.push([...activitiesEncoding["data"][count], ...timestampEncoding["data"][count], ...numRelObjEncoding["data"][count], ...numRelObjStartEncoding["data"][count], ...numRelObjEndEncoding["data"][count], ...strAttrEncoding["data"][count], ...numAttrEncoding["data"][count]]);
+			count = count + 1;
+		}
+		return {"data": data, "featureNames": featureNames};
+	}
+	
+	static filterOnVariance(fea, threshold) {
+		let varPerFea = OcelEventFeatures.variancePerFea(fea["data"]);
+		let filteredIdxs = [];
+		let j = 0;
+		while (j < varPerFea.length) {
+			if (varPerFea[j] >= 0.1) {
+				filteredIdxs.push(j);
+			}
+			j = j + 1;
+		}
+		let filteredFea = OcelEventFeatures.filterOnIndexes(fea, filteredIdxs);
+		return filteredFea;
+	}
+	
+	static filterOnIndexes(fea, idxs) {
+		let filteredFea = {"featureNames": [], "data": []};
+		let j = 0;
+		while (j < idxs.length) {
+			filteredFea["featureNames"].push(fea["featureNames"][idxs[j]]);
+			j++;
+		}
+		let i = 0;
+		while (i < fea["data"].length) {
+			let arr = [];
+			j = 0;
+			while (j < idxs.length) {
+				arr.push(fea["data"][i][idxs[j]]);
+				j++;
+			}
+			filteredFea["data"].push(arr);
+			i++;
+		}
+		return filteredFea;
+	}
+	
+	static variancePerFea(data) {
+		let ret = [];
+		let j = 0;
+		while (j < data[0].length) {
+			let avg = 0.0;
+			let i = 0;
+			while (i < data.length) {
+				avg += data[i][j];
+				i++;
+			}
+			avg = avg / data.length;
+			let vr = 0.0;
+			i = 0;
+			while (i < data.length) {
+				vr += (data[i][j] - avg)*(data[i][j] - avg)
+				i++;
+			}
+			vr = vr / data.length;
+			ret.push(vr);
+			j++;
+		}
+		return ret;
+	}
+	
+	static scaling(fea) {
+		let j = 0;
+		while (j < fea["featureNames"].length) {
+			let minValue = 99999999999;
+			let maxValue = -99999999999;
+			let i = 0;
+			while (i < fea["data"].length) {
+				minValue = Math.min(minValue, fea["data"][i][j]);
+				maxValue = Math.max(maxValue, fea["data"][i][j]);
+				i++;
+			}
+			i = 0;
+			while (i < fea["data"].length) {
+				fea["data"][i][j] = (fea["data"][i][j] - minValue)/(maxValue - minValue);
+				i++;
+			}
+			j++;
+		}
+		return fea;
+	}
+	
 	static enrichEventLogWithEventFeatures(ocel, strAttributes=null, numAttributes=null) {
 		let fea = OcelEventFeatures.apply(ocel, strAttributes, numAttributes);
 		let data = fea["data"];
@@ -17877,24 +17975,6 @@ class OcelEventFeatures {
 		while (i < featureNames.length) {
 			featureNames[i] = featureNames[i].replace(new RegExp("@@", 'g'), "").replace(new RegExp("#", 'g'), "_").replace(new RegExp(" ", 'g'), "_");
 			i = i + 1;
-		}
-		return {"data": data, "featureNames": featureNames};
-	}
-	
-	static apply(ocel, strAttributes=null, numAttributes=null) {
-		let activitiesEncoding = OcelEventFeatures.encodeActivity(ocel);
-		let timestampEncoding = OcelEventFeatures.encodeTimestamp(ocel);
-		let numRelObjEncoding = OcelEventFeatures.encodeNumRelObj(ocel);
-		let numRelObjStartEncoding = OcelEventFeatures.encodeNumRelObjStart(ocel);
-		let numRelObjEndEncoding = OcelEventFeatures.encodeNumRelObjEnd(ocel);
-		let strAttrEncoding = OcelEventFeatures.encodeStrAttrEv(ocel, strAttributes);
-		let numAttrEncoding = OcelEventFeatures.encodeNumAttrEv(ocel, numAttributes);
-		let featureNames = [...activitiesEncoding["featureNames"], ...timestampEncoding["featureNames"], ...numRelObjEncoding["featureNames"], ...numRelObjStartEncoding["featureNames"], ...numRelObjEndEncoding["featureNames"], ...strAttrEncoding["featureNames"], ...numAttrEncoding["featureNames"]];
-		let data = [];
-		let count = 0;
-		for (let evId in ocel["ocel:events"]) {
-			data.push([...activitiesEncoding["data"][count], ...timestampEncoding["data"][count], ...numRelObjEncoding["data"][count], ...numRelObjStartEncoding["data"][count], ...numRelObjEndEncoding["data"][count], ...strAttrEncoding["data"][count], ...numAttrEncoding["data"][count]]);
-			count = count + 1;
 		}
 		return {"data": data, "featureNames": featureNames};
 	}
@@ -18136,6 +18216,106 @@ catch (err) {
 
 
 class OcelObjectFeatures {
+	static apply(ocel, strAttributes=null, numAttributes=null) {
+		let objStrAttr = OcelObjectFeatures.encodeObjStrAttr(ocel, strAttributes);
+		let objNumAttr = OcelObjectFeatures.encodeObjNumAttr(ocel, numAttributes);
+		let objLifecycleActivities = OcelObjectFeatures.encodeLifecycleActivities(ocel);
+		let objLifecycleDuration = OcelObjectFeatures.encodeLifecycleDuration(ocel);
+		let objLifecycleLength = OcelObjectFeatures.encodeLifecycleLength(ocel);
+		let overallObjectGraphs = OcelObjectFeatures.encodeOverallObjectGraphs(ocel);
+		let interactionGraphOt = OcelObjectFeatures.encodeInteractionGraphOt(ocel);
+		let wip = OcelObjectFeatures.encodeWip(ocel);
+		let featureNames = [...objStrAttr["featureNames"], ...objNumAttr["featureNames"], ...objLifecycleActivities["featureNames"], ...objLifecycleDuration["featureNames"], ...objLifecycleLength["featureNames"], ...overallObjectGraphs["featureNames"], ...interactionGraphOt["featureNames"], ...wip["featureNames"]];
+		let data = [];
+		let objects = ocel["ocel:objects"];
+		let count = 0;
+		for (let objId in objects) {
+			data.push([...objStrAttr["data"][count], ...objNumAttr["data"][count], ...objLifecycleActivities["data"][count], ...objLifecycleDuration["data"][count], ...objLifecycleLength["data"][count], ...overallObjectGraphs["data"][count], ...interactionGraphOt["data"][count], ...wip["data"][count]]);
+			count = count + 1;
+		}
+		return {"data": data, "featureNames": featureNames};
+	}
+	
+	static filterOnVariance(fea, threshold) {
+		let varPerFea = OcelObjectFeatures.variancePerFea(fea["data"]);
+		let filteredIdxs = [];
+		let j = 0;
+		while (j < varPerFea.length) {
+			if (varPerFea[j] >= 0.1) {
+				filteredIdxs.push(j);
+			}
+			j = j + 1;
+		}
+		let filteredFea = OcelObjectFeatures.filterOnIndexes(fea, filteredIdxs);
+		return filteredFea;
+	}
+	
+	static filterOnIndexes(fea, idxs) {
+		let filteredFea = {"featureNames": [], "data": []};
+		let j = 0;
+		while (j < idxs.length) {
+			filteredFea["featureNames"].push(fea["featureNames"][idxs[j]]);
+			j++;
+		}
+		let i = 0;
+		while (i < fea["data"].length) {
+			let arr = [];
+			j = 0;
+			while (j < idxs.length) {
+				arr.push(fea["data"][i][idxs[j]]);
+				j++;
+			}
+			filteredFea["data"].push(arr);
+			i++;
+		}
+		return filteredFea;
+	}
+	
+	static variancePerFea(data) {
+		let ret = [];
+		let j = 0;
+		while (j < data[0].length) {
+			let avg = 0.0;
+			let i = 0;
+			while (i < data.length) {
+				avg += data[i][j];
+				i++;
+			}
+			avg = avg / data.length;
+			let vr = 0.0;
+			i = 0;
+			while (i < data.length) {
+				vr += (data[i][j] - avg)*(data[i][j] - avg)
+				i++;
+			}
+			vr = vr / data.length;
+			ret.push(vr);
+			j++;
+		}
+		return ret;
+	}
+	
+	static scaling(fea) {
+		let j = 0;
+		while (j < fea["featureNames"].length) {
+			let minValue = 99999999999;
+			let maxValue = -99999999999;
+			let i = 0;
+			while (i < fea["data"].length) {
+				minValue = Math.min(minValue, fea["data"][i][j]);
+				maxValue = Math.max(maxValue, fea["data"][i][j]);
+				i++;
+			}
+			i = 0;
+			while (i < fea["data"].length) {
+				fea["data"][i][j] = (fea["data"][i][j] - minValue)/(maxValue - minValue);
+				i++;
+			}
+			j++;
+		}
+		return fea;
+	}
+	
 	static enrichEventLogWithObjectFeatures(ocel, strAttributes=null, numAttributes=null) {
 		let fea = OcelObjectFeatures.apply(ocel, strAttributes, numAttributes);
 		let data = fea["data"];
@@ -18171,26 +18351,6 @@ class OcelObjectFeatures {
 		while (i < featureNames.length) {
 			featureNames[i] = featureNames[i].replace(new RegExp("@@", 'g'), "").replace(new RegExp("#", 'g'), "_").replace(new RegExp(" ", 'g'), "_");
 			i = i + 1;
-		}
-		return {"data": data, "featureNames": featureNames};
-	}
-	
-	static apply(ocel, strAttributes=null, numAttributes=null) {
-		let objStrAttr = OcelObjectFeatures.encodeObjStrAttr(ocel, strAttributes);
-		let objNumAttr = OcelObjectFeatures.encodeObjNumAttr(ocel, numAttributes);
-		let objLifecycleActivities = OcelObjectFeatures.encodeLifecycleActivities(ocel);
-		let objLifecycleDuration = OcelObjectFeatures.encodeLifecycleDuration(ocel);
-		let objLifecycleLength = OcelObjectFeatures.encodeLifecycleLength(ocel);
-		let overallObjectGraphs = OcelObjectFeatures.encodeOverallObjectGraphs(ocel);
-		let interactionGraphOt = OcelObjectFeatures.encodeInteractionGraphOt(ocel);
-		let wip = OcelObjectFeatures.encodeWip(ocel);
-		let featureNames = [...objStrAttr["featureNames"], ...objNumAttr["featureNames"], ...objLifecycleActivities["featureNames"], ...objLifecycleDuration["featureNames"], ...objLifecycleLength["featureNames"], ...overallObjectGraphs["featureNames"], ...interactionGraphOt["featureNames"], ...wip["featureNames"]];
-		let data = [];
-		let objects = ocel["ocel:objects"];
-		let count = 0;
-		for (let objId in objects) {
-			data.push([...objStrAttr["data"][count], ...objNumAttr["data"][count], ...objLifecycleActivities["data"][count], ...objLifecycleDuration["data"][count], ...objLifecycleLength["data"][count], ...overallObjectGraphs["data"][count], ...interactionGraphOt["data"][count], ...wip["data"][count]]);
-			count = count + 1;
 		}
 		return {"data": data, "featureNames": featureNames};
 	}
