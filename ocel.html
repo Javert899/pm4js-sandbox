@@ -12,6 +12,7 @@
 		<script src="scripts/generic/sorttable.js"></script>
 		<script src="scripts/generic/mxClient.min.js"></script>
 		<script src="scripts/generic/sql.js"></script>
+		<script src="scripts/generic/isolation-forest.js"></script>
 		<script src="scripts/pm4js_latest.js"></script>
 		<script src="scripts/ocel/eventsView.js"></script>
 		<script src="scripts/ocel/objectsView.js"></script>
@@ -30,6 +31,7 @@
 		<script src="scripts/ocel/celonis_upload.js"></script>
 		<script src="scripts/ocel/ml-generic.js"></script>
 		<script src="scripts/ocel/ml-sql.js"></script>
+		<script src="scripts/ocel/ml-isolationForest.js"></script>
 		<link rel="stylesheet" href="static/bootstrap.min.css"></link>
 		<link rel="stylesheet" href="static/bootstrap-grid.min.css"></link>
 		<link rel="stylesheet" href="static/bootstrap-reboot.min.css"></link>
@@ -692,7 +694,11 @@
 						<div class="navigation-body">
 							<ul class="navigation-menu">
 								<li class="navigation-item">
-									<a class="navigation-link" href="javascript:showSQLexplorer()"><i class="fas fa-sort-numeric-up-alt"></i>&nbsp;SQL explorer</a>
+									<a class="navigation-link" href="javascript:showSQLexplorer()"><i class="fas fa-database"></i>&nbsp;SQL explorer</a>
+								</li>
+								
+								<li class="navigation-item">
+									<a class="navigation-link" href="javascript:showIsolationForest()"><i class="fas fa-house-user"></i>&nbsp;Isolation Forest</a>
 								</li>
 								
 								<!--<li class="navigation-item">
@@ -710,9 +716,17 @@
 						</div>
 					</nav>
 					<div id="machineLearningSQL" style="display: none">
+						<p>This page permits to explore, using the SQL language, the table of the features (events=<b>OCEL_EVENTS</b>, objects=<b>OCEL_OBJECTS</b>) on the provided log.
+						Patterns such as excessive repetition of an activity during the lifecycle of an object can therefore be considered here.</p>
 						<textarea id="sqlQueryInput" name="sqlQueryInput" rows="4" cols="50"></textarea>
 						<button class="btn btn-primary" onclick="javascript:executeSQLQuery()">Execute Query</button>
 						<div id="machineLearningSQLResult">
+						</div>
+					</div>
+					<div id="machineLearningIsolationForest" style="display: none">
+						<p>The isolation forest calculated on the objects' features permits to identify the objects with peculiar behavior (different from the one of the other objects).
+						Objects which are more anomalous are reported first.</p>
+						<div id="machineLearningIsolationForestResult" border="1" class="table">
 						</div>
 					</div>
 				</div>
@@ -1023,6 +1037,7 @@
 				
 				function hideAllMLpages() {
 					document.getElementById("machineLearningSQL").style.display = "none";
+					document.getElementById("machineLearningIsolationForest").style.display = "none";
 				}
 				
 				function showSQLexplorer() {
@@ -1030,6 +1045,12 @@
 					document.getElementById("sqlQueryInput").value = sqlDefaultQuery;
 					executeSQLQuery();
 					document.getElementById("machineLearningSQL").style.display = "";
+				}
+				
+				function showIsolationForest() {
+					hideAllMLpages();
+					document.getElementById("machineLearningIsolationForest").style.display = "";
+					calculateIsolationForest(visualization.model.ocel);
 				}
 				
 				function showGraphs() {
