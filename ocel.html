@@ -47,6 +47,13 @@
 				let celonisMapper = null;
 				let celonis1DWrapper = new Celonis1DWrapper(null);
 				let celonisNDWrapper = new CelonisNDWrapper(null);
+				let strAttributesForExtraction = null;
+				let numAttributesForExtraction = null;
+				let db = null;
+				let evFeatures = null;
+				let objFeatures = null;
+				let evFeaturesTable = null;
+				let objFeaturesTable = null;
 			</script>
 			<div id="uploadPart" style="display: ">
 				<!--<img src="static/pads_rwth.png" /><br />
@@ -115,6 +122,10 @@
 								
 								<li class="navigation-item">
 									<a class="navigation-link" href="javascript:showNetworkAnalysis()"><i class="fab fa-mixer"></i>&nbsp;Network Analysis</a>
+								</li>
+								
+								<li class="navigation-item">
+									<a class="navigation-link" href="javascript:showMachineLearning()"><i class="fab fa-mixer"></i>&nbsp;Machine Learning</a>
 								</li>
 								
 								<li class="navigation-item">
@@ -664,6 +675,9 @@
 						</tr>
 					</table>
 				</div>
+				<div id="machineLearningPage" style="display: none">
+					MACHINE LEARNING PAGE
+				</div>
 				<div id="plotlyGraphsPage" style="display: none">
 					<div class="row" style="height: 85%">
 						<!--align-self-center text-center-->
@@ -891,6 +905,7 @@
 					document.getElementById("plotlyGraphsPage").style.display = "none";
 					document.getElementById("conformancePage").style.display = "none";
 					document.getElementById("networkAnalysisPage").style.display = "none";
+					document.getElementById("machineLearningPage").style.display = "none";
 				}
 				
 				function showProcessModelPage() {
@@ -929,6 +944,112 @@
 					populateNumEventsEventsPage();
 				}
 				
+				function calculateEventFeatures() {
+					evFeatures = OcelEventFeatures.apply(visualization.model.ocel, strAttributesForExtraction, numAttributesForExtraction);
+					evFeaturesTable = OcelEventFeatures.produceTable(visualization.model.ocel, evFeatures);
+				}
+				
+				function calculateObjectFeatures() {
+					objFeatures = OcelObjectFeatures.apply(visualization.model.ocel, strAttributesForExtraction, numAttributesForExtraction);
+					objFeaturesTable = OcelEventFeatures.produceTable(visualization.model.ocel, evFeatures);
+				}
+				
+				function prepareSQLDatabase() {
+					db = new SQL.Database();
+				}
+				
+				function insertObjectFeaturesInSQLDatabase() {
+					if (db != null) {
+						let table = objFeaturesTable;
+						let sqlStatements = [];
+						let creation = "CREATE TABLE OCEL_OBJECTS (";
+						let i = 0;
+						while (i < table["featureNames"].length) {
+							if (i > 0) {
+								creation += ", ";
+							}
+							creation = creation + table["featureNames"][i];
+							if (i == 0) {
+								creation = creation + " char";
+							}
+							else {
+								creation = creation + " numeric";
+							}
+							i++;
+						}
+						creation = creation + ");";
+						sqlStatements.push(creation);
+						let data = table["data"];
+						i = 0;
+						while (i < data.length) {
+							let state = "INSERT INTO OCEL_OBJECTS VALUES (";
+							let j = 0;
+							while (j < data[i].length) {						
+								if (j > 0) {
+									state += ",";
+								}
+								
+								if (j == 0) {
+									state += "'" + data[i][j] + "'";
+								}
+								else {
+									state += data[i][j];
+								}
+								j++;
+							}
+							state += ");";
+							sqlStatements.push(state);
+							i++;
+						}
+					}
+				}
+				
+				function insertEventFeaturesInSQLDatabase() {
+					if (db != null) {
+						let table = evFeaturesTable;
+						let sqlStatements = [];
+						let creation = "CREATE TABLE OCEL_EVENTS (";
+						let i = 0;
+						while (i < table["featureNames"].length) {
+							if (i > 0) {
+								creation += ", ";
+							}
+							creation = creation + table["featureNames"][i];
+							if (i == 0) {
+								creation = creation + " char";
+							}
+							else {
+								creation = creation + " numeric";
+							}
+							i++;
+						}
+						creation = creation + ");";
+						sqlStatements.push(creation);
+						let data = table["data"];
+						i = 0;
+						while (i < data.length) {
+							let state = "INSERT INTO OCEL_EVENTS VALUES (";
+							let j = 0;
+							while (j < data[i].length) {						
+								if (j > 0) {
+									state += ",";
+								}
+								
+								if (j == 0) {
+									state += "'" + data[i][j] + "'";
+								}
+								else {
+									state += data[i][j];
+								}
+								j++;
+							}
+							state += ");";
+							sqlStatements.push(state);
+							i++;
+						}
+					}
+				}
+				
 				function showObjectsList() {
 					//visualization.model.calculateExecutions();
 					hideAllDivsPages();
@@ -947,6 +1068,15 @@
 					applyNetworkAnalysisConfiguration();
 					hideAllDivsPages();
 					document.getElementById("networkAnalysisPage").style.display = "";
+				}
+				
+				function showMachineLearning() {
+					hideAllDivsPages();
+					calculateEventFeatures();
+					calculateObjectFeatures();
+					prepareSQLDatabase();
+					insertObjectFeaturesInSQLDatabase();
+					document.getElementById("machineLearningPage").style.display = "";
 				}
 				
 				function showGraphs() {
