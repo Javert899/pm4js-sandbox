@@ -11,7 +11,6 @@ function calculateEventFeatures() {
 		evFeaturesCorrDct[evFeatures["featureNames"][i]] = i;
 		i++;
 	}
-	console.log(evFeaturesCorrDct);
 }
 
 function calculateObjectFeatures() {
@@ -27,7 +26,6 @@ function calculateObjectFeatures() {
 		objFeaturesCorrDct[objFeatures["featureNames"][i]] = i;
 		i++;
 	}
-	console.log(objFeaturesCorrDct);
 }
 
 function prepareSQLDatabase() {
