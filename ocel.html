@@ -269,6 +269,7 @@
 					<script type="text/javascript">
 						var navigationGraph = null;
 						var conformanceNavigation = null;
+						var mlNavigation = null;
 						var allFilters = [];
 											
 						function doVisualization(initNavGraph=true) {
@@ -679,7 +680,31 @@
 					</table>
 				</div>
 				<div id="machineLearningPage" style="display: none">
-					<div id="machineLearningSQL">
+					<nav id="machineLearningNavigation" class="navigation navigation-justified border-bottom">
+						<div class="navigation-header">
+
+						</div>
+						<div class="navigation-body">
+							<ul class="navigation-menu">
+								<li class="navigation-item">
+									<a class="navigation-link" href="javascript:showSQLexplorer()"><i class="fas fa-sort-numeric-up-alt"></i>&nbsp;SQL explorer</a>
+								</li>
+								
+								<!--<li class="navigation-item">
+									<a class="navigation-link" href="javascript:showConformancePageNumObjects()"><i class="fas fa-sort-numeric-up-alt"></i>&nbsp;Number of Objects</a>
+								</li>
+								
+								<li class="navigation-item">
+									<a class="navigation-link" href="javascript:showConformancePageLifecycleObjects()"><i class="fas fa-life-ring"></i>&nbsp;Objects Lifecycle</a>
+								</li>
+								
+								<li class="navigation-item">
+									<a class="navigation-link" href="javascript:showConformancePageDurationsObjects()"><i class="fas fa-clock"></i>&nbsp;Objects Duration</a>
+								</li>-->					
+							</ul>
+						</div>
+					</nav>
+					<div id="machineLearningSQL" style="display: none">
 						<textarea id="sqlQueryInput" name="sqlQueryInput" rows="4" cols="50"></textarea>
 						<button class="btn btn-primary" onclick="javascript:executeSQLQuery()">Execute Query</button>
 						<div id="machineLearningSQLResult">
@@ -978,15 +1003,28 @@
 				}
 				
 				function showMachineLearning() {
-					document.getElementById("sqlQueryInput").value = sqlDefaultQuery;
 					hideAllDivsPages();
 					calculateEventFeatures();
 					calculateObjectFeatures();
 					prepareSQLDatabase();
 					insertObjectFeaturesInSQLDatabase();
 					insertEventFeaturesInSQLDatabase();
-					executeSQLQuery();
+					showSQLexplorer();
 					document.getElementById("machineLearningPage").style.display = "";
+					if (mlNavigation == null) {
+						mlNavigation = new Navigation(document.getElementById("mlNavigation"));
+					}
+				}
+				
+				function hideAllMLpages() {
+					document.getElementById("machineLearningSQL").style.display = "none";
+				}
+				
+				function showSQLexplorer() {
+					hideAllMLpages();
+					document.getElementById("sqlQueryInput").value = sqlDefaultQuery;
+					executeSQLQuery();
+					document.getElementById("machineLearningSQL").style.display = "";
 				}
 				
 				function showGraphs() {
