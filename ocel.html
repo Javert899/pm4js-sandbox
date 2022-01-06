@@ -32,6 +32,8 @@
 		<script src="scripts/ocel/ml-generic.js"></script>
 		<script src="scripts/ocel/ml-sql.js"></script>
 		<script src="scripts/ocel/ml-isolationForest.js"></script>
+		<script src="scripts/ocel/ml-pca.js"></script>
+		<script src="scripts/generic/ml.min.js"></script>
 		<link rel="stylesheet" href="static/bootstrap.min.css"></link>
 		<link rel="stylesheet" href="static/bootstrap-grid.min.css"></link>
 		<link rel="stylesheet" href="static/bootstrap-reboot.min.css"></link>
@@ -701,6 +703,10 @@
 									<a class="navigation-link" href="javascript:showIsolationForest()"><i class="fas fa-house-user"></i>&nbsp;Isolation Forest</a>
 								</li>
 								
+								<li class="navigation-item">
+									<a class="navigation-link" href="javascript:showPCAvisualization()"><i class="fas fa-house-user"></i>&nbsp;PCA</a>
+								</li>
+								
 								<!--<li class="navigation-item">
 									<a class="navigation-link" href="javascript:showConformancePageNumObjects()"><i class="fas fa-sort-numeric-up-alt"></i>&nbsp;Number of Objects</a>
 								</li>
@@ -727,6 +733,12 @@
 						<p>The isolation forest calculated on the objects' features permits to identify the objects with peculiar behavior (different from the one of the other objects).
 						Objects which are more anomalous are reported first.</p>
 						<div id="machineLearningIsolationForestResult" border="1" class="table">
+						</div>
+					</div>
+					<div id="machineLearningPCA" style="display: none">
+						<p>PCA</p>
+						<div id="plotlyPCA" style="width: 100%; height: 80%;">
+							
 						</div>
 					</div>
 				</div>
@@ -1038,6 +1050,7 @@
 				function hideAllMLpages() {
 					document.getElementById("machineLearningSQL").style.display = "none";
 					document.getElementById("machineLearningIsolationForest").style.display = "none";
+					document.getElementById("machineLearningPCA").style.display = "none";
 				}
 				
 				function showSQLexplorer() {
@@ -1051,6 +1064,12 @@
 					hideAllMLpages();
 					document.getElementById("machineLearningIsolationForest").style.display = "";
 					calculateIsolationForest(visualization.model.ocel);
+				}
+				
+				function showPCAvisualization() {
+					hideAllMLpages();
+					document.getElementById("machineLearningPCA").style.display = "";
+					applyPca();
 				}
 				
 				function showGraphs() {
