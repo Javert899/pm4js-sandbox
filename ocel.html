@@ -707,7 +707,7 @@
 								</li>
 								
 								<li class="navigation-item">
-									<a class="navigation-link" href="javascript:showPCAvisualization()"><i class="fas fa-signal"></i>&nbsp;PCA</a>
+									<a class="navigation-link" href="javascript:showPCAvisualization()"><i class="fas fa-signal"></i>&nbsp;Dimensionality Reduction</a>
 								</li>
 								
 								<li class="navigation-item">
@@ -731,8 +731,15 @@
 						</div>
 					</div>
 					<div id="machineLearningPCA" style="display: none">
-						<p>The first two principal components of the discovered features are illustrated in this page. This permits to visually identify the groups of objects with
+						<p>The first two components of the discovered features are illustrated in this page. This permits to visually identify the groups of objects with
 						similar behavior (in terms of the calculated features).</p>
+						<p>
+							Select the dimensionality reduction technique: 
+							<select id="dimensionalityReductionTechnique" name="dimensionalityReductionTechnique" onchange="applyPca()">
+								<option value="FASTMAP">FASTMAP</option>
+								<option value="PCA">PCA</option>
+							</select>
+						</p>
 						<div id="plotlyPCA" style="width: 100%; height: 80%;">
 							
 						</div>
