@@ -1,0 +1,62 @@
+<html>
+	<head>
+		<script src="scripts/generic/jquery.min.js"></script>
+		<script src="scripts/generic/decision-tree-min.js"></script>
+		<script src="scripts/generic/plotly-2.1.0.min.js"></script>
+		<script src="scripts/pm4js_latest.js"></script>
+	</head>
+	<body>
+		<select id="DTcategoryAttr" name="categoryAttr">
+		</select>
+		<select id="DTignoredAttributes" name="ignoredAttributes" multiple>
+		</select>
+		<button onclick="javascript:buildDT()">Build</button>
+		
+		<script type="text/javascript">
+			let fea = null;
+			
+			function populateDToptions(fea) {
+				for (let featureName of fea["featureNames"]) {
+					let opt1 = document.createElement("option");
+					opt1.value = featureName;
+					opt1.text = featureName;
+					let opt2 = document.createElement("option");
+					opt2.value = featureName;
+					opt2.text = featureName;
+					document.getElementById("DTcategoryAttr").appendChild(opt1);
+					document.getElementById("DTignoredAttributes").appendChild(opt2);
+				}
+			}
+			
+			function getConfigForDT(fea) {
+				let categoryAttr = document.getElementById("DTcategoryAttr").value;
+				let ignoredAttributes = [];
+				for (let option of document.getElementById("DTignoredAttributes").childNodes) {
+					if (option.selected) {
+						ignoredAttributes.push(option.value);
+					}
+				}
+				return {trainingSet: fea, categoryAttr: categoryAttr, ignoredAttributes: ignoredAttributes};
+			}
+			
+			function buildDT() {
+				let config = getConfigForDT(fea);
+				let decisionTree = new dt.DecisionTree(config);
+				let nodes = DtUtils.dtToNodes(decisionTree);
+				let gvizStri = DtUtils.getGvizString(nodes);
+				console.log(gvizStri);
+			}
+			
+	$.get("logs/example_table.jsonocel", function(stri) {
+			let ocel = JsonOcelImporter.apply(stri);
+			fea = OcelObjectFeatures.apply(ocel);
+			fea = OcelObjectFeatures.scaling(fea);
+			fea = OcelObjectFeatures.filterOnVariance(fea, 0.1);
+			
+			populateDToptions(fea);
+			
+			fea = OcelObjectFeatures.transformToDct(fea);
+		});
+		</script>
+	</body>
+</html>

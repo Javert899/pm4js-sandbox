@@ -34,6 +34,8 @@
 		<script src="scripts/ocel/ml-isolationForest.js"></script>
 		<script src="scripts/ocel/ml-pca.js"></script>
 		<script src="scripts/generic/ml.min.js"></script>
+		<script src="scripts/generic/decision-tree-min.js"></script>
+		<script src="scripts/ocel/ml-dt.js"></script>
 		<link rel="stylesheet" href="static/bootstrap.min.css"></link>
 		<link rel="stylesheet" href="static/bootstrap-grid.min.css"></link>
 		<link rel="stylesheet" href="static/bootstrap-reboot.min.css"></link>
@@ -705,7 +707,11 @@
 								
 								<li class="navigation-item">
 									<a class="navigation-link" href="javascript:showPCAvisualization()"><i class="fas fa-signal"></i>&nbsp;PCA</a>
-								</li>					
+								</li>
+								
+								<li class="navigation-item">
+									<a class="navigation-link" href="javascript:showDTvisualization()"><i class="fas fa-tree"></i>&nbsp;Decision Trees</a>
+								</li>
 							</ul>
 						</div>
 					</nav>
@@ -730,7 +736,21 @@
 							
 						</div>
 					</div>
-					
+					<div id="machineLearningDT" style="display: none">
+						<table id="machineLearningDTContainer" style="width: 100%; height: 85%">
+							<tr>
+								<td style="width: 15%;">
+									<p><select id="DTcategoryAttr" name="categoryAttr"></select></p>
+									<p><select id="DTignoredAttributes" name="ignoredAttributes" multiple></select></p>
+									<p><button onclick="javascript:buildDT()">Build</button></p>
+								</td>
+								<td style="width: 15%;">
+									<div id="machineLearningDTResult">
+									</div>
+								</td>
+							</tr>
+						</table>
+					</div>
 				</div>
 				<div id="plotlyGraphsPage" style="display: none">
 					<div class="row" style="height: 85%">
@@ -1041,6 +1061,7 @@
 					document.getElementById("machineLearningSQL").style.display = "none";
 					document.getElementById("machineLearningIsolationForest").style.display = "none";
 					document.getElementById("machineLearningPCA").style.display = "none";
+					document.getElementById("machineLearningDT").style.display = "";
 				}
 				
 				function showSQLexplorer() {
@@ -1060,6 +1081,12 @@
 					hideAllMLpages();
 					document.getElementById("machineLearningPCA").style.display = "";
 					applyPca();
+				}
+				
+				function showDTvisualization() {
+					hideAllMLpages();
+					document.getElementById("machineLearningDT").style.display = "";
+					applyDT();
 				}
 				
 				function showGraphs() {
