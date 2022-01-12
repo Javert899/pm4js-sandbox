@@ -1,6 +1,10 @@
 function applyPca(targetDiv="plotlyPCA") {
-		let pca = new ML.PCA(objFeaturesNormalizedFiltered["data"]);
-		let proj = pca.predict(objFeaturesNormalizedFiltered["data"]).data;
+		//let pca = new ML.PCA(objFeaturesNormalizedFiltered["data"]);
+		//let proj = pca.predict(objFeaturesNormalizedFiltered["data"]).data;
+		let matrix = druid.Matrix.from(objFeaturesNormalizedFiltered["data"]);
+		let proj = new druid.PCA(matrix, 2).transform().to2dArray;
+		console.log(proj);
+		console.log("BBBBBBBBBB");
 		let objects = Object.keys(visualization.model.ocel["ocel:objects"]);
 		let objType = {};
 		for (let objId of objects) {
