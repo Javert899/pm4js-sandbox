@@ -745,10 +745,13 @@
 						</div>
 					</div>
 					<div id="machineLearningDT" style="display: none">
+						<p>A decision tree helps to understand the conditions which determine a given outcome of a case:</p>
 						<table id="machineLearningDTContainer" style="width: 100%; height: 85%">
 							<tr>
 								<td style="width: 15%;">
+									<p>Select the categorical attribute:</p>
 									<p><select id="DTcategoryAttr" name="categoryAttr"></select></p>
+									<p>Select the attributes to ignore:</p>
 									<p><select id="DTignoredAttributes" name="ignoredAttributes" multiple></select></p>
 									<p><button onclick="javascript:buildDT()">Build</button></p>
 								</td>
