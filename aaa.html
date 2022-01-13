@@ -1,23 +1,76 @@
 <html>
 	<head>
 		<script src="scripts/generic/jquery.min.js"></script>
-		<script src="scripts/generic/druid.min.js"></script>
+		<script src="scripts/generic/statistics.min.js"></script>
 		<script src="scripts/generic/plotly-2.1.0.min.js"></script>
 		<script src="scripts/pm4js_latest.js"></script>
 	</head>
 	<body>
+		<div id="plotlyMLStatGraph" style="width: 100%; height: 100%;">
+			
+		</div>
 		<script type="text/javascript">
+			function getStatistic(fea, targetVariable, metric) {
+				let fea2 = OcelObjectFeatures.transformToDct(fea);
+				let metricVariables = {};
+				for (let v of fea["featureNames"]) {
+					metricVariables[v] = "metric";
+				}
+				var stats = new Statistics(fea2, metricVariables);
+				let varValues = [];
+				for (let v of fea["featureNames"]) {
+					if (v != targetVariable) {
+						let val = null;
+						if (metric == "correlationCoefficient") {
+							val = stats.correlationCoefficient(v, targetVariable).correlationCoefficient;
+						}
+						else if (metric == "covariance") {
+							val = stats.covariance(v, targetVariable).covariance;
+						}
+						else if (metric == "goodmanKruskalsGamma") {
+							val = stats.goodmanKruskalsGamma(v, targetVariable).gamma;
+						}
+						else if (metric == "kendallsTau") {
+							val = stats.kendallsTau(v, targetVariable).b.tauB;
+						}
+						else if (metric == "spearmansRho") {
+							val = stats.spearmansRho(v, targetVariable).rho;
+						}
+						varValues.push([v, val]);
+					}
+				}
+				varValues.sort((a, b) => { return b[1] - a[1]; });
+				return varValues;
+			}
+			
+			function drawStatisticsInPlot(stats, plotDiv="plotlyMLStatGraph") {
+				let XAxis = [];
+				let YAxis = [];
+				for (let stat of stats) {
+					XAxis.push(stat[1]);
+					YAxis.push(stat[0]);
+				}
+				let trace1 = {
+				  type: 'scatter',
+				  x: XAxis,
+				  y: YAxis,
+				  mode: 'markers',
+				  name: 'Percent of estimated voting age population'
+				};
+				let data = [trace1];
+				Plotly.newPlot(plotDiv, data);
+			}
+			
 	$.get("logs/example_table.jsonocel", function(stri) {
 			let ocel = JsonOcelImporter.apply(stri);
 			fea = OcelObjectFeatures.apply(ocel);
 			fea = OcelObjectFeatures.scaling(fea);
 			fea = OcelObjectFeatures.filterOnVariance(fea, 0.1);
 			
-			let matrix = druid.Matrix.from(fea["data"]);
-			console.log(matrix);
-			
-			let lle = new druid.FASTMAP(matrix, 1).transform();
-			console.log(lle);
+			console.log(fea["featureNames"]);
+			let varValues = getStatistic(fea, "@@obj_lif_dur", "spearmansRho");
+			console.log(varValues);
+			drawStatisticsInPlot(varValues);
 		});
 		</script>
 	</body>

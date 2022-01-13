@@ -37,6 +37,8 @@
 		<script src="scripts/generic/decision-tree-min.js"></script>
 		<script src="scripts/ocel/ml-dt.js"></script>
 		<script src="scripts/generic/druid.min.js"></script>
+		<script src="scripts/generic/statistics.min.js"></script>
+		<script src="scripts/ocel/ml-stats.js"></script>
 		<link rel="stylesheet" href="static/bootstrap.min.css"></link>
 		<link rel="stylesheet" href="static/bootstrap-grid.min.css"></link>
 		<link rel="stylesheet" href="static/bootstrap-reboot.min.css"></link>
@@ -713,6 +715,10 @@
 								<li class="navigation-item">
 									<a class="navigation-link" href="javascript:showDTvisualization()"><i class="fas fa-tree"></i>&nbsp;Decision Trees</a>
 								</li>
+								
+								<li class="navigation-item">
+									<a class="navigation-link" href="javascript:showMLStatsvisualization()"><i class="fas fa-plus-square"></i>&nbsp;Correlation Statistics</a>
+								</li>
 							</ul>
 						</div>
 					</nav>
@@ -761,6 +767,23 @@
 								</td>
 							</tr>
 						</table>
+					</div>
+					<div id="machineLearningStats" style="display: none">
+						<p>Shows the correlation between a selected feature and all the others features. This permits to understand which other factors influence the given feature.</p>
+						<p>
+							Select the target variable: <select id="mlstatstargetvariable" onchange="javascript:applyMLStats()"></select>
+						</p>
+						<p>Select the type of statistic that should be considered:
+							<select id="mlstattypestatistic" onchange="javascript:applyMLStats()">
+								<option value="correlationCoefficient" selected>Correlation Coefficient</option>
+								<option value="covariance">Covariance</option>
+								<option value="goodmanKruskalsGamma">Goodman-Kruskals Gamma</option>
+								<option value="kendallsTau">Kendall's Tau</option>
+								<option value="spearmansRho">Spearman's Rho</option>
+							</select>
+						</p>
+						<div id="plotlyMLStatGraph" style="width: 100%; height: 75%;">
+						</div>
 					</div>
 				</div>
 				<div id="plotlyGraphsPage" style="display: none">
@@ -1073,6 +1096,7 @@
 					document.getElementById("machineLearningIsolationForest").style.display = "none";
 					document.getElementById("machineLearningPCA").style.display = "none";
 					document.getElementById("machineLearningDT").style.display = "none";
+					document.getElementById("machineLearningStats").style.display = "none";
 				}
 				
 				function showSQLexplorer() {
@@ -1098,6 +1122,13 @@
 					hideAllMLpages();
 					document.getElementById("machineLearningDT").style.display = "";
 					applyDT();
+				}
+				
+				function showMLStatsvisualization() {
+					hideAllMLpages();
+					document.getElementById("machineLearningStats").style.display = "";
+					prepareMLStats();
+					applyMLStats();
 				}
 				
 				function showGraphs() {
