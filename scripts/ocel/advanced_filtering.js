@@ -1,6 +1,6 @@
 function filterMinOccurrencesActivity0() {
 	let minEvents = parseInt(prompt("Insert the minimum number of occurrences for an activity to be kept"));
-	let filteredModel = new OcdfgModel(OcelGeneralFiltering.filterOtMinOccActivities(visualization.model.ocel, minEvents));
+	let filteredModel = new OcdfgModel(OcelGeneralFiltering.filterMinOccActivities(visualization.model.ocel, minEvents));
 	visualization.setFilteredModel(filteredModel);
 }
 

@@ -20543,7 +20543,7 @@ class OcelGeneralFiltering {
 		return OcelGeneralFiltering.filterObjectTypes(ocel, retTypes);
 	}
 	
-	static filterOtMinOccActivities(ocel, minCount) {
+	static filterMinOccActivities(ocel, minCount) {
 		let evPerActCount = GeneralOcelStatistics.eventsPerActivityCount(ocel);
 		let keepActivities = [];
 		for (let act in evPerActCount) {
