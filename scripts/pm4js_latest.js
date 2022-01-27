@@ -18161,6 +18161,44 @@ catch (err) {
 
 
 class OcelGraphs {
+	static getObjectsLifecycle(ocel) {
+		let lif = {};
+		let objects = ocel["ocel:objects"];
+		for (let objId in objects) {
+			lif[objId] = [];
+		}
+		let events = ocel["ocel:events"];
+		for (let evId in events) {
+			let eve = events[evId];
+			for (let objId of eve["ocel:omap"]) {
+				lif[objId].push(evId);
+			}
+		}
+		return lif;
+	}
+	
+	static eventsRelationGraph(ocel) {
+		let lif = OcelGraphs.getObjectsLifecycle(ocel);
+		let eveRelGraph = {};
+		for (let evId in ocel["ocel:events"]) {
+			eveRelGraph[evId] = {};
+		}
+		for (let objId in lif) {
+			let objLif = lif[objId];
+			let i = 0;
+			while (i < objLif.length - 1) {
+				let j = i + 1;
+				while (j < objLif.length) {
+					eveRelGraph[objLif[i]][objLif[j]] = 0;
+					eveRelGraph[objLif[j]][objLif[i]] = 0;
+					j++;
+				}
+				i++;
+			}
+		}
+		return eveRelGraph;
+	}
+	
 	static objectInteractionGraph(ocel) {
 		let ret = {};
 		let events = ocel["ocel:events"];
@@ -18405,6 +18443,53 @@ try {
 	require('../../pm4js.js');
 	module.exports = {OcelGraphs: OcelGraphs};
 	global.OcelGraphs = OcelGraphs;
+}
+catch (err) {
+	// not in node
+	//console.log(err);
+}
+
+class OcelConnectedComponents {
+	static findConnCompEvIds(ocel) {
+		let evRelGraph = OcelGraphs.eventsRelationGraph(ocel);
+		let connComp = {};
+		let count = 0;
+		for (let evId in ocel["ocel:events"]) {
+			connComp[evId] = count;
+			count++;
+		}
+		let cont = true;
+		while (cont) {
+			cont = false;
+			for (let evId in evRelGraph) {
+				for (let evId2 in evRelGraph[evId]) {
+					if (connComp[evId] != connComp[evId2]) {
+						let cc = Math.min(connComp[evId], connComp[evId2]);
+						connComp[evId] = cc;
+						connComp[evId2] = cc;
+						cont = true;
+					}
+				}
+			}
+		}
+		let connComp1 = {};
+		for (let evId in connComp) {
+			let cc = connComp[evId];
+			if (!(cc in connComp1)) {
+				connComp1[cc] = [];
+			}
+			connComp1[cc].push(evId);
+		}
+		return connComp1;
+	}
+	
+	
+}
+
+try {
+	require('../../pm4js.js');
+	module.exports = {OcelConnectedComponents: OcelConnectedComponents};
+	global.OcelConnectedComponents = OcelConnectedComponents;
 }
 catch (err) {
 	// not in node
@@ -20626,6 +20711,37 @@ class OcelGeneralFiltering {
 		}
 		
 		return filteredOcel;
+	}
+	
+	static filterConnComp(ocel, connComp, selectedConnCompIdx) {
+		let cc = connComp[selectedConnCompIdx];
+		
+		let filteredOcel = {};
+		filteredOcel["ocel:global-event"] = ocel["ocel:global-event"];
+		filteredOcel["ocel:global-object"] = ocel["ocel:global-object"];
+		filteredOcel["ocel:global-log"] = {};
+		filteredOcel["ocel:global-log"]["ocel:attribute-names"] = ocel["ocel:global-log"]["ocel:attribute-names"];
+		filteredOcel["ocel:global-log"]["ocel:object-types"] = ocel["ocel:global-log"]["ocel:object-types"];
+		filteredOcel["ocel:objects"] = {};
+		filteredOcel["ocel:events"] = {};
+		
+		for (let evId in ocel["ocel:events"]) {
+			if (cc.includes(evId)) {
+				let eve = ocel["ocel:events"][evId];
+				filteredOcel["ocel:events"][evId] = eve;
+				for (let objId of eve["ocel:omap"]) {
+					filteredOcel["ocel:objects"][objId] = ocel["ocel:objects"][objId];
+				}
+			}
+		}
+		
+		return filteredOcel;
+	}
+	
+	static sampleEventLog(ocel, connComp) {
+		let keys = Object.keys(connComp);
+		let selectedKey = keys[ keys.length * Math.random() << 0];
+		return OcelGeneralFiltering.filterConnComp(ocel, connComp, selectedKey);
 	}
 }
 

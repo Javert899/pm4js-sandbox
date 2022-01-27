@@ -51,3 +51,14 @@ function filterRateUniqueActivities() {
 	showProcessModelPage();
 	return addFilter("<i class=\"fas fa-user-minus\"></i>&nbsp;Unique Activities&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;", "filterRateUniqueActivities0()");
 }
+
+function sampleEventLogFiltering0() {
+	let graph = OcelConnectedComponents.findConnCompEvIds(visualization.model.ocel);
+	let filteredModel = new OcdfgModel(OcelGeneralFiltering.sampleEventLog(visualization.model.ocel, graph));
+	visualization.setFilteredModel(filteredModel);
+}
+
+function sampleEventLogFiltering() {
+	showProcessModelPage();
+	return addFilter("<i class=\"fas fa-user-minus\"></i>&nbsp;Sample Event Log&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;", "sampleEventLogFiltering0()");
+}
