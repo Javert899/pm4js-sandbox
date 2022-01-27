@@ -1,4 +1,4 @@
-function calculateIsolationForest(ocel, targetDiv="machineLearningIsolationForestResult") {
+function identifyAnomalousObjects(ocel) {
 	let isolationForest = new IsolationForest.IsolationForest();
 	isolationForest.fit(objFeaturesTable["data"]);
 	let trainingScores = isolationForest.scores();
@@ -10,6 +10,11 @@ function calculateIsolationForest(ocel, targetDiv="machineLearningIsolationFores
 		i++;
 	}
 	combo.sort((a, b) => { return b[1] - a[1] });
+	return combo;
+}
+
+function calculateIsolationForest(ocel, targetDiv="machineLearningIsolationForestResult") {
+	let combo = identifyAnomalousObjects(ocel);
 	let objTypes = {};
 	for (let objId of objects) {
 		objTypes[objId] = ocel["ocel:objects"][objId]["ocel:type"];

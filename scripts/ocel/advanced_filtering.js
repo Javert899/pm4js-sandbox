@@ -62,3 +62,22 @@ function sampleEventLogFiltering() {
 	showProcessModelPage();
 	return addFilter("<i class=\"fas fa-user-minus\"></i>&nbsp;Sample Event Log&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;", "sampleEventLogFiltering0()");
 }
+
+function anomalousObjectsFiltering0() {
+	let quantile = parseFloat(prompt("Insert the quantile of anomalous objects"));
+	calculateObjectFeatures();
+	let combo = identifyAnomalousObjects(visualization.model.ocel);
+	let idx = Math.floor(combo.length * quantile);
+	let relObjIds = [];
+	while (idx < combo.length) {
+		relObjIds.push(combo[idx][0]);
+		idx = idx + 1;
+	}
+	let filteredModel = new OcdfgModel(OcelGeneralFiltering.projectOnArrayObjects(visualization.model.ocel, relObjIds));
+	visualization.setFilteredModel(filteredModel);
+}
+
+function anomalousObjectsFiltering() {
+	showProcessModelPage();
+	return addFilter("<i class=\"fas fa-user-minus\"></i>&nbsp;Anomalous Objects Filtering&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;", "anomalousObjectsFiltering0()");
+}
