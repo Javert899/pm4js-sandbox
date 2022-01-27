@@ -61,7 +61,7 @@ class Pm4JS {
 	}
 }
 
-Pm4JS.VERSION = "0.0.20";
+Pm4JS.VERSION = "0.0.24";
 Pm4JS.registrationEnabled = false;
 Pm4JS.objects = [];
 Pm4JS.algorithms = [];
@@ -7869,6 +7869,166 @@ class GeneralLogStatistics {
 		}
 		return sojTime;
 	}
+	
+	static resourceActivityPattern(eventLog, activityKey="concept:name", resourceKey="org:resource") {
+		let activities = Object.keys(GeneralLogStatistics.getAttributeValues(eventLog, activityKey));
+		let resources = Object.keys(GeneralLogStatistics.getAttributeValues(eventLog, resourceKey));
+		let resActPatt = {};
+		for (let res of resources) {
+			resActPatt[res] = [];
+			for (let act of activities) {
+				resActPatt[res].push(0);
+			}
+		}
+		for (let trace of eventLog.traces) {
+			for (let eve of trace.events) {
+				let act = eve.attributes[activityKey];
+				let res = eve.attributes[resourceKey];
+				if (act != null && res != null) {
+					act = act.value;
+					res = res.value;
+					resActPatt[res][activities.indexOf(act)] += 1;
+				}
+			}
+		}
+		return {"resActPatt": resActPatt, "activities": activities};
+	}
+	
+	static activityResourcePattern(eventLog, activityKey="concept:name", resourceKey="org:resource") {
+		let activities = Object.keys(GeneralLogStatistics.getAttributeValues(eventLog, activityKey));
+		let resources = Object.keys(GeneralLogStatistics.getAttributeValues(eventLog, resourceKey));
+		let actResPatt = {};
+		for (let act of activities) {
+			actResPatt[act] = [];
+			for (let res of resources) {
+				actResPatt[act].push(0);
+			}
+		}
+		for (let trace of eventLog.traces) {
+			for (let eve of trace.events) {
+				let act = eve.attributes[activityKey];
+				let res = eve.attributes[resourceKey];
+				if (act != null && res != null) {
+					act = act.value;
+					res = res.value;
+					actResPatt[act][resources.indexOf(res)] += 1;
+				}
+			}
+		}
+		return {"actResPatt": actResPatt, "resources": resources}
+	}
+	
+	static subcontracting(eventLog, resourceKey="org:resource") {
+		let subc = {};
+		for (let trace of eventLog.traces) {
+			let i = 0;
+			while (i < trace.events.length - 2) {
+				let ri = trace.events[i].attributes[resourceKey];
+				let ri1 = trace.events[i+1].attributes[resourceKey];
+				let ri2 = trace.events[i+2].attributes[resourceKey];
+				if (ri != null && ri1 != null && ri2 != null) {
+					ri = ri.value;
+					ri1 = ri1.value;
+					ri2 = ri2.value;
+					if (ri != ri1 && ri == ri2) {
+						// subcontracting happens
+						if (!(ri in subc)) {
+							subc[ri] = {};
+						}
+						if (!(ri1 in subc[ri])) {
+							subc[ri][ri1] = [];
+						}
+						subc[ri][ri1].push([trace, i, i+2]);
+					}
+				}
+				i++;
+			}
+		}
+		return subc;
+	}
+	
+	static workingTogether(eventLog, resourceKey="org:resource") {
+		let wt = {};
+		for (let trace of eventLog.traces) {
+			let originators = {};
+			for (let eve of trace.events) {
+				let res = eve.attributes[resourceKey];
+				if (res != null) {
+					res = res.value;
+					originators[res] = 0;
+				}
+			}
+			for (let res1 in originators) {
+				for (let res2 in originators) {
+					if (res1 != res2) {
+						if (!(res1 in wt)) {
+							wt[res1] = {};
+						}
+						if (!(res2 in wt)) {
+							wt[res2] = {};
+						}
+						if (!(res2 in wt[res1])) {
+							wt[res1][res2] = 0;
+						}
+						if (!(res1 in wt[res2])) {
+							wt[res2][res1] = 0;
+						}
+						wt[res1][res2] += 1;
+						wt[res2][res1] += 1;
+					}
+				}
+			}
+		}
+		return wt;
+	}
+	
+	static activitiesOccurrencesPerCase(eventLog, activityKey="concept:name") {
+		let activities = Object.keys(GeneralLogStatistics.getAttributeValues(eventLog, activityKey));
+		let occurrences = {};
+		for (let act of activities) {
+			occurrences[act] = [];
+		}
+		for (let trace of eventLog.traces) {
+			let occ = {};
+			for (let eve of trace.events) {
+				let activity = eve.attributes[activityKey];
+				if (activity != null) {
+					activity = activity.value;
+					if (!(activity in occ)) {
+						occ[activity] = 0;
+					}
+					occ[activity] += 1;
+				}
+			}
+			for (let act of activities) {
+				if (act in occ) {
+					occurrences[act].push(occ[act]);
+				}
+				else {
+					occurrences[act].push(0);
+				}
+			}
+		}
+		return occurrences;
+	}
+	
+	static projectOnAttributeValues(eventLog, attributeKey="concept:name") {
+		let ret = [];
+		for (let trace of eventLog.traces) {
+			let arr = [];
+			for (let eve of trace.events) {
+				let val = eve.attributes[attributeKey];
+				if (val != null) {
+					arr.push(val.value);
+				}
+				else {
+					arr.push(null);
+				}
+			}
+			ret.push(arr);
+		}
+		return ret;
+	}
 }
 
 try {
@@ -8220,16 +8380,16 @@ class XesExporter {
 }
 
 try {
+	require('../../../../pm4js.js');
+	require('../../log.js');
+	module.exports = {XesExporter: XesExporter};
+	global.XesExporter = XesExporter;
 	const jsdom = require("jsdom");
 	const { JSDOM } = jsdom;
 	global.dom = new JSDOM('<!doctype html><html><body></body></html>');
 	global.window = dom.window;
 	global.document = dom.window.document;
 	global.navigator = global.window.navigator;
-	require('../../../../pm4js.js');
-	require('../../log.js');
-	module.exports = {XesExporter: XesExporter};
-	global.XesExporter = XesExporter;
 }
 catch (err) {
 	// not in node
@@ -8895,16 +9055,16 @@ class PnmlExporter {
 }
 
 try {
+	require('../../../pm4js.js');
+	require('../petri_net.js');
+	module.exports = {PnmlExporter: PnmlExporter};
+	global.PnmlExporter = PnmlExporter;
 	const jsdom = require("jsdom");
 	const { JSDOM } = jsdom;
 	global.dom = new JSDOM('<!doctype html><html><body></body></html>');
 	global.window = dom.window;
 	global.document = dom.window.document;
 	global.navigator = global.window.navigator;
-	require('../../../pm4js.js');
-	require('../petri_net.js');
-	module.exports = {PnmlExporter: PnmlExporter};
-	global.PnmlExporter = PnmlExporter;
 }
 catch (err) {
 	// not in node
@@ -9485,6 +9645,57 @@ class LogGeneralFiltering {
 			}
 			if (addEvenIfEmpty || newTrace.events.length > 0) {
 				filteredLog.traces.push(newTrace);
+			}
+		}
+		return filteredLog;
+	}
+	
+	static filterRework(log, activity, minOccurrences, activityKey="concept:name") {
+		let filteredLog = new EventLog();
+		for (let trace of log.traces) {
+			let actOcc = {};
+			for (let eve of trace.events) {
+				let act = eve.attributes[activityKey];
+				if (act != null) {
+					act = act.value;
+					if (!(act in actOcc)) {
+						actOcc[act] = 0;
+					}
+					actOcc[act] += 1;
+				}
+			}
+			if (activity in actOcc && actOcc[activity] >= minOccurrences) {
+				filteredLog.traces.push(trace);
+			}
+		}
+		return filteredLog;
+	}
+	
+	static filterBetween(log, activity1, activity2, activityKey="concept:name") {
+		let filteredLog = new EventLog();
+		for (let trace of log.traces) {
+			let a1Idx = -1;
+			let i = 0;
+			while (i < trace.events.length) {
+				let eve = trace.events[i];
+				let act = eve.attributes[activityKey];
+				if (act != null) {
+					act = act.value;
+					if (act == activity1) {
+						a1Idx = i;
+					}
+					else if (act == activity2 && a1Idx > -1) {
+						let newTrace = new Trace();
+						let j = a1Idx;
+						while (j <= i) {
+							newTrace.events.push(trace.events[j]);
+							j++;
+						}
+						filteredLog.traces.push(newTrace);
+						a1Idx = -1;
+					}
+				}
+				i++;
 			}
 		}
 		return filteredLog;
@@ -12744,7 +12955,7 @@ class CaseFeaturesOutput {
 }
 
 class CaseFeatures {
-	static apply(eventLog, activityKey="concept:name", caseIdKey="concept:name", evStrAttr=null, evNumAttr=null, trStrAttr=null, trNumAttr=null, evSuccStrAttr=null) {
+	static apply(eventLog, activityKey="concept:name", caseIdKey="concept:name", evStrAttr=null, evNumAttr=null, trStrAttr=null, trNumAttr=null, evSuccStrAttr=null, timestampKey="time:timestamp", resourceKey="org:resource", includeWorkInProgress=CaseFeatures.INCLUDE_WIP, includeResourceWorkload=CaseFeatures.INCLUDE_RESOURCE_WORKLOAD) {
 		let vect = null;
 		if (evStrAttr == null || evNumAttr == null || trStrAttr == null || trNumAttr == null || evSuccStrAttr == null) {
 			vect = CaseFeatures.automaticFeatureSelection(eventLog, activityKey);
@@ -12847,6 +13058,36 @@ class CaseFeatures {
 			}
 			data.push(vect);
 		}
+		let activityMinMaxIdx = CaseFeatures.activityMinMaxIndex(eventLog, activityKey);
+		let activityMinMaxTimeFromStart = CaseFeatures.activityMinMaxTimeFromStart(eventLog, activityKey, timestampKey);
+		let activityMinMaxTimeToEnd = CaseFeatures.activityMinMaxTimeToEnd(eventLog, activityKey, timestampKey);
+		let pathDuration = CaseFeatures.pathDuration(eventLog, activityKey, timestampKey);
+		
+		let i = 0;
+		while (i < data.length) {
+			data[i] = [...data[i], ...activityMinMaxIdx[0][i], ...activityMinMaxTimeFromStart[0][i], ...activityMinMaxTimeToEnd[0][i], ...pathDuration[0][i]];
+			i++;
+		}
+		features = [...features, ...activityMinMaxIdx[1], ...activityMinMaxTimeFromStart[1], ...activityMinMaxTimeToEnd[1], ...pathDuration[1]];
+		
+		if (includeWorkInProgress) {
+			let wip = CaseFeatures.workInProgress(eventLog, timestampKey, caseIdKey);
+			i = 0;
+			while (i < data.length) {
+				data[i] = [...data[i], ...wip[0][i]];
+				i++;
+			}
+			features = [...features, ...wip[1]];
+		}
+		if (includeResourceWorkload) {
+			let resWorkload = CaseFeatures.resourceWorkload(eventLog, timestampKey, resourceKey);
+			i = 0;
+			while (i < data.length) {
+				data[i] = [...data[i], ...resWorkload[0][i]];
+				i++;
+			}
+			features = [...features, ...resWorkload[1]];
+		}
 		return new CaseFeaturesOutput(data, features);
 	}
 	
@@ -12947,8 +13188,237 @@ class CaseFeatures {
 		}
 		return true;
 	}
+	
+	static activityMinMaxIndex(log, activityKey="concept:name", naRep=-1) {
+		let features = ["@@act_min_idx", "@@act_max_idx"];
+		let data = [];
+		let activities = Object.keys(GeneralLogStatistics.getAttributeValues(log, activityKey));
+		for (let trace of log.traces) {
+			let minIdx = {};
+			let maxIdx = {};
+			let i = 0;
+			while (i < trace.events.length) {
+				let act = trace.events[i].attributes[activityKey];
+				if (act != null) {
+					act = act.value;
+					if (!(act in minIdx)) {
+						minIdx[act] = i;
+					}
+					maxIdx[act] = i;
+				}
+				i++;
+			}
+			let arr = [];			
+			for (let act of activities) {
+				if (act in minIdx) {
+					arr.push(minIdx[act]);
+					arr.push(maxIdx[act]);
+				}
+				else {
+					arr.push(naRep);
+					arr.push(naRep);
+				}
+			}
+			data.push(arr);
+		}
+		return [data, features];
+	}
+	
+	static activityMinMaxTimeFromStart(log, activityKey="concept:name", timestampKey="time:timestamp", naRep=-1) {
+		let features = ["@@act_min_time_from_start", "@@act_max_time_from_start"];
+		let data = [];
+		let activities = Object.keys(GeneralLogStatistics.getAttributeValues(log, activityKey));
+		for (let trace of log.traces) {
+			let minTime = {};
+			let maxTime = {};
+			let i = 0;
+			let consideredTime = 0;
+			if (trace.events.length > 0) {
+				consideredTime = trace.events[0].attributes[timestampKey].value / 1000.0;
+			}
+			while (i < trace.events.length) {
+				let act = trace.events[i].attributes[activityKey];
+				let thisTime = trace.events[i].attributes[timestampKey];
+				if (act != null && thisTime != null) {
+					act = act.value;
+					thisTime = thisTime.value / 1000.0;
+					if (!(act in minTime)) {
+						minTime[act] = thisTime - consideredTime;
+					}
+					maxTime[act] = thisTime - consideredTime;
+				}
+				i++;
+			}
+			let arr = [];			
+			for (let act of activities) {
+				if (act in minTime) {
+					arr.push(minTime[act]);
+					arr.push(maxTime[act]);
+				}
+				else {
+					arr.push(naRep);
+					arr.push(naRep);
+				}
+			}
+			data.push(arr);
+		}
+		
+		return [data, features];
+	}
+	
+	static activityMinMaxTimeToEnd(log, activityKey="concept:name", timestampKey="time:timestamp", naRep=-1) {
+		let features = ["@@act_min_time_to_end", "@@act_max_time_to_end"];
+		let data = [];
+		let activities = Object.keys(GeneralLogStatistics.getAttributeValues(log, activityKey));
+		for (let trace of log.traces) {
+			let minTime = {};
+			let maxTime = {};
+			let i = 0;
+			let consideredTime = 0;
+			if (trace.events.length > 0) {
+				consideredTime = trace.events[trace.events.length - 1].attributes[timestampKey].value / 1000.0;
+			}
+			while (i < trace.events.length) {
+				let act = trace.events[i].attributes[activityKey];
+				let thisTime = trace.events[i].attributes[timestampKey];
+				if (act != null && thisTime != null) {
+					act = act.value;
+					thisTime = thisTime.value / 1000.0;
+					if (!(act in maxTime)) {
+						maxTime[act] = consideredTime - thisTime;
+					}
+					minTime[act] = consideredTime - thisTime;
+				}
+				i++;
+			}
+			let arr = [];			
+			for (let act of activities) {
+				if (act in minTime) {
+					arr.push(minTime[act]);
+					arr.push(maxTime[act]);
+				}
+				else {
+					arr.push(naRep);
+					arr.push(naRep);
+				}
+			}
+			data.push(arr);
+		}
+		return [data, features];
+	}
+	
+	static pathDuration(log, activityKey="concept:name", timestampKey="time:timestamp", naRep=-1) {
+		let paths = Object.keys(FrequencyDfgDiscovery.apply(log, activityKey).pathsFrequency);
+		let data = [];
+		let features = [];
+		for (let path of paths) {
+			features.push("@@path_duration_min_"+path);
+			features.push("@@path_duration_max_"+path);
+		}
+		for (let trace of log.traces) {
+			let minPathDuration = {};
+			let maxPathDuration = {};
+			let i = 0;
+			while (i < trace.events.length - 1) {
+				let acti = trace.events[i].attributes[activityKey];
+				let actj = trace.events[i+1].attributes[activityKey];
+				let timei = trace.events[i].attributes[timestampKey];
+				let timej = trace.events[i+1].attributes[timestampKey];
+				if (acti != null && actj != null && timei != null && timej != null) {
+					acti = acti.value;
+					actj = actj.value;
+					timei = timei.value / 1000;
+					timej = timej.value / 1000;
+					let path = acti + "," + actj;
+					let thisdiff = timej - timei;
+					if (!(path in minPathDuration)) {
+						minPathDuration[path] = thisdiff;
+						maxPathDuration[path] = thisdiff;
+					}
+					minPathDuration[path] = Math.min(thisdiff, minPathDuration[path]);
+					maxPathDuration[path] = Math.max(thisdiff, maxPathDuration[path]);
+				}
+				let arr = [];
+				for (let path of paths) {
+					if (path in minPathDuration) {
+						arr.push(minPathDuration[path]);
+						arr.push(maxPathDuration[path]);
+					}
+					else {
+						arr.push(naRep);
+						arr.push(naRep);
+					}
+				}
+				data.push(arr);
+				i++;
+			}
+		}
+		return [data, features];
+	}
+	
+	static workInProgress(log, timestampKey="time:timestamp", caseIdKey="concept:name") {
+		let tree = IntervalTreeBuilder.apply(log, timestampKey);
+		let features = ["@@case_wip"];
+		let data = [];
+		let i = 0;
+		while (i < log.traces.length) {
+			let inte = {};
+			if (log.traces[i].events.length > 0) {
+				let st = log.traces[i].events[0].attributes[timestampKey].value / 1000.0;
+				let et = log.traces[i].events[log.traces[i].events.length - 1].attributes[timestampKey].value / 1000.0;
+				let intersectionAfterBefore = IntervalTreeAlgorithms.queryInterval(tree, st, et);
+				for (let el of intersectionAfterBefore) {
+					inte[el.value[0].attributes[caseIdKey].value] = 0;
+				}
+			}
+			data.push([Object.keys(inte).length]);
+			i++;
+		}
+		return [data, features];
+	}
+	
+	static resourceWorkload(log, timestampKey="time:timestamp", resourceKey="org:resource") {
+		let tree = IntervalTreeBuilder.apply(log, timestampKey);
+		let resources = Object.keys(GeneralLogStatistics.getAttributeValues(log, resourceKey));
+		let features = [];
+		let data = [];
+		for (let res of resources) {
+			features.push("@@res_work_"+res);
+		}
+		let i = 0;
+		while (i < log.traces.length) {
+			let inte = {};
+			if (log.traces[i].events.length > 0) {
+				let st = log.traces[i].events[0].attributes[timestampKey].value / 1000.0;
+				let et = log.traces[i].events[log.traces[i].events.length - 1].attributes[timestampKey].value / 1000.0;
+				let intersectionAfterBefore = IntervalTreeAlgorithms.queryInterval(tree, st, et);
+				for (let el of intersectionAfterBefore) {
+					let eve = el.value[0].events[el.value[1]];
+					let res = eve.attributes[resourceKey].value;
+					if (!(res in inte)) {
+						inte[res] = 0;
+					}
+					inte[res] += 1;
+				}
+			}
+			let arr = [];
+			for (let res of resources) {
+				if (res in inte) {
+					arr.push(inte[res]);
+				}
+				else {
+					arr.push(0);
+				}
+			}
+			data.push(arr);
+			i++;
+		}
+		return [data, features];
+	}
 }
 
+CaseFeatures.INCLUDE_WIP = false;
+CaseFeatures.INCLUDE_RESOURCE_WORKLOAD = false;
 try {
 	require('../../pm4js.js');
 	require('../discovery/dfg/algorithm.js');
@@ -13054,6 +13524,26 @@ class IntervalTreeAlgorithms {
 			}
 		}
 		return returned;
+	}
+	
+	static queryInterval(tree, st, et) {
+		let afterIntersectingObjects0 = tree.queryAfterPoint(st);
+		let beforeIntersectingObjects0 = tree.queryBeforePoint(et);
+		let afterIntersectingObjects = [];
+		let beforeIntersectingObjects = [];
+		for (let obj of afterIntersectingObjects0) {
+			afterIntersectingObjects.push(obj);
+		}
+		for (let obj of beforeIntersectingObjects0) {
+			beforeIntersectingObjects.push(obj);
+		}
+		let intersectionAfterBefore = [];
+		for (let obj of afterIntersectingObjects) {
+			if (beforeIntersectingObjects.includes(obj)) {
+				intersectionAfterBefore.push(obj);
+			}
+		}
+		return intersectionAfterBefore;
 	}
 }
 
@@ -14386,9 +14876,9 @@ class BpmnExporter {
 		}
 	
 	static apply(bpmnGraph) {
-		let definitions = document.createElementNS("", "definitions");
+		let definitions = document.createElementNS("", "bpmn"+BpmnExporter.DUMMY_SEP+"definitions");
 		let processId = BpmnExporter.nodeUuid();
-		definitions.setAttribute("xmlns", "http://www.omg.org/spec/BPMN/20100524/MODEL");
+		definitions.setAttribute("xmlns:bpmn", "http://www.omg.org/spec/BPMN/20100524/MODEL");
 		definitions.setAttribute("xmlns:bpmndi", "http://www.omg.org/spec/BPMN/20100524/DI");
 		definitions.setAttribute("xmlns:omgdc", "http://www.omg.org/spec/DD/20100524/DC");
 		definitions.setAttribute("xmlns:omgdi", "http://www.omg.org/spec/DD/20100524/DI");
@@ -14449,7 +14939,7 @@ class BpmnExporter {
 			bpmnPlane.appendChild(xmlEdge);
 		}
 		//<process id="id071a1d8d-32e0-4b39-ae20-8ab8c71faec3" isClosed="false" isExecutable="false" processType="None">
-		let process = document.createElementNS("", "process");
+		let process = document.createElementNS("", "bpmn"+BpmnExporter.DUMMY_SEP+"process");
 		process.setAttribute("id", processId);
 		process.setAttribute("isClosed", "false");
 		process.setAttribute("isExecutable", "false");
@@ -14457,19 +14947,19 @@ class BpmnExporter {
 		definitions.appendChild(process);
 		for (let nodeId in bpmnGraph.nodes) {
 			let node = bpmnGraph.nodes[nodeId];
-			let xmlNode = document.createElementNS("", node.type);
+			let xmlNode = document.createElementNS("", "bpmn"+BpmnExporter.DUMMY_SEP+node.type);
 			xmlNode.setAttribute("id", nodeId);
 			xmlNode.setAttribute("name", node.name);
 			for (let prop in node.properties) {
 				xmlNode.setAttribute(prop, node.properties[prop]);
 			}
 			for (let inc in node.incoming) {
-				let xmlInc = document.createElementNS("", "incoming");
+				let xmlInc = document.createElementNS("", "bpmn"+BpmnExporter.DUMMY_SEP+"incoming");
 				xmlInc.textContent = inc;
 				xmlNode.appendChild(xmlInc);
 			}
 			for (let out in node.outgoing) {
-				let xmlOut = document.createElementNS("", "outgoing");
+				let xmlOut = document.createElementNS("", "bpmn"+BpmnExporter.DUMMY_SEP+"outgoing");
 				xmlOut.textContent = out;
 				xmlNode.appendChild(xmlOut);
 			}
@@ -14477,7 +14967,7 @@ class BpmnExporter {
 		}
 		for (let edgeId in bpmnGraph.edges) {
 			let edge = bpmnGraph.edges[edgeId];
-			let xmlEdge = document.createElementNS("", "sequenceFlow");
+			let xmlEdge = document.createElementNS("", "bpmn"+BpmnExporter.DUMMY_SEP+"sequenceFlow");
 			xmlEdge.setAttribute("id", edgeId);
 			xmlEdge.setAttribute("name", edge.name);
 			xmlEdge.setAttribute("sourceRef", edge.source.id);
@@ -14501,16 +14991,16 @@ class BpmnExporter {
 BpmnExporter.DUMMY_SEP = "AIOEWFRIUOERWQIO";
 
 try {
+	require('../../../pm4js.js');
+	require('../bpmn_graph.js');
+	module.exports = {BpmnExporter: BpmnExporter};
+	global.BpmnExporter = BpmnExporter;
 	const jsdom = require("jsdom");
 	const { JSDOM } = jsdom;
 	global.dom = new JSDOM('<!doctype html><html><body></body></html>');
 	global.window = dom.window;
 	global.document = dom.window.document;
 	global.navigator = global.window.navigator;
-	require('../../../pm4js.js');
-	require('../bpmn_graph.js');
-	module.exports = {BpmnExporter: BpmnExporter};
-	global.BpmnExporter = BpmnExporter;
 }
 catch (err) {
 	// not in node
@@ -14904,15 +15394,15 @@ class PtmlExporter {
 PtmlExporter.DUMMY_SEP = "AIOEWFRIUOERWQIO";
 
 try {
+	require('../../../pm4js.js');
+	global.PtmlExporter = PtmlExporter;
+	module.exports = {PtmlExporter: PtmlExporter};
 	const jsdom = require("jsdom");
 	const { JSDOM } = jsdom;
 	global.dom = new JSDOM('<!doctype html><html><body></body></html>');
 	global.window = dom.window;
 	global.document = dom.window.document;
 	global.navigator = global.window.navigator;
-	require('../../../pm4js.js');
-	global.PtmlExporter = PtmlExporter;
-	module.exports = {PtmlExporter: PtmlExporter};
 }
 catch (err) {
 	// not in node
@@ -16269,15 +16759,15 @@ class XmlOcelExporter {
 }
 
 try {
+	require('../../../../pm4js.js');
+	module.exports = {XmlOcelExporter: XmlOcelExporter};
+	global.XmlOcelExporter = XmlOcelExporter;
 	const jsdom = require("jsdom");
 	const { JSDOM } = jsdom;
 	global.dom = new JSDOM('<!doctype html><html><body></body></html>');
 	global.window = dom.window;
 	global.document = dom.window.document;
 	global.navigator = global.window.navigator;
-	require('../../../../pm4js.js');
-	module.exports = {XmlOcelExporter: XmlOcelExporter};
-	global.XmlOcelExporter = XmlOcelExporter;
 }
 catch (err) {
 	// not in node
@@ -18788,22 +19278,7 @@ class OcelObjectFeatures {
 			if (lif.length > 0) {
 				let st = lif[0]["ocel:timestamp"].getTime() / 1000.0;
 				let et = lif[lif.length - 1]["ocel:timestamp"].getTime() / 1000.0;
-				let afterIntersectingObjects0 = tree.queryAfterPoint(st);
-				let beforeIntersectingObjects0 = tree.queryBeforePoint(et);
-				let afterIntersectingObjects = [];
-				let beforeIntersectingObjects = [];
-				for (let obj of afterIntersectingObjects0) {
-					afterIntersectingObjects.push(obj);
-				}
-				for (let obj of beforeIntersectingObjects0) {
-					beforeIntersectingObjects.push(obj);
-				}
-				let intersectionAfterBefore = [];
-				for (let obj of afterIntersectingObjects) {
-					if (beforeIntersectingObjects.includes(obj)) {
-						intersectionAfterBefore.push(obj);
-					}
-				}
+				let intersectionAfterBefore = IntervalTreeAlgorithms.queryInterval(tree, st, et);
 				data.push([intersectionAfterBefore.length]);
 			}
 			else {
@@ -19428,7 +19903,7 @@ class GeneralOcelStatistics {
 		return dct;
 	}
 	
-	static objectsPerTypePerActivity(ocel) {
+	static objectsPerTypePerActivity(ocel, retSum=false) {
 		// convergence problem
 		let objects = ocel["ocel:objects"];
 		let objType = {};
@@ -19477,7 +19952,12 @@ class GeneralOcelStatistics {
 					count += cc;
 					sum += nc * cc;
 				}
-				dct[evAct][otype] = sum / count;
+				if (retSum) {
+					dct[evAct][otype] = sum;
+				}
+				else {
+					dct[evAct][otype] = sum / count;
+				}
 			}
 		}
 		return dct;
@@ -19499,7 +19979,7 @@ class GeneralOcelStatistics {
 		return lif;
 	}
 	
-	static eventsPerTypePerActivity(ocel) {
+	static eventsPerTypePerActivity(ocel, retSum=false) {
 		let objects = ocel["ocel:objects"];
 		let otObjects = {};
 		let objType = {};
@@ -19554,10 +20034,60 @@ class GeneralOcelStatistics {
 					count += cc;
 					sum += nc * cc;
 				}
-				dct[ot][act] = sum / count;
+				if (retSum) {
+					dct[ot][act] = sum;
+				}
+				else {
+					dct[ot][act] = sum / count;
+				}
 			}
 		}
 		return dct;
+	}
+	
+	static getEssentialEventsWithCategorization(ocel) {
+		let essEvents = {};
+		let ocelEvents = Object.keys(ocel["ocel:events"]);
+		let ocelEventsReversed = Object.keys(ocel["ocel:events"]);
+		ocelEventsReversed.reverse();
+		let lastEventPerLifecycle = {};
+		for (let evId of ocelEventsReversed) {
+			let eve = ocel["ocel:events"][evId];
+			for (let objId of eve["ocel:omap"]) {
+				if (!(objId in lastEventPerLifecycle)) {
+					lastEventPerLifecycle[objId] = evId;
+				}
+			}
+		}
+		let seenObjects = {};
+		let relations = {};
+		for (let evId of ocelEvents) {
+			let eve = ocel["ocel:events"][evId];
+			let isFirstLifecycle = 0;
+			let isLastLifecycle = 0;
+			let newRelationsOccured = 0;
+			for (let objId of eve["ocel:omap"]) {
+				if (!(objId in seenObjects)) {
+					seenObjects[objId] = evId;
+					isFirstLifecycle += 1;
+				}
+				if (lastEventPerLifecycle[objId] == evId) {
+					isLastLifecycle += 1;
+				}
+				for (let objId2 of eve["ocel:omap"]) {
+					if (objId < objId2) {
+						if (!([objId, objId2] in relations)) {
+							relations[[objId, objId2]] = 0;
+							newRelationsOccured += 1;
+						}
+					}
+				}
+			}
+			if (isFirstLifecycle > 0 || isLastLifecycle > 0 || newRelationsOccured > 0) {
+				essEvents[evId] = {"isFirstLifecycle": isFirstLifecycle, "isLastLifecycle": isLastLifecycle, "newRelationsOccured": newRelationsOccured};
+			}
+		}
+		return essEvents;
 	}
 }
 
@@ -19710,12 +20240,18 @@ catch (err) {
 
 
 class DagreBPMNLayouting {
-	static apply(bpmnGraph, nodesep=null, edgesep=null, ranksep=null, targetSvg="svg", targetInner="g") {
+	static apply(bpmnGraph, nodesep=null, edgesep=null, ranksep=null, targetSvg="svg", targetInner="g", d3Obj=null, dagreD3Obj=null) {
 		// works only in browser
 		// works only with Dagre/D3
+		if (d3Obj == null) {
+			d3Obj = d3;
+		}
+		if (dagreD3Obj == null) {
+			dagreD3Obj = dagreD3;
+		}
 		let ordered = bpmnGraph.getOrderedNodesAndEdges();
 		
-		var g = new dagreD3.graphlib.Graph().setGraph({});
+		var g = new dagreD3Obj.graphlib.Graph().setGraph({});
 		
 		for (let nodeId of ordered["nodesId"]) {
 			let node = bpmnGraph.nodes[nodeId];
@@ -19737,9 +20273,9 @@ class DagreBPMNLayouting {
 			g.graph().ranksep = ranksep;
 		}
 
-		let render = new dagreD3.render();
+		let render = new dagreD3Obj.render();
 		
-		let svg = d3.select(targetSvg);
+		let svg = d3Obj.select(targetSvg);
 		let inner = svg.append(targetInner);
 		render(inner, g);
 		
@@ -19777,6 +20313,329 @@ try {
 catch (err) {
 	// not in Node
 	//console.log(err);
+}
+
+
+class StatisticsUtils {
+	static average(x) {
+		if (x.length > 0) {
+			let ret = 0.0;
+			for (let el of x) {
+				ret += el;
+			}
+			return ret / x.length;
+		}
+		return 0.0;
+	}
+	
+	static stddev(x) {
+		let avg = StatisticsUtils.average(x);
+		if (x.length > 0) {
+			let ret = 0.0;
+			for (let el of x) {
+				ret += (el - avg)*(el-avg);
+			}
+			ret = ret / x.length;
+			ret = Math.sqrt(ret);
+			return ret;
+		}
+		return 0.0;
+	}
+	
+	static covariance(x, y) {
+		if (x.length != y.length) {
+			throw "Incompatible dimensions";
+		}
+		else if (x.length > 0) {
+			let avgX = StatisticsUtils.average(x);
+			let avgY = StatisticsUtils.average(y);
+			let ret = 0.0;
+			let i = 0;
+			while (i < x.length) {
+				ret += (x[i] - avgX) * (y[i] - avgY);
+				i = i + 1;
+			}
+			ret = ret / x.length;
+			return ret;
+		}
+		return 0.0;
+	}
+	
+	static pearsonCorrelation(x, y) {
+		return StatisticsUtils.covariance(x, y) / (StatisticsUtils.stddev(x) * StatisticsUtils.stddev(y));
+	}
+}
+
+try {
+	require('../../pm4js.js');
+	module.exports = {StatisticsUtils: StatisticsUtils};
+	global.StatisticsUtils = StatisticsUtils;
+}
+catch (err) {
+	// not in node
+	//console.log(err);
+}
+
+
+
+class OcelGeneralFiltering {
+	static filterRelatedEvents(ocel, relObjs) {
+		let filteredOcel = {};
+		filteredOcel["ocel:global-event"] = ocel["ocel:global-event"];
+		filteredOcel["ocel:global-object"] = ocel["ocel:global-object"];
+		filteredOcel["ocel:global-log"] = {};
+		filteredOcel["ocel:global-log"]["ocel:attribute-names"] = ocel["ocel:global-log"]["ocel:attribute-names"];
+		filteredOcel["ocel:global-log"]["ocel:object-types"] = ocel["ocel:global-log"]["ocel:object-types"];
+		filteredOcel["ocel:objects"] = {};
+		filteredOcel["ocel:events"] = {};
+		for (let eveId in ocel["ocel:events"]) {
+			let eve = ocel["ocel:events"][eveId];
+			let inte = [];
+			for (let objId of eve["ocel:omap"]) {
+				if (relObjs.includes(objId)) {
+					inte.push(objId);
+				}
+			}
+			if (inte.length > 0) {
+				for (let objId of eve["ocel:omap"]) {
+					if (!(objId in filteredOcel["ocel:objects"])) {
+						filteredOcel["ocel:objects"][objId] = ocel["ocel:objects"][objId];
+					}
+				}
+				filteredOcel["ocel:events"][eveId] = eve;
+			}
+		}
+		return filteredOcel;
+	}
+	
+	static filterNonRelatedEvents(ocel, positive, negative) {
+		let filteredOcel = {};
+		filteredOcel["ocel:global-event"] = ocel["ocel:global-event"];
+		filteredOcel["ocel:global-object"] = ocel["ocel:global-object"];
+		filteredOcel["ocel:global-log"] = {};
+		filteredOcel["ocel:global-log"]["ocel:attribute-names"] = ocel["ocel:global-log"]["ocel:attribute-names"];
+		filteredOcel["ocel:global-log"]["ocel:object-types"] = ocel["ocel:global-log"]["ocel:object-types"];
+		filteredOcel["ocel:objects"] = {};
+		filteredOcel["ocel:events"] = {};
+		for (let eveId in ocel["ocel:events"]) {
+			let eve = ocel["ocel:events"][eveId];
+			let inte = [];
+			let inte2 = [];
+			for (let objId of eve["ocel:omap"]) {
+				if (positive.includes(objId)) {
+					inte.push(objId);
+				}
+				if (negative.includes(objId)) {
+					inte2.push(objId);
+				}
+			}
+			if (inte.length > 0 && inte2.length == 0) {
+				for (let objId of eve["ocel:omap"]) {
+					if (!(objId in filteredOcel["ocel:objects"])) {
+						filteredOcel["ocel:objects"][objId] = ocel["ocel:objects"][objId];
+					}
+				}
+				filteredOcel["ocel:events"][eveId] = eve;
+			}
+		}
+		return filteredOcel;
+	}
+	
+	static filterObjectTypes(ocel, objTypes) {
+		let filteredOcel = {};
+		filteredOcel["ocel:global-event"] = ocel["ocel:global-event"];
+		filteredOcel["ocel:global-object"] = ocel["ocel:global-object"];
+		filteredOcel["ocel:global-log"] = {};
+		filteredOcel["ocel:global-log"]["ocel:attribute-names"] = ocel["ocel:global-log"]["ocel:attribute-names"];
+		filteredOcel["ocel:global-log"]["ocel:object-types"] = objTypes;
+		filteredOcel["ocel:objects"] = {};
+		for (let objId in ocel["ocel:objects"]) {
+			let obj = ocel["ocel:objects"][objId];
+			if (objTypes.includes(obj["ocel:type"])) {
+				filteredOcel["ocel:objects"][objId] = obj;
+			}
+		}
+		filteredOcel["ocel:events"] = {};
+		for (let eveId in ocel["ocel:events"]) {
+			let eve = ocel["ocel:events"][eveId];
+			let relObj = [];
+			for (let objId of eve["ocel:omap"]) {
+				if (objId in filteredOcel["ocel:objects"]) {
+					relObj.push(objId);
+				}
+			}
+			if (relObj.length > 0) {
+				let newEve = {};
+				newEve["ocel:activity"] = eve["ocel:activity"];
+				newEve["ocel:timestamp"] = eve["ocel:timestamp"];
+				newEve["ocel:vmap"] = eve["ocel:vmap"];
+				newEve["ocel:omap"] = relObj;
+				filteredOcel["ocel:events"][eveId] = newEve;
+			}
+		}
+		return filteredOcel;
+	}
+	
+	static filterOtRateUniqueActivities(ocel, minRate) {
+		let lif = {};
+		let lifUnq = {};
+		let objects = ocel["ocel:objects"];
+		for (let objId in objects) {
+			lif[objId] = [];
+			lifUnq[objId] = {}
+		}
+		let events = ocel["ocel:events"];
+		for (let evId in events) {
+			let eve = events[evId];
+			for (let objId of eve["ocel:omap"]) {
+				lif[objId].push(eve["ocel:activity"]);
+				lifUnq[objId][eve["ocel:activity"]] = 0;
+			}
+		}
+		let objOt = {};
+		let objectTypes = {};
+		for (let objId in objects) {
+			let obj = objects[objId];
+			objOt[objId] = obj["ocel:type"];
+			objectTypes[obj["ocel:type"]] = 0;
+		}
+		objectTypes = Object.keys(objectTypes);
+		let otEvents = {};
+		let otUnqAct = {}
+		for (let objId in lif) {
+			let ot = objOt[objId];
+			if (!(ot in otEvents)) {
+				otEvents[ot] = 0;
+				otUnqAct[ot] = 0;
+			}
+			otEvents[ot] += lif[objId].length;
+			otUnqAct[ot] += Object.keys(lifUnq[objId]).length;
+		}
+		let includedTypes = [];
+		for (let ot of objectTypes) {
+			let rate = otUnqAct[ot] / otEvents[ot];
+			if (rate > minRate) {
+				includedTypes.push(ot);
+			}
+		}
+		return OcelGeneralFiltering.filterObjectTypes(ocel, includedTypes);
+	}
+	
+	static filterOtMinNumRelatedEvents(ocel, minCount) {
+		let relEveOt = GeneralOcelStatistics.eventsRelatedPerObjectTypeCount(ocel);
+		let retTypes = [];
+		for (let ot in relEveOt) {
+			if (relEveOt[ot] >= minCount) {
+				retTypes.push(ot);
+			}
+		}
+		return OcelGeneralFiltering.filterObjectTypes(ocel, retTypes);
+	}
+	
+	static filterOtMinNumRelatedObjects(ocel, minCount) {
+		let relObjOt = GeneralOcelStatistics.objectsPerTypeCount(ocel);
+		let retTypes = [];
+		for (let ot in relObjOt) {
+			if (relObjOt[ot] >= minCount) {
+				retTypes.push(ot);
+			}
+		}
+		return OcelGeneralFiltering.filterObjectTypes(ocel, retTypes);
+	}
+	
+	static filterOtMinOccActivities(ocel, minCount) {
+		let evPerActCount = GeneralOcelStatistics.eventsPerActivityCount(ocel);
+		let keepActivities = [];
+		for (let act in evPerActCount) {
+			if (evPerActCount[act] >= minCount) {
+				keepActivities.push(act);
+			}
+		}
+		let filteredOcel = {};
+		filteredOcel["ocel:global-event"] = ocel["ocel:global-event"];
+		filteredOcel["ocel:global-object"] = ocel["ocel:global-object"];
+		filteredOcel["ocel:global-log"] = {};
+		filteredOcel["ocel:global-log"]["ocel:attribute-names"] = ocel["ocel:global-log"]["ocel:attribute-names"];
+		filteredOcel["ocel:global-log"]["ocel:object-types"] = ocel["ocel:global-log"]["ocel:object-types"];
+		filteredOcel["ocel:objects"] = {};
+		filteredOcel["ocel:events"] = {};
+				
+		for (let evId in ocel["ocel:events"]) {
+			let eve = ocel["ocel:events"][evId];
+			if (keepActivities.includes(eve["ocel:activity"])) {
+				filteredOcel["ocel:events"][evId] = eve;
+				for (let objId of eve["ocel:omap"]) {
+					filteredOcel["ocel:objects"][objId] = ocel["ocel:objects"][objId];
+				}
+			}
+		}
+		
+		return filteredOcel;
+	}
+	
+	static filterEssentialEvents(ocel) {
+		let essentialEvents = GeneralOcelStatistics.getEssentialEventsWithCategorization(ocel);
+		let filteredOcel = {};
+		filteredOcel["ocel:global-event"] = ocel["ocel:global-event"];
+		filteredOcel["ocel:global-object"] = ocel["ocel:global-object"];
+		filteredOcel["ocel:global-log"] = {};
+		filteredOcel["ocel:global-log"]["ocel:attribute-names"] = ocel["ocel:global-log"]["ocel:attribute-names"];
+		filteredOcel["ocel:global-log"]["ocel:object-types"] = ocel["ocel:global-log"]["ocel:object-types"];
+		filteredOcel["ocel:objects"] = {};
+		filteredOcel["ocel:events"] = {};
+		
+		for (let evId in ocel["ocel:events"]) {
+			if (evId in essentialEvents) {
+				let eve = ocel["ocel:events"][evId];
+				filteredOcel["ocel:events"][evId] = eve;
+				for (let objId of eve["ocel:omap"]) {
+					filteredOcel["ocel:objects"][objId] = ocel["ocel:objects"][objId];
+				}
+			}
+		}
+		
+		return filteredOcel;
+	}
+	
+	static filterEssentialEventsOrMinActCount(ocel, minCount) {
+		let essentialEvents = GeneralOcelStatistics.getEssentialEventsWithCategorization(ocel);
+		let evPerActCount = GeneralOcelStatistics.eventsPerActivityCount(ocel);
+		let keepActivities = [];
+		for (let act in evPerActCount) {
+			if (evPerActCount[act] >= minCount) {
+				keepActivities.push(act);
+			}
+		}
+		let filteredOcel = {};
+		filteredOcel["ocel:global-event"] = ocel["ocel:global-event"];
+		filteredOcel["ocel:global-object"] = ocel["ocel:global-object"];
+		filteredOcel["ocel:global-log"] = {};
+		filteredOcel["ocel:global-log"]["ocel:attribute-names"] = ocel["ocel:global-log"]["ocel:attribute-names"];
+		filteredOcel["ocel:global-log"]["ocel:object-types"] = ocel["ocel:global-log"]["ocel:object-types"];
+		filteredOcel["ocel:objects"] = {};
+		filteredOcel["ocel:events"] = {};
+		
+		for (let evId in ocel["ocel:events"]) {
+			let eve = ocel["ocel:events"][evId];
+			if (keepActivities.includes(eve["ocel:activity"]) || evId in essentialEvents) {
+				filteredOcel["ocel:events"][evId] = eve;
+				for (let objId of eve["ocel:omap"]) {
+					filteredOcel["ocel:objects"][objId] = ocel["ocel:objects"][objId];
+				}
+			}
+		}
+		
+		return filteredOcel;
+	}
+}
+
+try {
+	require('../../../pm4js.js');
+	module.exports = {OcelGeneralFiltering: OcelGeneralFiltering};
+	global.OcelGeneralFiltering = OcelGeneralFiltering;
+}
+catch (err) {
+	// not in Node
 }
 
 

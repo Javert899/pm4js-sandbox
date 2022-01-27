@@ -33,6 +33,7 @@
 		<script src="scripts/ocel/ml-sql.js"></script>
 		<script src="scripts/ocel/ml-isolationForest.js"></script>
 		<script src="scripts/ocel/ml-pca.js"></script>
+		<script src="scripts/ocel/advanced_filtering.js"></script>
 		<!--<script src="scripts/generic/ml.min.js"></script>-->
 		<script src="scripts/generic/decision-tree-min.js"></script>
 		<script src="scripts/ocel/ml-dt.js"></script>
@@ -143,6 +144,10 @@
 								
 								<li class="navigation-item">
 									<a class="navigation-link" href="javascript:showMachineLearning()"><i class="fab fa-mixer"></i>&nbsp;Machine Learning</a>
+								</li>
+								
+								<li class="navigation-item">
+									<a class="navigation-link" href="javascript:showAdvancedFiltering()"><i class="fas fa-camera"></i>&nbsp;Advanced Filtering</a>
 								</li>
 								
 								<li class="navigation-item">
@@ -693,6 +698,9 @@
 						</tr>
 					</table>
 				</div>
+				<div id="advancedFilteringPage" style="display: none">
+					
+				</div>
 				<div id="machineLearningPage" style="display: none">
 					<nav id="machineLearningNavigation" class="navigation navigation-justified border-bottom">
 						<div class="navigation-header">
@@ -1014,6 +1022,8 @@
 					document.getElementById("conformancePage").style.display = "none";
 					document.getElementById("networkAnalysisPage").style.display = "none";
 					document.getElementById("machineLearningPage").style.display = "none";
+					//advancedFilteringPage
+					document.getElementById("advancedFilteringPage").style.display = "none";
 				}
 				
 				function showProcessModelPage() {
@@ -1089,6 +1099,11 @@
 					if (mlNavigation == null) {
 						mlNavigation = new Navigation(document.getElementById("mlNavigation"));
 					}
+				}
+				
+				function showAdvancedFiltering() {
+					hideAllDivsPages();
+					document.getElementById("advancedFilteringPage").style.display = "";
 				}
 				
 				function hideAllMLpages() {
