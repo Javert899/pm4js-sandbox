@@ -41,6 +41,17 @@ function filterOtMinNumRelatedEvents() {
 	return addFilter("<i class=\"fas fa-user-minus\"></i>&nbsp;Min Events per OT&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;", "filterOtMinNumRelatedEvents0()");
 }
 
+function filterOtMinNumRelatedObjects0() {
+	let minRelObj = parseInt(prompt("Insert the minimum number of objects belonging to an object type, in order to keep the object type"));
+	let filteredModel = new OcdfgModel(OcelGeneralFiltering.filterOtMinNumRelatedObjects(visualization.model.ocel, minRelObj));
+	visualization.setFilteredModel(filteredModel);
+}
+
+function filterOtMinNumRelatedObjects() {
+	showProcessModelPage();
+	return addFilter("<i class=\"fas fa-user-minus\"></i>&nbsp;Min Objects per OT&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;", "filterOtMinNumRelatedObjects0()");
+}
+
 function filterRateUniqueActivities0() {
 	let minRate = parseFloat(prompt("Insert the minimum rate of unique activities per objects of the given object type"));
 	let filteredModel = new OcdfgModel(OcelGeneralFiltering.filterOtRateUniqueActivities(visualization.model.ocel, minRate));
@@ -54,7 +65,16 @@ function filterRateUniqueActivities() {
 
 function sampleEventLogFiltering0() {
 	let graph = OcelConnectedComponents.findConnCompEvIds(visualization.model.ocel);
-	let filteredModel = new OcdfgModel(OcelGeneralFiltering.sampleEventLog(visualization.model.ocel, graph));
+	let lengths = [];
+	for (let k in graph) {
+		lengths.push([k, graph[k].length]);
+	}
+	lengths.sort(function(a,b) {
+		return b[1] - a[1];
+	});
+	console.log(lengths);
+	//let filteredModel = new OcdfgModel(OcelGeneralFiltering.sampleEventLog(visualization.model.ocel, graph));
+	let filteredModel = new OcdfgModel(OcelGeneralFiltering.filterConnComp(visualization.model.ocel, graph, lengths[0][0]))
 	visualization.setFilteredModel(filteredModel);
 }
 
