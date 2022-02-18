@@ -101,3 +101,48 @@ function anomalousObjectsFiltering() {
 	showProcessModelPage();
 	return addFilter("<i class=\"fas fa-user-minus\"></i>&nbsp;Anomalous Objects Filtering&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;", "anomalousObjectsFiltering0()");
 }
+
+function fillTableAdvancedFiltering() {
+	let ocel = visualization.model.ocel;
+	let activities = Object.keys(GeneralOcelStatistics.eventsPerActivityCount(ocel));
+	let stat = GeneralOcelStatistics.eventsPerTypePerActivity(ocel);
+	let otypes = Object.keys(stat);
+	let table = document.createElement("table");
+	let thead = document.createElement("thead");
+	let tbody = document.createElement("tbody");
+	table.appendChild(thead);
+	table.appendChild(tbody);
+	let trHead = document.createElement("tr");
+	thead.appendChild(trHead);
+	let tdTopLeft = document.createElement("th");
+	trHead.appendChild(tdTopLeft);
+	for (let ot of otypes) {
+		let td = document.createElement("th");
+		trHead.appendChild(td);
+		td.innerHTML = ot;
+	}
+	for (let act of activities) {
+		let tr = document.createElement("tr");
+		tbody.appendChild(tr);
+		let tdActName = document.createElement("td");
+		tr.appendChild(tdActName);
+		tdActName.innerHTML = act;
+		for (let ot of otypes) {
+			let td = document.createElement("td");
+			tr.appendChild(td);
+			let checkb = document.createElement("input");
+			checkb.type = "checkbox";
+			checkb.name = act+"@#@#@#"+ot;
+			checkb.value = act+"@#@#@#"+ot;
+			checkb.classList.add("actOtSelectionCheckbox");
+			if (act in stat[ot]) {
+				checkb.checked = true;
+			}
+			else {
+				checkb.disabled = true;
+			}
+			td.appendChild(checkb);
+		}
+	}
+	document.getElementById("actOtFilterContainer").appendChild(table);
+}

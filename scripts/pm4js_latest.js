@@ -61,7 +61,7 @@ class Pm4JS {
 	}
 }
 
-Pm4JS.VERSION = "0.0.24";
+Pm4JS.VERSION = "0.0.25";
 Pm4JS.registrationEnabled = false;
 Pm4JS.objects = [];
 Pm4JS.algorithms = [];
@@ -9696,6 +9696,96 @@ class LogGeneralFiltering {
 					}
 				}
 				i++;
+			}
+		}
+		return filteredLog;
+	}
+	
+	static filterPrefixes(log, activity, strict=true, activityKey="concept:name") {
+		let filteredLog = new EventLog();
+		for (let trace of log.traces) {
+			let activities = [];
+			for (let eve of trace.events) {
+				if (activityKey in eve.attributes) {
+					activities.push(eve.attributes[activityKey].value);
+				}
+			}
+			let idx = activities.indexOf(activity);
+			if (idx > -1) {
+				if (strict) {
+					idx--;
+				}
+				let filteredTrace = new Trace();
+				let i = 0;
+				while (i <= idx) {
+					filteredTrace.events.push(trace.events[i]);
+					i++;
+				}
+				filteredLog.traces.push(filteredTrace);
+			}
+		}
+		return filteredLog;
+	}
+	
+	static filterSuffixes(log, activity, strict=true, activityKey="concept:name") {
+		let filteredLog = new EventLog();
+		for (let trace of log.traces) {
+			let activities = [];
+			for (let eve of trace.events) {
+				if (activityKey in eve.attributes) {
+					activities.push(eve.attributes[activityKey].value);
+				}
+			}
+			let idx = activities.lastIndexOf(activity);
+			if (idx > -1) {
+				if (strict) {
+					idx++;
+				}
+				let filteredTrace = new Trace();
+				let i = idx;
+				while (i < trace.events.length) {
+					filteredTrace.events.push(trace.events[i]);
+					i++;
+				}
+				filteredLog.traces.push(filteredTrace);
+			}
+		}
+		return filteredLog;
+	}
+	
+	static filterFullTextEvents(log, attribute, searchString) {
+		let filteredLog = new EventLog();
+		for (let trace of log.traces) {
+			let filteredTrace = new Trace();
+			for (let eve of trace.events) {
+				if (attribute in eve.attributes) {
+					let value = eve.attributes[attribute].value;
+					if (value.indexOf(searchString) > -1) {
+						filteredTrace.events.push(eve);
+					}
+				}
+			}
+			if (filteredTrace.events.length > 0) {
+				filteredLog.traces.push(filteredTrace);
+			}
+		}
+		return filteredLog;
+	}
+	
+	static filterFullTextCases(log, attribute, searchString) {
+		let filteredLog = new EventLog();
+		for (let trace of log.traces) {
+			let toInclude = false;
+			for (let eve of trace.events) {
+				if (attribute in eve.attributes) {
+					let value = eve.attributes[attribute].value;
+					if (value.indexOf(searchString) > -1) {
+						toInclude = true;
+					}
+				}
+			}
+			if (toInclude) {
+				filteredLog.traces.push(trace);
 			}
 		}
 		return filteredLog;
@@ -20773,6 +20863,47 @@ class OcelGeneralFiltering {
 			}
 		}
 		
+		return filteredOcel;
+	}
+	
+	static filterActivityOtAssociation(ocel, actOtAssociation) {
+		let filteredOcel = {};
+		filteredOcel["ocel:global-event"] = ocel["ocel:global-event"];
+		filteredOcel["ocel:global-object"] = ocel["ocel:global-object"];
+		filteredOcel["ocel:global-log"] = {};
+		filteredOcel["ocel:global-log"]["ocel:attribute-names"] = ocel["ocel:global-log"]["ocel:attribute-names"];
+		filteredOcel["ocel:global-log"]["ocel:object-types"] = ocel["ocel:global-log"]["ocel:object-types"];
+		filteredOcel["ocel:objects"] = {};
+		filteredOcel["ocel:events"] = {};
+		let objOt = {};
+		let objectTypes = {};
+		for (let objId in ocel["ocel:objects"]) {
+			let obj = ocel["ocel:objects"][objId];
+			objOt[objId] = obj["ocel:type"];
+			objectTypes[obj["ocel:type"]] = 0;
+		}
+		objectTypes = Object.keys(objectTypes);
+		for (let evId in ocel["ocel:events"]) {
+			let eve = ocel["ocel:events"][evId];
+			let newEve = {};
+			let act = eve["ocel:activity"]
+			newEve["ocel:activity"] = act;
+			newEve["ocel:timestamp"] = eve["ocel:timestamp"];
+			newEve["ocel:vmap"] = eve["ocel:vmap"];
+			newEve["ocel:omap"] = [];
+			for (let objId of eve["ocel:omap"]) {
+				let ot = objOt[objId];
+				if (act in actOtAssociation && actOtAssociation[act].includes(ot)) {
+					let obj = ocel["ocel:objects"][objId];
+					filteredOcel["ocel:objects"][objId] = obj;
+					newEve["ocel:omap"].push(objId);
+				}
+			}
+			
+			if (newEve["ocel:omap"].length > 0) {
+				filteredOcel["ocel:events"][evId] = newEve;
+			}
+		}
 		return filteredOcel;
 	}
 }
