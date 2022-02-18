@@ -144,5 +144,42 @@ function fillTableAdvancedFiltering() {
 			td.appendChild(checkb);
 		}
 	}
+	document.getElementById("actOtFilterContainer").innerHTML = "";
 	document.getElementById("actOtFilterContainer").appendChild(table);
 }
+
+
+function actOtApplyFilterFromTable() {
+	let actOtDct = {};
+	for (let el of document.getElementsByClassName("actOtSelectionCheckbox")) {
+		let name = el.name;
+		let isChecked = el.checked;
+		let ot = name.split("@#@#@#")[1];
+		let act = name.split("@#@#@#")[0];
+		if (isChecked) {
+			if (!(act in actOtDct)) {
+				actOtDct[act] = [];
+			}
+			actOtDct[act].push(ot);
+		}
+	}
+	let filteredOcel = OcelGeneralFiltering.filterActivityOtAssociation(visualization.model.ocel, actOtDct);
+	let filteredModel = new OcdfgModel(filteredOcel);
+	visualization.setFilteredModel(filteredModel);
+}
+
+function actOtApplyFilterFromTable0() {
+	showProcessModelPage();
+	return addFilter("<i class=\"fas fa-user-minus\"></i>&nbsp;Activity-OT Filter&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;", "actOtApplyFilterFromTable()");
+}
+
+function showActOtFilterContainer() {
+	let container = document.getElementById("actOtFilterContainer0");
+	if (container.style.display == "none") {
+		container.style.display = "";
+	}
+	else {
+		container.style.display = "none";
+	}
+}
+
