@@ -24,11 +24,44 @@ function anomalyScorePerObjectType(ocel, ot) {
 	return combo;
 }
 
+function rulesPerObjectType(ocel, ot, percAnom=0.1) {
+	let scores = anomalyScorePerObjectType(ocel, ot);
+	let anomObjects = {};
+	let i = 0;
+	while (i < scores.length * percAnom) {
+		anomObjects[scores[i][0]] = 0;
+		i++;
+	}
+	let classification = [];
+	let objects = Object.keys(ocel["ocel:objects"]);
+	i = 0;
+	while (i < objects.length) {
+		if (objects[i] in anomObjects) {
+			classification.push(-1);
+		}
+		else {
+			classification.push(1);
+		}
+		i++;
+	}
+	let discoveredRules = MlRules.ruleDiscovery(objFeaturesTable["data"], objFeaturesTable["featureNames"], classification);
+	let classificationScore = MlRules.ruleClassificationScore(discoveredRules, objFeaturesTable["data"], objFeaturesTable["featureNames"], classification);
+	let combo = [];
+	for (let k in discoveredRules) {
+		if (classificationScore[k] > 0) {
+			combo.push([k, discoveredRules[k][0], discoveredRules[k][1], classificationScore[k]]);
+		}
+	}
+	combo.sort((a, b) => { return b[3] - a[3] });
+	return combo;
+}
+
 function identifyAnomalousObjects(ocel) {
 	let objectTypes = Object.keys(GeneralOcelStatistics.objectsPerTypeCount(ocel));
 	let combo = [];
 	for (let ot of objectTypes) {
 		combo = [...combo, ...anomalyScorePerObjectType(ocel, ot)];
+		//rulesPerObjectType(ocel, ot);
 	}
 	combo.sort((a, b) => { return b[1] - a[1] });
 	return combo;
