@@ -80,7 +80,47 @@ function sampleEventLogFiltering0() {
 
 function sampleEventLogFiltering() {
 	showProcessModelPage();
-	return addFilter("<i class=\"fas fa-user-minus\"></i>&nbsp;Sample Event Log&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;", "sampleEventLogFiltering0()");
+	return addFilter("<i class=\"fas fa-user-minus\"></i>&nbsp;Sample Event Log (connected components)&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;", "sampleEventLogFiltering0()");
+}
+
+function randomSampleEvents0() {
+	let filteredModel = new OcdfgModel(OcelGeneralFiltering.eventBasedRandomSampling(visualization.model.ocel));
+	visualization.setFilteredModel(filteredModel);
+}
+
+function randomSampleEvents() {
+	showProcessModelPage();
+	return addFilter("<i class=\"fas fa-user-minus\"></i>&nbsp;Sample Event Log (random events)&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;", "randomSampleEvents0()");
+}
+
+function randomSampleObjects0() {
+	let filteredModel = new OcdfgModel(OcelGeneralFiltering.objectBasedRandomSampling(visualization.model.ocel));
+	visualization.setFilteredModel(filteredModel);
+}
+
+function randomSampleObjects() {
+	showProcessModelPage();
+	return addFilter("<i class=\"fas fa-user-minus\"></i>&nbsp;Sample Event Log (random objects)&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;", "randomSampleObjects0()");
+}
+
+function randomSampleObjectTypes0() {
+	let filteredModel = new OcdfgModel(OcelGeneralFiltering.objectTypeBasedRandomSampling(visualization.model.ocel));
+	visualization.setFilteredModel(filteredModel);
+}
+
+function randomSampleObjectTypes() {
+	showProcessModelPage();
+	return addFilter("<i class=\"fas fa-user-minus\"></i>&nbsp;Sample Event Log (random object types)&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;", "randomSampleObjectTypes0()");
+}
+
+function actOtAutomaticFiltering0() {
+	let filteredModel = new OcdfgModel(OcelGeneralFiltering.objectTypeBasedRandomSampling(visualization.model.ocel));
+	visualization.setFilteredModel(filteredModel);
+}
+
+function actOtAutomaticFiltering() {
+	showProcessModelPage();
+	return addFilter("<i class=\"fas fa-user-minus\"></i>&nbsp;Activity-OT Filter (automatic)&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;", "actOtAutomaticFiltering0()");
 }
 
 function anomalousObjectsFiltering0() {
@@ -182,4 +222,3 @@ function showActOtFilterContainer() {
 		container.style.display = "none";
 	}
 }
-

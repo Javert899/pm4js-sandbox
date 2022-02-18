@@ -718,19 +718,31 @@
 						<h4><a href="javascript:filterRateUniqueActivities()">Filter Object Types having a Minimum Rate of Unique Activities</a></h4>
 					</div>
 					<div>
-						<h4><a href="javascript:sampleEventLogFiltering()">Random Sampling Event Log</a></h4>
+						<h4><a href="javascript:sampleEventLogFiltering()">Random Sampling Event Log (connected components)</a></h4>
+					</div>
+					<div>
+						<h4><a href="javascript:randomSampleEvents()">Random Sampling Event Log (random events)</a></h4>
+					</div>
+					<div>
+						<h4><a href="javascript:randomSampleObjects()">Random Sampling Event Log (random objects)</a></h4>
+					</div>
+					<div>
+						<h4><a href="javascript:randomSampleObjectTypes()">Random Sampling Event Log (random object types)</a></h4>
 					</div>
 					<div>
 						<h4><a href="javascript:anomalousObjectsFiltering()">Anomalous Objects Filtering (Isolation Forest)</a></h4>
 					</div>
 					<div>
-						<h4><a href="javascript:showActOtFilterContainer()">Activity - OT Filter</a></h4>
+						<h4><a href="javascript:showActOtFilterContainer()">Activity - OT Filter (manual)</a></h4>
 					</div>
 					<div id="actOtFilterContainer0" style="display: none">
 						<div id="actOtFilterContainer">
 						</div>
 						<button id="actOtFilter" onclick="javascript:actOtApplyFilterFromTable0()">Apply Filter</button>
 					</div>
+					<!--<div>
+						<h4><a href="javascript:actOtAutomaticFiltering()">Activity - OT Filter (automatic)</a></h4>
+					</div>-->
 				</div>
 				<div id="machineLearningPage" style="display: none">
 					<nav id="machineLearningNavigation" class="navigation navigation-justified border-bottom">
