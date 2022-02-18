@@ -1,11 +1,22 @@
-function identifyAnomalousObjects(ocel) {
+function anomalyScorePerObjectType(ocel, ot) {
+	let combo = [];
+	let objects = Object.keys(ocel["ocel:objects"]);
+	let i = 0;
+	let filteredDataObjects = [];
+	let filteredData = [];
+	while (i < objects.length) {
+		let obj = ocel["ocel:objects"][objects[i]];
+		if (obj["ocel:type"] == ot) {
+			filteredData.push(objFeaturesTable["data"][i]);
+			filteredDataObjects.push(objects[i]);
+		}
+		i++;
+	}
 	let isolationForest = new IsolationForest.IsolationForest();
 	isolationForest.fit(objFeaturesTable["data"]);
 	let trainingScores = isolationForest.scores();
-	let objects = Object.keys(ocel["ocel:objects"]);
-	let combo = [];
-	let i = 0;
-	while (i < objects.length) {
+	i = 0;
+	while (i < filteredDataObjects.length) {
 		combo.push([objects[i], trainingScores[i]]);
 		i++;
 	}
@@ -13,8 +24,19 @@ function identifyAnomalousObjects(ocel) {
 	return combo;
 }
 
+function identifyAnomalousObjects(ocel) {
+	let objectTypes = Object.keys(GeneralOcelStatistics.objectsPerTypeCount(ocel));
+	let combo = [];
+	for (let ot of objectTypes) {
+		combo = [...combo, ...anomalyScorePerObjectType(ocel, ot)];
+	}
+	combo.sort((a, b) => { return b[1] - a[1] });
+	return combo;
+}
+
 function calculateIsolationForest(ocel, targetDiv="machineLearningIsolationForestResult") {
 	let combo = identifyAnomalousObjects(ocel);
+	let objects = Object.keys(ocel["ocel:objects"]);
 	let objTypes = {};
 	for (let objId of objects) {
 		objTypes[objId] = ocel["ocel:objects"][objId]["ocel:type"];
