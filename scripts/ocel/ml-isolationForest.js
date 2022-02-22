@@ -46,14 +46,41 @@ function rulesPerObjectType(ocel, ot, percAnom=0.1) {
 	}
 	let discoveredRules = MlRules.ruleDiscovery(objFeaturesTable["data"], objFeaturesTable["featureNames"], classification);
 	let classificationScore = MlRules.ruleClassificationScore(discoveredRules, objFeaturesTable["data"], objFeaturesTable["featureNames"], classification);
+	let deviationsPerRule = {};
+	for (let k in discoveredRules) {
+		let cl = MlRules.getClassificationFromRule(discoveredRules, objFeaturesTable["data"], objFeaturesTable["featureNames"], k);
+		deviationsPerRule[k] = [];
+		i = 0;
+		while (i < objects.length) {
+			if (objects[i] in anomObjects) {
+				if (cl[i] == -1) {
+					deviationsPerRule[k].push(objects[i]);
+				}
+			}
+			i++;
+		}
+	}
 	let combo = [];
 	for (let k in discoveredRules) {
 		if (classificationScore[k] > 0) {
-			combo.push([k, discoveredRules[k][0], discoveredRules[k][1], classificationScore[k]]);
+			combo.push([k, discoveredRules[k][0], discoveredRules[k][1], classificationScore[k], deviationsPerRule[k]]);
 		}
 	}
 	combo.sort((a, b) => { return b[3] - a[3] });
 	return combo;
+}
+
+function showRulesPerObjectType(percAnom=0.1) {
+	let ocel = visualization.model.ocel;
+	let ot = document.getElementById("conformanceRulesOtSelection").value;
+	let rules = rulesPerObjectType(ocel, ot, percAnom=0.1);
+	document.getElementById("conformanceRulesTbody").innerHTML = "";
+	for (let rule of rules) {
+		let tr = document.createElement("tr");
+		document.getElementById("conformanceRulesTbody").appendChild(tr);
+		tr.innerHTML = "<td>"+rule[0]+"</td><td>"+rule[1]+"</td><td>"+rule[2]+"</td><td>"+rule[3]+"</td><td>"+rule[4].length+"</td><td><a href=\"javascript:filterExactSetObjects('"+rule[4].join(',')+"')\"><i class=\"fas fa-filter\"></i></a></td>";
+		console.log(rule);
+	}
 }
 
 function identifyAnomalousObjects(ocel) {

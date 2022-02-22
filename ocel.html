@@ -770,6 +770,10 @@
 								<li class="navigation-item">
 									<a class="navigation-link" href="javascript:showMLStatsvisualization()"><i class="fas fa-plus-square"></i>&nbsp;Correlation Statistics</a>
 								</li>
+								
+								<li class="navigation-item">
+									<a class="navigation-link" href="javascript:showConformanceRules()"><i class="fas fa-house-user"></i>&nbsp;Conformance Rules</a>
+								</li>
 							</ul>
 						</div>
 					</nav>
@@ -835,6 +839,26 @@
 						</p>
 						<div id="plotlyMLStatGraph" style="width: 100%; height: 75%;">
 						</div>
+					</div>
+					<div id="conformanceRules" style="display: none">
+						<p>Some <b>conformance rules</b> (the value of a feature should be contained in a range) are inferred automatically from the extracted features.
+						Anomalous objects are identified by such rules.</p>
+						<select id="conformanceRulesOtSelection" name="conformanceRulesOtSelection"></select>
+						<button onclick="javascript:showRulesPerObjectType()">Show Conformance Rules</button>
+						<table id="conformanceRulesContainer" class="table">
+							<thead>
+								<tr>
+									<th>Feature</th>
+									<th>Minimum Normal Value</th>
+									<th>Maximum Normal Value</th>
+									<th>Score</th>
+									<th>Number of Deviations</th>
+									<th>Filter Deviations</th>
+								</tr>
+							</thead>
+							<tbody id="conformanceRulesTbody">
+							</tbody>
+						</table>
 					</div>
 				</div>
 				<div id="plotlyGraphsPage" style="display: none">
@@ -1050,6 +1074,11 @@
 					addFilter("<i class=\"fab fa-mixer\"></i>&nbsp;Executions Filter&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;", "executionGraphFilterDescrSpecific(\""+objectIdentifiers+"\")");
 				}
 				
+				function filterExactSetObjects(objectIdentifiers) {
+					showProcessModelPage();
+					addFilter("<i class=\"fab fa-mixer\"></i>&nbsp;Executions Filter&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;", "executionGraphFilterDescrSpecific(\""+objectIdentifiers+"\")");
+				}
+				
 				function executionGraphFilterDescrSpecific(relObj) {
 					relObj = relObj.split(",");
 					let filteredModel = visualization.model.filterRelatedObjects(relObj);
@@ -1156,6 +1185,7 @@
 					document.getElementById("machineLearningPCA").style.display = "none";
 					document.getElementById("machineLearningDT").style.display = "none";
 					document.getElementById("machineLearningStats").style.display = "none";
+					document.getElementById("conformanceRules").style.display = "none";
 				}
 				
 				function showSQLexplorer() {
@@ -1169,6 +1199,20 @@
 					hideAllMLpages();
 					document.getElementById("machineLearningIsolationForest").style.display = "";
 					calculateIsolationForest(visualization.model.ocel);
+				}
+				
+				function showConformanceRules() {
+					hideAllMLpages();
+					document.getElementById("conformanceRulesOtSelection").innerHTML = "";
+					document.getElementById("conformanceRulesTbody").innerHTML = "";
+					document.getElementById("conformanceRules").style.display = "";
+					let objectTypes = Object.keys(GeneralOcelStatistics.objectsPerTypeCount(visualization.model.ocel));
+					for (let ot of objectTypes) {
+						let sel = document.createElement("option");
+						sel.text = ot;
+						sel.value = ot;
+						document.getElementById("conformanceRulesOtSelection").appendChild(sel);
+					}
 				}
 				
 				function showPCAvisualization() {
