@@ -488,8 +488,10 @@ class OcdfgVisualization {
 			layout.execute(parent);
 			this.graph.getModel().endUpdate();
 			this.graph.fit();
+			this.graph.isCellMovable = function() { return false; };
 			this.graph.view.rendering = true;
 			this.graph.refresh();
+
 			/*document.getElementById(this.targetContainer).style.height = oldHeight;
 			console.log(oldHeight);
 			console.log(document.getElementById("graphContainer").offsetHeight);*/
