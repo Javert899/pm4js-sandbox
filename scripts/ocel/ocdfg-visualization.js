@@ -7,7 +7,7 @@ class OcdfgVisualization {
 		//this.graph.updateCellSize(cell, true);
 		this.original = model;
 		this.ACTIVITY_FREQUENCY = 0.7;
-		this.PATHS_FREQUENCY = 0.7;
+		this.PATHS_FREQUENCY = 0.85;
 		this.IDX = 0;
 		this.expandedActivities = {};
 		this.expandedEdges = {};
@@ -18,7 +18,7 @@ class OcdfgVisualization {
 		this.callbackActivity = null;
 		this.callbackEdge = null;
 		this.callbackStatistics = null;
-		this.displayType = "petriNet";
+		this.displayType = "dfg";
 		this.petriNetEnableDecorations = false;
 	}
 	
@@ -294,7 +294,7 @@ class OcdfgVisualization {
 					let cc = Math.floor(125 + 125 * (this.MAX_INDIPENDENT_ACT_COUNT - count)/(this.MAX_INDIPENDENT_ACT_COUNT - this.MIN_INDIPENDENT_ACT_COUNT + 0.000001));
 					cc = cc + 256 * cc + 256*256 * cc;
 					let hex = "#"+Number(cc).toString(16);
-					let activityObject = this.graph.insertVertex(parent, act, label, 150, 150, width, height, "fontSize=18;fillColor="+hex);
+					let activityObject = this.graph.insertVertex(parent, act, label, 150, 150, width, height, "fontSize=19;fillColor="+hex);
 					this.activitiesIndipendent[act] = activityObject;
 					this.invActivitiesIndipendent[activityObject.id] = act;
 					/*if (act in this.expandedActivities) {
@@ -304,7 +304,7 @@ class OcdfgVisualization {
 								if (otView.satisfy(act, this.IDX, minEdgeCount)) {
 									let color = this.stringToColour(ot);
 									let intermediateNode = this.graph.insertVertex(parent, act+" "+ot, otView.toCompleteString(act).replaceAll("<br />", "\n").replaceAll("<br/>", "\n").replaceAll("<b>","").replaceAll("</b>",""), 150, 150, 275, 250, "fontSize=13;fillColor="+color+";fontColor=white;shape=hexagon");
-									let arc1 = this.graph.insertEdge(parent, act+" "+ot+" -> "+act, "", intermediateNode, activityObject, "fontSize=16;strokeColor="+color+";fontColor="+color);
+									let arc1 = this.graph.insertEdge(parent, act+" "+ot+" -> "+act, "", intermediateNode, activityObject, "fontSize=19;strokeColor="+color+";fontColor="+color);
 									this.activitiesDependent[[act, ot]] = intermediateNode;
 									this.invActivitiesDependent[intermediateNode.id] = [act, ot];
 								}
@@ -331,20 +331,20 @@ class OcdfgVisualization {
 								if (edgeVect in this.expandedEdges) {
 									label = otEdges.toIntermediateString(edge, this.IDX);
 								}
-								let arc = this.graph.insertEdge(parent, edgeVect.toString(), label, obj1, obj2, "curved=1;fontSize=16;strokeWidth="+penwidth+";strokeColor="+color+";fontColor="+color);
+								let arc = this.graph.insertEdge(parent, edgeVect.toString(), label, obj1, obj2, "curved=1;fontSize=19;strokeWidth="+penwidth+";strokeColor="+color+";fontColor="+color);
 								this.graphEdges[edgeVect] = arc;
 								this.invGraphEdges[arc.id] = edgeVect;
 								/*if (edgeVect in this.expandedEdges) {
 									let intermediateNode = this.graph.insertVertex(parent, "", otEdges.toCompleteString(edge), 150, 150, 275, 250, "fontSize=11;shape=doubleEllipse;fillColor="+color+";fontColor=white");
-									let arc1 = this.graph.insertEdge(parent, null, "", obj1, intermediateNode, "fontSize=16;strokeColor="+color+";fontColor="+color);
-									let arc2 = this.graph.insertEdge(parent, null, "", intermediateNode, obj2, "fontSize=16;strokeColor="+color+";fontColor="+color);
+									let arc1 = this.graph.insertEdge(parent, null, "", obj1, intermediateNode, "fontSize=19;strokeColor="+color+";fontColor="+color);
+									let arc2 = this.graph.insertEdge(parent, null, "", intermediateNode, obj2, "fontSize=19;strokeColor="+color+";fontColor="+color);
 									this.graphEdges[edgeVect] = intermediateNode;
 									this.invGraphEdges[intermediateNode.id] = edgeVect;
 								}
 								else {
 									let penwidth = Math.floor(1 + Math.log(1 + value)/2);
 									let label = otEdges.toReducedString(edge, this.IDX);
-									let arc = this.graph.insertEdge(parent, edgeVect.toString(), label, obj1, obj2, "fontSize=16;strokeWidth="+penwidth+";strokeColor="+color+";fontColor="+color);
+									let arc = this.graph.insertEdge(parent, edgeVect.toString(), label, obj1, obj2, "fontSize=19;strokeWidth="+penwidth+";strokeColor="+color+";fontColor="+color);
 									this.graphEdges[edgeVect] = arc;
 									this.invGraphEdges[arc.id] = edgeVect;
 								}*/
@@ -359,25 +359,25 @@ class OcdfgVisualization {
 					let endpointWidth = ot.length * 10;
 					let endpointHeight = 2 * 25;
 					if (Object.keys(otSa).length > 0) {
-						let saNode = this.graph.insertVertex(this.parent, "SA_"+ot, ot, 150, 150, endpointWidth, endpointHeight, "shape=ellipse;fontColor=white;fillColor="+color);
+						let saNode = this.graph.insertVertex(this.parent, "SA_"+ot, ot, 150, 150, endpointWidth, endpointHeight, "shape=ellipse;fontSize=15;fontColor=white;fillColor="+color);
 						this.saNodes[ot] = saNode;
 						this.invSaNodes[saNode.id] = ot;
 						for (let act in otSa) {
 							let value = otSa[act];
 							let penwidth = Math.floor(1 + Math.log(1 + value)/2);
-							let arc = this.graph.insertEdge(parent, null, "UO="+value, saNode, this.activitiesIndipendent[act], "curved=1;fontSize=16;strokeColor="+color+";fontColor="+color+";strokeWidth="+penwidth);
+							let arc = this.graph.insertEdge(parent, null, "UO="+value, saNode, this.activitiesIndipendent[act], "curved=1;fontSize=19;strokeColor="+color+";fontColor="+color+";strokeWidth="+penwidth);
 						}
 					}
 					let otEa = otObjects.filteredEa(minEdgeCount, this.activitiesIndipendent);
 					if (Object.keys(otEa).length > 0) {
 						endpointWidth = endpointHeight;
-						let eaNode = this.graph.insertVertex(this.parent, "EA_"+ot, "", 150, 150, endpointWidth, endpointHeight, "shape=ellipse;fillColor="+color);
+						let eaNode = this.graph.insertVertex(this.parent, "EA_"+ot, "", 150, 150, endpointWidth, endpointHeight, "shape=ellipse;fontSize=15;fillColor="+color);
 						this.eaNodes[ot] = eaNode;
 						this.invEaNodes[eaNode.id] = ot;
 						for (let act in otEa) {
 							let value = otEa[act];
 							let penwidth = Math.floor(1 + Math.log(1 + value)/2);
-							let arc = this.graph.insertEdge(parent, null, "UO="+value, this.activitiesIndipendent[act], eaNode, "curved=1;fontSize=16;strokeColor="+color+";fontColor="+color+";strokeWidth="+penwidth);
+							let arc = this.graph.insertEdge(parent, null, "UO="+value, this.activitiesIndipendent[act], eaNode, "curved=1;fontSize=19;strokeColor="+color+";fontColor="+color+";strokeWidth="+penwidth);
 						}
 					}
 				}

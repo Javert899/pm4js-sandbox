@@ -127,39 +127,39 @@
 									<a href="ocel.html"><img src="static/ocpm_red.png"></img></a>&nbsp;&nbsp;&nbsp;&nbsp;
 								</li>
 								<li class="navigation-item">
-									<a class="navigation-link" href="javascript:showProcessModelPage()"><i class="fas fa-project-diagram"></i>&nbsp;Process Schema</a>
+									<a class="navigation-link" href="javascript:showProcessModelPage()"><i class="fas fa-project-diagram"></i>&nbsp;<span style="font-size: 15pt">Process Schema</span></a>
 								</li>
 								
 								<li class="navigation-item">
-									<a class="navigation-link" href="javascript:showEventsList()"><i class="fas fa-atom"></i>Events</a>
+									<a class="navigation-link" href="javascript:showEventsList()"><i class="fas fa-atom"></i><span style="font-size: 15pt">Events</span></a>
 								</li>
 								
 								<li class="navigation-item">
-									<a class="navigation-link" href="javascript:showObjectsList()"><i class="fas fa-database"></i>&nbsp;Objects</a>
+									<a class="navigation-link" href="javascript:showObjectsList()"><i class="fas fa-database"></i>&nbsp;<span style="font-size: 15pt">Objects</span></a>
 								</li>
 								
 								<li class="navigation-item">
-									<a class="navigation-link" href="javascript:showNetworkAnalysis()"><i class="fas fa-address-card"></i>&nbsp;Network Analysis</a>
+									<a class="navigation-link" href="javascript:showNetworkAnalysis()"><i class="fas fa-address-card"></i>&nbsp;<span style="font-size: 15pt">Network Analysis</span></a>
 								</li>
 								
 								<li class="navigation-item">
-									<a class="navigation-link" href="javascript:showMachineLearning()"><i class="fab fa-mixer"></i>&nbsp;Machine Learning</a>
+									<a class="navigation-link" href="javascript:showMachineLearning()"><i class="fab fa-mixer"></i>&nbsp;<span style="font-size: 15pt">Machine Learning</span></a>
 								</li>
 								
 								<li class="navigation-item">
-									<a class="navigation-link" href="javascript:showAdvancedFiltering()"><i class="fas fa-camera"></i>&nbsp;Advanced Filtering</a>
+									<a class="navigation-link" href="javascript:showAdvancedFiltering()"><i class="fas fa-camera"></i>&nbsp;<span style="font-size: 15pt">Advanced Filtering</span></a>
 								</li>
 								
 								<li class="navigation-item">
-									<a class="navigation-link" href="javascript:showGraphs()"><i class="fas fa-chart-pie"></i>&nbsp;Statistics</a>
+									<a class="navigation-link" href="javascript:showGraphs()"><i class="fas fa-chart-pie"></i>&nbsp;<span style="font-size: 15pt">Statistics</span></a>
 								</li>
 								
 								<li class="navigation-item">
-									<a class="navigation-link" href="javascript:showConformance()"><i class="fas fa-bell"></i>&nbsp;Conformance</a>
+									<a class="navigation-link" href="javascript:showConformance()"><i class="fas fa-bell"></i>&nbsp;<span style="font-size: 15pt">Conformance</span></a>
 								</li>
 							
 								<li class="navigation-item">
-									<a class="navigation-link" href="#"><i class="fas fa-download"></i>&nbsp;Download Log</a>
+									<a class="navigation-link" href="#"><i class="fas fa-download"></i>&nbsp;<span style="font-size: 15pt">Download Log</span></a>
 									<div class="navigation-megamenu">
 										<div class="navigation-megamenu-container">
 											<div class="navigation-row">
@@ -167,7 +167,7 @@
 												<div><button id="downloadXmlOcel" onclick="downloadXmlOcel()" class="btn btn-primary">Download XML Ocel</button>&nbsp;</div>
 												<button id="celonisUploadOcel" onclick="uploadEntireToCelonis()" class="btn btn-primary" style="display: none">Celonis Upload&nbsp;</button>
 												<div>
-													Flattening OT: <select id="flatteningOt" class="form-select">
+													<span style="font-size: 15pt">Flattening OT:</span> <select id="flatteningOt" class="form-select">
 													</select>
 													<button id="flattenEventLog" onclick="flattenEventLog()" class="btn btn-primary">Flatten (XES)&nbsp;</button>
 													<button id="flattenEventLogUploadCelonis" onclick="uploadFlattenedToCelonis()" class="btn btn-primary" style="display: none">Flattened to Celonis&nbsp;</button>
@@ -208,7 +208,7 @@
 									<div>% of Activities:</div>
 									<div><input id="af_slider" type="range" min="0" max="100" value="70" class="slider form-range"></div>
 									<div>% of Paths:</div>
-									<div><input id="pf_slider" type="range" min="0" max="100" value="70" class="slider form-range"></div>
+									<div><input id="pf_slider" type="range" min="0" max="100" value="85" class="slider form-range"></div>
 									<div>&nbsp;</div>
 									<div><button id="apply_changes" onclick="doVisualization()" class="btn btn-primary">Apply Changes</button></div>
 								</div>
@@ -224,14 +224,14 @@
 										<ul class="navigation-menu">
 
 											<li class="navigation-item">
-												<a class="navigation-link" href="#"><i class="fas fa-cog"></i>&nbsp;Options</a>
+												<a class="navigation-link" href="#"><i class="fas fa-cog"></i>&nbsp;<span style="font-size: 15pt">Options</span></a>
 												<div class="navigation-megamenu">
 													<div class="navigation-megamenu-container">
 														<div class="navigation-row">
 															<div>Visualization:
 															<select id="visualizationType" class="form-select">
-																<option value="dfg">OC-DFG</option>
-																<option value="petriNet" selected>OC-Petri Net</option>
+																<option value="dfg" selected>OC-DFG</option>
+																<option value="petriNet">OC-Petri Net</option>
 															</select></div>
 															<div>Annotation:
 															<select id="annotationSelector" class="form-select">
@@ -246,7 +246,7 @@
 											</li>
 										
 											<li class="navigation-item">
-												<a class="navigation-link" href="#"><i class="fab fa-superpowers"></i>&nbsp;Object Types</a>
+												<a class="navigation-link" href="#"><i class="fab fa-superpowers"></i>&nbsp;<span style="font-size: 15pt">Object Types</span></a>
 												<div class="navigation-megamenu">
 													<div class="navigation-megamenu-container">
 														<div class="navigation-row">
@@ -262,7 +262,7 @@
 											</li>
 											
 											<li class="navigation-item">
-												<a class="navigation-link" href="#"><i class="fas fa-filter"></i>&nbsp;Filters</a>
+												<a class="navigation-link" href="#"><i class="fas fa-filter"></i>&nbsp;<span style="font-size: 15pt">Filters</span></a>
 												<div class="navigation-megamenu">
 													<div class="navigation-megamenu-container">
 														<div class="navigation-row">
@@ -587,7 +587,7 @@
 					var currEnd = 0;
 					var pageSize = 500;
 				</script>
-				<div id="eventsListPage" style="display: none">
+				<div id="eventsListPage" style="display: none; font-size: 15pt;">
 					<p>The page shows the list of events of the log. Each event is distinguished by its fundamental properties (ID, activity and timestamp),
 					a list of related objects for each type, and values for some attributes. Clicking an object, it is possible to see the lifecycle
 					of the object.</p>
@@ -599,7 +599,7 @@
 					<table id="eventsListTable" border="1"  class="table">
 					</table>
 				</div>
-				<div id="objectsListPage" style="display: none">
+				<div id="objectsListPage" style="display: none; font-size: 15pt;">
 					<p>The page shows the properties of the objects, after the selection of an object type. Each object is distinguished by the timestamp of the first
 					event of its lifecycle, the timestamp of the last event of its lifecycle, and the difference between them.</p>
 					<p>To start, please select an object type:
@@ -612,13 +612,13 @@
 						</table>
 					</div>
 				</div>
-				<div id="executionsPage" style="display: none">
+				<div id="executionsPage" style="display: none; font-size: 15pt;">
 					<p>An execution describes the connection between the lifecycle of different objects. Executions can be grouped together if they are equivalent in
 					the involved object types.</p>
 					<table id="executionsTable" border="1" class="table">
 					</table>
 				</div>
-				<div id="networkAnalysisPage" style="display: none">
+				<div id="networkAnalysisPage" style="display: none; font-size: 15pt;">
 					<table id="networkAnalysisContainer" style="width: 100%; height: 85%">
 						<tr>
 							<td style="width: 15%; font-size: 9pt">
@@ -700,7 +700,7 @@
 						</tr>
 					</table>
 				</div>
-				<div id="advancedFilteringPage" style="display: none">
+				<div id="advancedFilteringPage" style="display: none; font-size: 15pt;">
 					<div>
 						<h4><a href="javascript:filterMinOccurrencesActivity()">Filter Activities having a Minimum Number of Occurrences</a></h4>
 					</div>
@@ -746,7 +746,7 @@
 						<h4><a href="javascript:actOtAutomaticFiltering()">Activity - OT Filter (automatic)</a></h4>
 					</div>-->
 				</div>
-				<div id="machineLearningPage" style="display: none">
+				<div id="machineLearningPage" style="display: none; font-size: 15pt;">
 					<nav id="machineLearningNavigation" class="navigation navigation-justified border-bottom">
 						<div class="navigation-header">
 
@@ -754,27 +754,27 @@
 						<div class="navigation-body">
 							<ul class="navigation-menu">
 								<li class="navigation-item">
-									<a class="navigation-link" href="javascript:showSQLexplorer()"><i class="fas fa-database"></i>&nbsp;SQL explorer</a>
+									<a class="navigation-link" href="javascript:showSQLexplorer()"><i class="fas fa-database"></i>&nbsp;<span style="font-size: 13pt">SQL explorer</span></a>
 								</li>
 								
 								<li class="navigation-item">
-									<a class="navigation-link" href="javascript:showIsolationForest()"><i class="fas fa-house-user"></i>&nbsp;Isolation Forest</a>
+									<a class="navigation-link" href="javascript:showIsolationForest()"><i class="fas fa-house-user"></i>&nbsp;<span style="font-size: 13pt">Isolation Forest</span></a>
 								</li>
 								
 								<li class="navigation-item">
-									<a class="navigation-link" href="javascript:showPCAvisualization()"><i class="fas fa-signal"></i>&nbsp;Dimensionality Reduction</a>
+									<a class="navigation-link" href="javascript:showPCAvisualization()"><i class="fas fa-signal"></i>&nbsp;<span style="font-size: 13pt">Dimensionality Reduction</span></a>
 								</li>
 								
 								<li class="navigation-item">
-									<a class="navigation-link" href="javascript:showDTvisualization()"><i class="fas fa-tree"></i>&nbsp;Decision Trees</a>
+									<a class="navigation-link" href="javascript:showDTvisualization()"><i class="fas fa-tree"></i>&nbsp;<span style="font-size: 13pt">Decision Trees</span></a>
 								</li>
 								
 								<li class="navigation-item">
-									<a class="navigation-link" href="javascript:showMLStatsvisualization()"><i class="fas fa-plus-square"></i>&nbsp;Correlation Statistics</a>
+									<a class="navigation-link" href="javascript:showMLStatsvisualization()"><i class="fas fa-plus-square"></i>&nbsp;<span style="font-size: 13pt">Correlation Statistics</span></a>
 								</li>
 								
 								<li class="navigation-item">
-									<a class="navigation-link" href="javascript:showConformanceRules()"><i class="fas fa-house-user"></i>&nbsp;Conformance Rules</a>
+									<a class="navigation-link" href="javascript:showConformanceRules()"><i class="fas fa-house-user"></i>&nbsp;<span style="font-size: 13pt">Conformance Rules</span></a>
 								</li>
 							</ul>
 						</div>
@@ -787,11 +787,11 @@
 						<div id="machineLearningSQLResult">
 						</div>
 					</div>
-					<div id="machineLearningIsolationForest" style="display: none">
+					<div id="machineLearningIsolationForest" style="display: none;">
 						<p>The isolation forest calculated on the objects' features permits to identify the objects with peculiar behavior (different from the one of the other objects).
 						Objects which are more anomalous are reported first.</p>
-						<div id="machineLearningIsolationForestResult" border="1" class="table">
-						</div>
+						<table id="machineLearningIsolationForestResult" border="1" class="table" style="font-size: 15pt">
+						</table>
 					</div>
 					<div id="machineLearningPCA" style="display: none">
 						<p>The first two components of the discovered features are illustrated in this page. This permits to visually identify the groups of objects with
@@ -842,12 +842,12 @@
 						<div id="plotlyMLStatGraph" style="width: 100%; height: 75%;">
 						</div>
 					</div>
-					<div id="conformanceRules" style="display: none">
+					<div id="conformanceRules" style="display: none; font-size: 15pt;">
 						<p>Some <b>conformance rules</b> (the value of a feature should be contained in a range) are inferred automatically from the extracted features.
 						Anomalous objects are identified by such rules.</p>
 						<select id="conformanceRulesOtSelection" name="conformanceRulesOtSelection"></select>
 						<button onclick="javascript:showRulesPerObjectType()">Show Conformance Rules</button>
-						<table id="conformanceRulesContainer" class="table">
+						<table id="conformanceRulesContainer" class="table" style="font-size: 15pt">
 							<thead>
 								<tr>
 									<th>Feature</th>
@@ -863,19 +863,19 @@
 						</table>
 					</div>
 				</div>
-				<div id="plotlyGraphsPage" style="display: none">
+				<div id="plotlyGraphsPage" style="display: none;">
 					<div class="row" style="height: 85%">
 						<!--align-self-center text-center-->
 						<div class="col-2 border-right">
-							<h6>Select the statistic:</h6>
-							<div><i class="fas fa-chart-pie"></i>&nbsp;<a href="javascript:showSpecificGraph('plotlyOtGraph')">Objects per Type</a></div>
-							<div><i class="fas fa-chart-bar"></i>&nbsp;<a href="javascript:showSpecificGraph('plotlyActGraph')">Events per Activity</a></div>
-							<div><i class="fas fa-chart-bar"></i>&nbsp;<a href="javascript:showSpecificGraph('plotlyObjPerEveGraph')">N. Objects per Event</a></div>
-							<div><i class="fas fa-chart-bar"></i>&nbsp;<a href="javascript:showSpecificGraph('plotlyLifecycleLengthGraph')">Length of Object Lifecycle</a></div>
-							<div><i class="fas fa-chart-bar"></i>&nbsp;<a href="javascript:showSpecificGraph('plotlyEventsPerTimeGraph')">Events per Time</a></div>				
-							<div><i class="fas fa-box"></i>&nbsp;<a href="javascript:showSpecificGraph('plotlyLifecycleDurationGraph')">Lifecycle Duration (logarithmic)</a></div>
-							<div><i class="fas fa-chart-area"></i>&nbsp;<a href="javascript:showSpecificGraph('plotlyDottedChartColorActivity')">Dotted Chart (color: activity)</a></div>
-							<div><i class="fas fa-chart-area"></i>&nbsp;<a href="javascript:showSpecificGraph('plotlyDottedChartColorObjType')">Dotted Chart (color: object type)</a></div>				
+							<h6><span style="font-size: 16pt">Select the statistic:</span></h6>
+							<div><i class="fas fa-chart-pie"></i>&nbsp;<a href="javascript:showSpecificGraph('plotlyOtGraph')"><span style="font-size: 16pt">Objects per Type</span></a></div>
+							<div><i class="fas fa-chart-bar"></i>&nbsp;<a href="javascript:showSpecificGraph('plotlyActGraph')"><span style="font-size: 16pt">Events per Activity</span></a></div>
+							<div><i class="fas fa-chart-bar"></i>&nbsp;<a href="javascript:showSpecificGraph('plotlyObjPerEveGraph')"><span style="font-size: 16pt">N. Objects per Event</span></a></div>
+							<div><i class="fas fa-chart-bar"></i>&nbsp;<a href="javascript:showSpecificGraph('plotlyLifecycleLengthGraph')"><span style="font-size: 16pt">Length of Object Lifecycle</span></a></div>
+							<div><i class="fas fa-chart-bar"></i>&nbsp;<a href="javascript:showSpecificGraph('plotlyEventsPerTimeGraph')"><span style="font-size: 16pt">Events per Time</span></a></div>
+							<div><i class="fas fa-box"></i>&nbsp;<a href="javascript:showSpecificGraph('plotlyLifecycleDurationGraph')"><span style="font-size: 16pt">Lifecycle Duration (logarithmic)</span></a></div>
+							<div><i class="fas fa-chart-area"></i>&nbsp;<a href="javascript:showSpecificGraph('plotlyDottedChartColorActivity')"><span style="font-size: 16pt">Dotted Chart (color: activity)</span></a></div>
+							<div><i class="fas fa-chart-area"></i>&nbsp;<a href="javascript:showSpecificGraph('plotlyDottedChartColorObjType')"><span style="font-size: 16pt">Dotted Chart (color: object type)</span></a></div>
 						</div>
 						<div class="col-10">
 							<div id="plotlyOtGraph" style="width: 100%; height: 100%; display: none">
@@ -905,7 +905,7 @@
 						</div>
 					</div>
 				</div>
-				<div id="conformancePage" style="display: none">
+				<div id="conformancePage" style="display: none; font-size: 15pt;">
 					<nav id="conformanceNavigation" class="navigation navigation-justified border-bottom">
 						<div class="navigation-header">
 
@@ -914,15 +914,15 @@
 							<ul class="navigation-menu">
 								
 								<li class="navigation-item">
-									<a class="navigation-link" href="javascript:showConformancePageNumObjects()"><i class="fas fa-sort-numeric-up-alt"></i>&nbsp;Number of Objects</a>
+									<a class="navigation-link" href="javascript:showConformancePageNumObjects()"><i class="fas fa-sort-numeric-up-alt"></i>&nbsp;<span style="font-size: 15pt">Number of Objects</span></a>
 								</li>
 								
 								<li class="navigation-item">
-									<a class="navigation-link" href="javascript:showConformancePageLifecycleObjects()"><i class="fas fa-life-ring"></i>&nbsp;Objects Lifecycle</a>
+									<a class="navigation-link" href="javascript:showConformancePageLifecycleObjects()"><i class="fas fa-life-ring"></i>&nbsp;<span style="font-size: 15pt">Objects Lifecycle</span></a>
 								</li>
 								
 								<li class="navigation-item">
-									<a class="navigation-link" href="javascript:showConformancePageDurationsObjects()"><i class="fas fa-clock"></i>&nbsp;Objects Duration</a>
+									<a class="navigation-link" href="javascript:showConformancePageDurationsObjects()"><i class="fas fa-clock"></i>&nbsp;<span  style="font-size: 15pt">Objects Duration</span></a>
 								</li>							
 							</ul>
 						</div>
@@ -931,21 +931,21 @@
 						<p>The page shows the objects of the given type which are related to events of the given activity in extraordinary number
 						(lower than avg - stdev, or higher than avg + stdev). It is offered a possibility to filter on the events related to such objects, to understand
 						the control flow in these situations.</p>
-						<table id="conformanceCheckingNumObjectsTable" class="table">
+						<table id="conformanceCheckingNumObjectsTable" class="table" style="font-size: 15pt">
 							
 						</table>
 					</div>
 					<div id="conformanceCheckingLifecycleObjects" style="display: none">
 						<p>The page shows the log skeleton constraints (default noise: 5%) that are violated by the objects of the given type. Each rule is reported
 						with a description, the overall number of violations, and a possibility to filter the events related to such objects.</p>
-						<table id="conformanceCheckingLifecycleObjectsTable" class="table">
+						<table id="conformanceCheckingLifecycleObjectsTable" class="table" style="font-size: 15pt">
 							
 						</table>
 					</div>
 					<div id="conformanceCheckingDurationObjects" style="display: none">
 						<p>The page identifies deviations in the duration of the lifecycle of the objects. Objects having an exceptional durations are here identified,
 						along with the number of deviations and a possibility to filter the events related to such objects.</p>
-						<table id="conformanceCheckingDurationObjectsTable" class="table">
+						<table id="conformanceCheckingDurationObjectsTable" class="table" style="font-size: 15pt">
 							
 						</table>
 					</div>
@@ -1424,8 +1424,8 @@
 			<script type="text/javascript">
 				/*for (let evId in eventLog["ocel:events"]) {
 					eventLog["ocel:events"][evId]["ocel:timestamp"] = new Date(eventLog["ocel:events"][evId]["ocel:timestamp"]);
-				}*/
-				//createVisualization();
+				}
+				createVisualization();*/
 			</script>
 		</div>
 		<div id="htmlLoadView" style="z-index: 200; display: none">
