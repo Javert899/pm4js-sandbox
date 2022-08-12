@@ -21,6 +21,9 @@ class PlotlyOcelGraphs {
 
 		var layout = {
 			title: 'Objects per Type',
+			font: {
+				size: 19
+			}
 		};
 
 		Plotly.newPlot('plotlyOtGraph', data, layout, {responsive: true});
@@ -35,7 +38,10 @@ class PlotlyOcelGraphs {
 			y.push(Object.keys(actView).length);
 		}
 		var data = [{x: x, y: y, type: 'bar'}];
-		var layout = {title: "Events per Activity"};
+		var layout = {title: "Events per Activity",
+			font: {
+				size: 19
+			}};
 		Plotly.newPlot('plotlyActGraph', data, layout, {responsive: true});
 	}
 	
@@ -60,7 +66,10 @@ class PlotlyOcelGraphs {
 			y.push(dictio[key]);
 		}	
 		var data = [{x: x, y: y, type: 'bar'}];
-		var layout = {title: "N. Objects per Event"};
+		var layout = {title: "N. Objects per Event",
+			font: {
+				size: 19
+			}};
 		Plotly.newPlot('plotlyObjPerEveGraph', data, layout, {responsive: true});
 	}
 	
@@ -84,7 +93,10 @@ class PlotlyOcelGraphs {
 			y.push(dictio[key]);
 		}
 		var data = [{x: x, y: y, type: 'bar'}];
-		var layout = {title: "Length of Object Lifecycle"};
+		var layout = {title: "Length of Object Lifecycle",
+			font: {
+				size: 19
+			}};
 		Plotly.newPlot('plotlyLifecycleLengthGraph', data, layout, {responsive: true});
 	}
 	
@@ -110,7 +122,10 @@ class PlotlyOcelGraphs {
 			y1[i] = Math.random() + 1;
 		}
 		var data = [{y: serie, type: "box"}];
-		var layout = {title: "Lifecycle Duration (logarithmic)"};
+		var layout = {title: "Lifecycle Duration (logarithmic)",
+			font: {
+				size: 19
+			}};
 		Plotly.newPlot('plotlyLifecycleDurationGraph', data, layout, {responsive: true});
 	}
 	
@@ -150,7 +165,10 @@ class PlotlyOcelGraphs {
 			y.push(stepsDictio[key]);
 		}
 		var data = [{x: x, y: y, type: 'bar'}];
-		var layout = {title: "Events per Time"};
+		var layout = {title: "Events per Time",
+			font: {
+				size: 19
+			}};
 		Plotly.newPlot('plotlyEventsPerTimeGraph', data, layout, {responsive: true});
 	}
 	
@@ -200,6 +218,9 @@ class PlotlyOcelGraphs {
 			},
 			yaxis: {
 				title: "Object index"
+			},
+			font: {
+				size: 19
 			}
 		};
 		Plotly.newPlot('plotlyDottedChartColorActivity', data, layout, {responsive: true});
@@ -252,6 +273,9 @@ class PlotlyOcelGraphs {
 			},
 			yaxis: {
 				title: "Object index"
+			},
+			font: {
+				size: 19
 			}
 		};
 		Plotly.newPlot('plotlyDottedChartColorObjType', data, layout, {responsive: true});
