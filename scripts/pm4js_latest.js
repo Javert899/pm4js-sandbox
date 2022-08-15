@@ -61,7 +61,7 @@ class Pm4JS {
 	}
 }
 
-Pm4JS.VERSION = "0.0.25";
+Pm4JS.VERSION = "0.0.26";
 Pm4JS.registrationEnabled = false;
 Pm4JS.objects = [];
 Pm4JS.algorithms = [];
@@ -18820,7 +18820,7 @@ class OcelEventFeatures {
 		featureNames.unshift("EVENT_ID");
 		i = 0;
 		while (i < featureNames.length) {
-			featureNames[i] = featureNames[i].replace(new RegExp("@@", 'g'), "").replace(new RegExp("#", 'g'), "_").replace(new RegExp(" ", 'g'), "_");
+			featureNames[i] = featureNames[i].replace(new RegExp("@@", 'g'), "").replace(/[^a-z0-9]/gmi, " ").replace(/\s+/g, " ").replace(new RegExp(" ", 'g'), "_");
 			i = i + 1;
 		}
 		return {"data": data, "featureNames": featureNames};
@@ -19217,7 +19217,7 @@ class OcelObjectFeatures {
 		featureNames.unshift("OBJECT_ID");
 		i = 0;
 		while (i < featureNames.length) {
-			featureNames[i] = featureNames[i].replace(new RegExp("@@", 'g'), "").replace(new RegExp("#", 'g'), "_").replace(new RegExp(" ", 'g'), "_");
+			featureNames[i] = featureNames[i].replace(new RegExp("@@", 'g'), "").replace(/[^a-z0-9]/gmi, " ").replace(/\s+/g, " ").replace(new RegExp(" ", 'g'), "_");
 			i = i + 1;
 		}
 		return {"data": data, "featureNames": featureNames};
