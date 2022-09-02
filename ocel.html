@@ -72,6 +72,8 @@
 				let evFeaturesCorrDct = null;
 				let objFeaturesCorrDct = null;
 				let featVarianceThreshold = 0.05;
+				var csvOcelContent = null;
+				var arr = null;
 			</script>
 			<div id="uploadPart" style="display: ">
 				<!--<img src="static/pads_rwth.png" /><br />
@@ -114,6 +116,173 @@
 						</div>
 					</div>
 				</div>
+			</div>
+			<div id="csvUpload" style="display: none">
+				<script>
+		function CSVrenderTable(content=null, maxrow=15, targetTable="parsedCSV") {
+			if (content != null) {
+				csvOcelContent = content;
+			}
+			let sep = document.getElementById("CSVseparator").value;
+			let quotechar = document.getElementById("CSVquotechar").value;
+			arr = CsvImporter.parseCSV(csvOcelContent, sep, quotechar);
+			let innerHTML = [];
+			innerHTML.push("<table border='1' class='table'>");
+			innerHTML.push("<thead><tr>");
+			let j = 0;
+			while (j < arr[0].length) {
+				innerHTML.push("<th>"+arr[0][j]+"</th>");
+				j++;
+			}
+			innerHTML.push("</tr>");
+			innerHTML.push("</thead>");
+			innerHTML.push("<tbody>");
+			innerHTML.push("<tr>");
+			j = 0;
+			while (j < arr[0].length) {
+				innerHTML.push("<td><select id='csvoption_"+j+"' class='csvoption'>");
+				let actSelected = arr[0][j].toLowerCase().indexOf("act") > -1;
+				let timestSelected = arr[0][j].toLowerCase().indexOf("time") > -1;
+				let evIdSelected = arr[0][j].toLowerCase().indexOf("id") > -1;
+				let objTypeSelected = arr[0][j].toLowerCase().indexOf("type") > -1;
+				let selected = "";
+				if (!(actSelected || timestSelected || evIdSelected || objTypeSelected)) {
+					selected = " selected";
+				}
+				innerHTML.push("<option value='attribute'"+selected+">Event Attribute</option>");
+				selected = "";
+				if (actSelected) {
+					selected = " selected";
+				}
+				innerHTML.push("<option value='activity'"+selected+">Activity</option>");
+				selected = "";
+				if (timestSelected && (!(actSelected || evIdSelected || objTypeSelected))) {
+					selected = " selected";
+				}
+				innerHTML.push("<option value='timestamp'"+selected+">Timestamp</option>");
+				selected = "";
+				if (evIdSelected && (!(actSelected || timestSelected || objTypeSelected))) {
+					selected = " selected";
+				}
+				innerHTML.push("<option value='evid'"+selected+">Event ID</option>");
+				selected = "";
+				if (objTypeSelected && (!(actSelected || evIdSelected || timestSelected))) {
+					selected = " selected";
+				}
+				innerHTML.push("<option value='objtype'"+selected+">Object Type</option>");
+
+				innerHTML.push("</select></td>");
+				j++;
+			}
+			innerHTML.push("</tr>");
+			let i = 1;
+			while (i < Math.min(maxrow, arr.length)) {
+				innerHTML.push("<tr>");
+				j = 0;
+				while (j < arr[i].length) {
+					innerHTML.push("<td>"+arr[i][j]+"</td>");
+					j++;
+				}
+				innerHTML.push("</tr>");
+				i++;
+			}
+			innerHTML.push("</tbody></table>");
+			document.getElementById(targetTable).innerHTML = innerHTML.join();
+		}
+		
+		function CSVconvertToOCEL() {
+			let sep = document.getElementById("CSVseparator").value;
+			let quotechar = document.getElementById("CSVquotechar").value;
+			let separators = [];
+			let objectQuotes = document.getElementById("CSVobjectquotes").value;
+			if (objectQuotes == "classic") {
+				separators = ["'", "\""];
+			}
+			
+			let evIdColumn = [];
+			let activityColumn = [];
+			let timestColumn = [];
+			let attributes = [];
+			let objTypes = [];
+			for (let sel of document.getElementsByClassName("csvoption")) {
+				att = arr[0][parseInt(sel.id.split("csvoption_")[1])];
+				value = sel.value;
+				if (value == "evid") {
+					evIdColumn.push(att);
+				}
+				else if (value == "activity") {
+					activityColumn.push(att);
+				}
+				else if (value == "timestamp") {
+					timestColumn.push(att);
+				}
+				else if (value == "attribute") {
+					attributes.push(att);
+				}
+				else if (value == "objtype") {
+					objTypes.push(att);
+				}
+			}
+			let errors = [];
+			if (evIdColumn.length > 1) {
+				errors.push("At most one column must be selected as event identifier!");
+			}
+			if (activityColumn.length != 1) {
+				errors.push("Exactly one column must be selected as activity!");
+			}
+			if (timestColumn.length != 1) {
+				errors.push("Exactly one column must be selected as timestamp!");
+			}
+			if (objTypes.length == 0) {
+				errors.push("At least a column must be selected as object type!");
+			}
+			
+			if (errors.length == 0) {
+				// can proceed
+				if (evIdColumn.length == 1) {
+					evIdColumn = evIdColumn[0];
+				}
+				else {
+					evIdColumn = null;
+				}
+				eventLog = CsvOcelImporter.apply(csvOcelContent, activityColumn[0], timestColumn[0], objTypes, attributes, evIdColumn, separators, sep, quotechar);
+				document.getElementById("uploadPart").style.display = "none";
+				document.getElementById("mainApplication").style.display = "";
+				document.getElementById("csvUpload").style.display = "none";
+				createVisualization();
+			}
+			else {
+				let innerHTML = "";
+				for (let err of errors) {
+					innerHTML += "<p style='color: red'>"+err+"</p>";
+				}
+				document.getElementById("CSVimportingErrors").innerHTML = innerHTML;
+			}
+		}
+	</script>
+				<div id="CSVpreliminaryParameters" class="container-fluid">
+					<p>Please select the correct values for the separator and the quote character of the CSV. Moreover, please provide a mapping for the columns
+					(i.e., which column is the activity, timestamp, object type, event attribute, event identifier).</p>
+					<span>Separator: <input type="text" id="CSVseparator" value=","></input></span>
+					<span>Quote characters: <input type="text" id="CSVquotechar" value='"'></input></span>
+					<span>Object Quotes:
+						<select id="CSVobjectquotes">
+							<option value="classic">Classic (' or ")</option>
+							<option value="absent">Absent</option>
+						</select>
+					</span>
+					<span><button onclick="javascript:CSVrenderTable()">Re-Build Table</button></span>
+				</div>
+				
+				<div id="parsedCSV">
+				
+				</div>
+				
+				<div id="CSVimportingErrors">
+					
+				</div>
+				
+				<button onclick="javascript:CSVconvertToOCEL()">Obtain OCEL</button>
 			</div>
 			<div id="mainApplication" style="display: none" class="container-fluid">
 				<div id="header" style="background-color:" class="border-bottom">
@@ -559,14 +728,21 @@
 								eventLog = XmlOcelImporter.importLog(contentStri);
 								createVisualization();
 							}
-							else {
+							else if (f.name.endsWith(".jsonocel")) {
 								eventLog = JsonOcelImporter.importLog(contentStri);
 								createVisualization();
+							}
+							else {
+								document.getElementById("uploadPart").style.display = "none";
+								document.getElementById("mainApplication").style.display = "none";
+								document.getElementById("csvUpload").style.display = "";
+								CSVrenderTable(contentStri);
 							}
 						}
 						
 						function createVisualization() {
 							document.getElementById("mainApplication").style.display = "";
+							document.getElementById("csvUpload").style.display = "none";
 							document.getElementById("uploadPart").style.display = "none";
 							visualization = new OcdfgVisualization(new OcdfgModel(eventLog), "graphContainer");
 							visualization.callbackActivity = callbackActivity;
