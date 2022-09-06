@@ -1175,91 +1175,99 @@
 			<script src="logs/example-jsonocel.js"></script>
 			<script type="text/javascript">
 				function fillAttributesLinkNetworkAnalysis() {
-					let attributesList = StreamAttrWrapper.attributesList(Object.values(visualization.model.ocel["ocel:events"]));
-					console.log(attributesList);
-					let option = null;
-					for (let att of attributesList) {
-						if (att != "ocel:activity") {
-							option = document.createElement("option");
-							option.value = att;
-							option.text = att;
-							document.getElementById("NAoutAttribute").appendChild(option);
-							option = document.createElement("option");
-							option.value = att;
-							option.text = att;
-							document.getElementById("NAinAttribute").appendChild(option);
-							option = document.createElement("option");
-							option.value = att;
-							option.text = att;
-							document.getElementById("NAsnAttribute").appendChild(option);
-							option = document.createElement("option");
-							option.value = att;
-							option.text = att;
-							document.getElementById("NAtnAttribute").appendChild(option);
-							option = document.createElement("option");
-							option.value = att;
-							option.text = att;
-							document.getElementById("NAedgeAggAttribute").appendChild(option);
+					let thisUuid = Pm4JS.startAlgorithm({"name": "OCPM fillAttributesLinkNetworkAnalysis"});
+					setTimeout(function() {
+						let attributesList = StreamAttrWrapper.attributesList(Object.values(visualization.model.ocel["ocel:events"]));
+						console.log(attributesList);
+						let option = null;
+						for (let att of attributesList) {
+							if (att != "ocel:activity") {
+								option = document.createElement("option");
+								option.value = att;
+								option.text = att;
+								document.getElementById("NAoutAttribute").appendChild(option);
+								option = document.createElement("option");
+								option.value = att;
+								option.text = att;
+								document.getElementById("NAinAttribute").appendChild(option);
+								option = document.createElement("option");
+								option.value = att;
+								option.text = att;
+								document.getElementById("NAsnAttribute").appendChild(option);
+								option = document.createElement("option");
+								option.value = att;
+								option.text = att;
+								document.getElementById("NAtnAttribute").appendChild(option);
+								option = document.createElement("option");
+								option.value = att;
+								option.text = att;
+								document.getElementById("NAedgeAggAttribute").appendChild(option);
+							}
 						}
-					}
+						Pm4JS.stopAlgorithm(thisUuid, {});
+					}, 100);
 				}
 				
 				function applyNetworkAnalysisConfiguration() {
-					let linkMethod = document.getElementById("NAlinkMethod").value;
-					let graphLink = document.getElementById("NAgraphLink").value;
-					let outAttribute = document.getElementById("NAoutAttribute").value;
-					let inAttribute = document.getElementById("NAinAttribute").value;
-					let keepFirst = document.getElementById("NAkeepFirst").checked;
-					let expandLinks = document.getElementById("NAexpandLinks").checked;
-					let snAggregation = document.getElementById("NAsnAttribute").value;
-					let tnAggregation = document.getElementById("NAtnAttribute").value;
-					let aggPlace = document.getElementById("NAedgeAggPlace").value;
-					let aggAttr = document.getElementById("NAedgeAggAttribute").value;
-					let annotation = document.getElementById("NAannotation").value;
-					
-					let links = null;
-					if (linkMethod == "graph") {
-						let graph = null;
-						if (graphLink == "descendants") {
-							graph = OcelGraphs.objectDescendantsGraph(visualization.model.ocel);
+					let thisUuid = Pm4JS.startAlgorithm({"name": "OCPM fillAttributesLinkNetworkAnalysis"});
+					setTimeout(function() {
+						let linkMethod = document.getElementById("NAlinkMethod").value;
+						let graphLink = document.getElementById("NAgraphLink").value;
+						let outAttribute = document.getElementById("NAoutAttribute").value;
+						let inAttribute = document.getElementById("NAinAttribute").value;
+						let keepFirst = document.getElementById("NAkeepFirst").checked;
+						let expandLinks = document.getElementById("NAexpandLinks").checked;
+						let snAggregation = document.getElementById("NAsnAttribute").value;
+						let tnAggregation = document.getElementById("NAtnAttribute").value;
+						let aggPlace = document.getElementById("NAedgeAggPlace").value;
+						let aggAttr = document.getElementById("NAedgeAggAttribute").value;
+						let annotation = document.getElementById("NAannotation").value;
+						
+						let links = null;
+						if (linkMethod == "graph") {
+							let graph = null;
+							if (graphLink == "descendants") {
+								graph = OcelGraphs.objectDescendantsGraph(visualization.model.ocel);
+							}
+							else if (graphLink == "interaction") {
+								graph = OcelGraphs.objectInteractionGraph(visualization.model.ocel);
+							}
+							else if (graphLink == "cobirth") {
+								graph = OcelGraphs.objectCobirthGraph(visualization.model.ocel);
+							}
+							else if (graphLink == "codeath") {
+								graph = OcelGraphs.objectCodeathGraph(visualization.model.ocel);
+							}
+							else if (graphLink == "inheritance") {
+								graph = OcelGraphs.objectInheritanceGraph(visualization.model.ocel);
+							}
+							links = OcelLinkAnalysis.linkEventsWithObjGraph(visualization.model.ocel, graph);
 						}
-						else if (graphLink == "interaction") {
-							graph = OcelGraphs.objectInteractionGraph(visualization.model.ocel);
+						else {
+							links = OcelLinkAnalysis.linkAnalysisAttributeOutIn(visualization.model.ocel, outAttribute, inAttribute);
+							links = OcelLinkAnalysis.filterLinksByTimestamp(visualization.model.ocel, links);
 						}
-						else if (graphLink == "cobirth") {
-							graph = OcelGraphs.objectCobirthGraph(visualization.model.ocel);
+						if (keepFirst) {
+							links = OcelLinkAnalysis.filterFirstLink(visualization.model.ocel, links);
 						}
-						else if (graphLink == "codeath") {
-							graph = OcelGraphs.objectCodeathGraph(visualization.model.ocel);
+						if (expandLinks) {
+							links = OcelLinkAnalysis.expandLinks(visualization.model.ocel, links);
 						}
-						else if (graphLink == "inheritance") {
-							graph = OcelGraphs.objectInheritanceGraph(visualization.model.ocel);
+						links = OcelLinkAnalysis.linksToFinalForm(visualization.model.ocel, links);
+						let aggPlace1 = false;
+						if (aggPlace == "source") {
+							aggPlace1 = true;
 						}
-						links = OcelLinkAnalysis.linkEventsWithObjGraph(visualization.model.ocel, graph);
-					}
-					else {
-						links = OcelLinkAnalysis.linkAnalysisAttributeOutIn(visualization.model.ocel, outAttribute, inAttribute);
-						links = OcelLinkAnalysis.filterLinksByTimestamp(visualization.model.ocel, links);
-					}
-					if (keepFirst) {
-						links = OcelLinkAnalysis.filterFirstLink(visualization.model.ocel, links);
-					}
-					if (expandLinks) {
-						links = OcelLinkAnalysis.expandLinks(visualization.model.ocel, links);
-					}
-					links = OcelLinkAnalysis.linksToFinalForm(visualization.model.ocel, links);
-					let aggPlace1 = false;
-					if (aggPlace == "source") {
-						aggPlace1 = true;
-					}
-					let performance = false;
-					if (annotation == "performance") {
-						performance = true;
-					}
-					let naResult = NetworkAnalysis.apply(links, snAggregation, tnAggregation, aggAttr, aggPlace1);
-					let naVis = NetworkAnalysisGraphvizVisualizer.apply(naResult, performance);
-					let svgXml = Viz(naVis, { format: "svg"});
-					document.getElementById("naGraphvizContainer").innerHTML = svgXml;
+						let performance = false;
+						if (annotation == "performance") {
+							performance = true;
+						}
+						let naResult = NetworkAnalysis.apply(links, snAggregation, tnAggregation, aggAttr, aggPlace1);
+						let naVis = NetworkAnalysisGraphvizVisualizer.apply(naResult, performance);
+						let svgXml = Viz(naVis, { format: "svg"});
+						document.getElementById("naGraphvizContainer").innerHTML = svgXml;
+						Pm4JS.stopAlgorithm(thisUuid, {});
+					}, 100);
 				}
 				
 				function filterDeviationsLifecycleObjects(objType, dev) {
@@ -1325,13 +1333,17 @@
 				}
 				
 				function populateNumEventsEventsPage() {
-					currStart = Math.max(0, Math.min(numEvents, currStart0));
-					currEnd = Math.max(0, Math.min(numEvents, currEnd0));
-					document.getElementById("numEventsEventsPage").innerHTML = numEvents;
-					document.getElementById("currStartEventsPage").innerHTML = currStart;
-					document.getElementById("currEndEventsPage").innerHTML = currEnd;
-					eventsListFactory = new EventsListFactory(visualization.model);
-					eventsListFactory.buildEventsTable(document.getElementById("eventsListTable"), null, true, null, currStart, currEnd);
+					let thisUuid = Pm4JS.startAlgorithm({"name": "OCPM showEventsList"});
+					setTimeout(function() {
+						currStart = Math.max(0, Math.min(numEvents, currStart0));
+						currEnd = Math.max(0, Math.min(numEvents, currEnd0));
+						document.getElementById("numEventsEventsPage").innerHTML = numEvents;
+						document.getElementById("currStartEventsPage").innerHTML = currStart;
+						document.getElementById("currEndEventsPage").innerHTML = currEnd;
+						eventsListFactory = new EventsListFactory(visualization.model);
+						eventsListFactory.buildEventsTable(document.getElementById("eventsListTable"), null, true, null, currStart, currEnd);
+						Pm4JS.stopAlgorithm(thisUuid, {});
+					}, 100);
 				}
 				
 				function increaseRange() {
@@ -1548,9 +1560,13 @@
 				}
 				
 				function showObjListOt() {
-					let selectedOt = document.getElementById("otObjListSelection").value;
-					objectsListFactory = new ObjectsListFactory(visualization.model);
-					objectsListFactory.buildObjectsTable(document.getElementById("objectsListTable"), selectedOt);
+					let thisUuid = Pm4JS.startAlgorithm({"name": "OCPM showObjListOt"});
+					setTimeout(function() {
+						let selectedOt = document.getElementById("otObjListSelection").value;
+						objectsListFactory = new ObjectsListFactory(visualization.model);
+						objectsListFactory.buildObjectsTable(document.getElementById("objectsListTable"), selectedOt);
+						Pm4JS.stopAlgorithm(thisUuid, {});
+					}, 100);
 				}
 
 				$('.hover_bkgr_fricc').click(function(){
