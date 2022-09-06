@@ -256,6 +256,10 @@ class OcdfgVisualization {
 	represent(af = null, pf = null) {
 		let thisUuid = Pm4JS.startAlgorithm({"name": "OcdfgVisualization"});
 		let self = this;
+		this.model.otInductiveModels = null;
+		this.model.otTransMap = null;
+		this.model.otInductiveModels = {};
+		this.model.otTransMap = {};
 		setTimeout(function() {
 			if (self.displayType == "petriNet") {
 				let activities = Object.keys(self.activitiesIndipendent);
