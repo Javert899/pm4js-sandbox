@@ -1352,17 +1352,21 @@
 				}
 				
 				function showMachineLearning() {
-					hideAllDivsPages();
-					calculateEventFeatures();
-					calculateObjectFeatures();
-					prepareSQLDatabase();
-					insertObjectFeaturesInSQLDatabase();
-					//insertEventFeaturesInSQLDatabase();
-					showSQLexplorer();
-					document.getElementById("machineLearningPage").style.display = "";
-					if (mlNavigation == null) {
-						mlNavigation = new Navigation(document.getElementById("mlNavigation"));
-					}
+					let thisUuid = Pm4JS.startAlgorithm({"name": "OCPM ML"});
+					setTimeout(function() {
+						hideAllDivsPages();
+						calculateEventFeatures();
+						calculateObjectFeatures();
+						prepareSQLDatabase();
+						insertObjectFeaturesInSQLDatabase();
+						//insertEventFeaturesInSQLDatabase();
+						showSQLexplorer();
+						document.getElementById("machineLearningPage").style.display = "";
+						if (mlNavigation == null) {
+							mlNavigation = new Navigation(document.getElementById("mlNavigation"));
+						}
+						Pm4JS.stopAlgorithm(thisUuid, {});
+					}, 100);
 				}
 				
 				function showAdvancedFiltering() {
@@ -1452,21 +1456,18 @@
 					visualization.model.calculateConformanceNumObjs();
 					hideAllConformancePages();
 					document.getElementById("conformanceCheckingNumObjects").style.display = "";
-					visualization.model.conformanceNumObjs.populateTable(document.getElementById("conformanceCheckingNumObjectsTable"));
 				}
 				
 				function showConformancePageLifecycleObjects() {
 					visualization.model.calculateConformanceLifecycleObjects();
 					hideAllConformancePages();
 					document.getElementById("conformanceCheckingLifecycleObjects").style.display = "";
-					visualization.model.conformanceLifecycleObjects.populateTable(document.getElementById("conformanceCheckingLifecycleObjectsTable"));
 				}
 				
 				function showConformancePageDurationsObjects() {
 					visualization.model.calculateConformanceDurationObjects();
 					hideAllConformancePages();
 					document.getElementById("conformanceCheckingDurationObjects").style.display = "";
-					visualization.model.conformanceDurationObjects.populateTable(document.getElementById("conformanceCheckingDurationObjectsTable"));
 				}
 				
 				function showSpecificGraph(divName) {

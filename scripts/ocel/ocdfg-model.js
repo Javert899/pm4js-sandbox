@@ -66,24 +66,42 @@ class OcdfgModel {
 	}
 	
 	calculateConformanceNumObjs() {
-		if (this.conformanceNumObjs == null) {
-			this.conformanceNumObjs = new OcelConfNumObjs(this.ocel);
-			this.conformanceNumObjs.calculate();
-		}
+		let self = this;
+		let thisUuid = Pm4JS.startAlgorithm({"name": "OCPM calculateConfNumbObjs"});
+		setTimeout(function() {
+			if (self.conformanceNumObjs == null) {
+				self.conformanceNumObjs = new OcelConfNumObjs(self.ocel);
+				self.conformanceNumObjs.calculate();
+				self.conformanceNumObjs.populateTable(document.getElementById("conformanceCheckingNumObjectsTable"));
+			}
+			Pm4JS.stopAlgorithm(thisUuid, {});
+		}, 100);
 	}
 	
 	calculateConformanceLifecycleObjects() {
-		if (this.conformanceLifecycleObjects == null) {
-			this.conformanceLifecycleObjects = new OcelConfLifecycleObjects(this.ocel);
-			this.conformanceLifecycleObjects.calculate();
-		}
+		let self = this;
+		let thisUuid = Pm4JS.startAlgorithm({"name": "OCPM calculateConformanceLifecycleObjects"});
+		setTimeout(function() {
+			if (self.conformanceLifecycleObjects == null) {
+				self.conformanceLifecycleObjects = new OcelConfLifecycleObjects(self.ocel);
+				self.conformanceLifecycleObjects.calculate();
+				self.conformanceLifecycleObjects.populateTable(document.getElementById("conformanceCheckingLifecycleObjectsTable"))
+			}
+			Pm4JS.stopAlgorithm(thisUuid, {});
+		}, 100);
 	}
 	
 	calculateConformanceDurationObjects() {
-		if (this.conformanceDurationObjects == null) {
-			this.conformanceDurationObjects = new OcelConfDurationObjects(this);
-			this.conformanceDurationObjects.calculate();
-		}
+		let self = this;
+		let thisUuid = Pm4JS.startAlgorithm({"name": "OCPM calculateConformanceDurationObjects"});
+		setTimeout(function() {
+			if (self.conformanceDurationObjects == null) {
+				self.conformanceDurationObjects = new OcelConfDurationObjects(self);
+				self.conformanceDurationObjects.calculate();
+				self.conformanceDurationObjects.populateTable(document.getElementById("conformanceCheckingDurationObjectsTable"));
+			}
+			Pm4JS.stopAlgorithm(thisUuid, {});
+		}, 100);
 	}
 	
 	filterObjectTypes(objTypes) {
