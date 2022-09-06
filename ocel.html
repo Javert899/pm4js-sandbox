@@ -293,6 +293,9 @@
 						<div class="navigation-body">		
 							<ul class="navigation-menu">
 								<li class="navigation-item">
+									<div class="spinningcircle" id="spinningcircle" style="display: none"></div>
+								</li>
+								<li class="navigation-item">
 									<a href="ocel.html"><img src="static/ocpm_red.png"></img></a>&nbsp;&nbsp;&nbsp;&nbsp;
 								</li>
 								<li class="navigation-item">
@@ -380,7 +383,7 @@
 									<div>% of Paths:</div>
 									<div><input id="pf_slider" type="range" min="0" max="100" value="85" class="slider form-range"></div>
 									<div>&nbsp;</div>
-									<div><button id="apply_changes" onclick="doVisualization()" class="btn btn-primary">Apply Changes</button></div>
+									<div><button id="apply_changes" onclick="doVisualization()" class="btn btn-primary">Apply Sliders</button></div>
 								</div>
 							</div>
 						</div>
@@ -409,7 +412,7 @@
 																<option id="unique_objects" value="1" selected>UO</option>
 																<option id="total_objects" value="2">TO</option>
 															</select></div>
-															<div><button id="apply_changes2" onclick="doVisualization()" class="btn btn-primary">Apply Changes</button></div>
+															<div><button id="apply_changes2" onclick="doVisualization()" class="btn btn-primary">Apply</button></div>
 														</div>
 													</div>
 												</div>
@@ -505,11 +508,16 @@
 						}
 						
 						function addFilter(filterDescription, filterMethod, addToPage=true) {
-							if (addToPage) {
-								this.allFilters.push([filterDescription, filterMethod]);
-							}
-							setFiltersOnPage();
-							return eval(filterMethod);
+							let thisUuid = Pm4JS.startAlgorithm({"name": "OCPM addFilter"});
+							
+							setTimeout(function() {
+								if (addToPage) {
+									this.allFilters.push([filterDescription, filterMethod]);
+								}
+								setFiltersOnPage();
+								eval(filterMethod);
+								Pm4JS.stopAlgorithm(thisUuid, {});
+							}, 100);
 						}
 						
 						function setFiltersOnPage() {
@@ -532,35 +540,55 @@
 						}
 						
 						function downloadJsonOcel() {
-							let jsonStri = JsonOcelExporter.exportLog(visualization.model.ocel);
-							download(jsonStri, "obj-centr-log.jsonocel", "text/json");
+							let thisUuid = Pm4JS.startAlgorithm({"name": "OCPM downloadJsonOcel"});
+							setTimeout(function() {
+								let jsonStri = JsonOcelExporter.exportLog(visualization.model.ocel);
+								download(jsonStri, "obj-centr-log.jsonocel", "text/json");
+								Pm4JS.stopAlgorithm(thisUuid, {});
+							}, 100);
 						}
 						
 						function downloadXmlOcel() {
-							let xmlStri = XmlOcelExporter.exportLog(visualization.model.ocel);
-							download(xmlStri, "obj-centr-log.xmlocel", "text/xml");
+							let thisUuid = Pm4JS.startAlgorithm({"name": "OCPM downloadXmlOcel"});
+							setTimeout(function() {
+								let xmlStri = XmlOcelExporter.exportLog(visualization.model.ocel);
+								download(xmlStri, "obj-centr-log.xmlocel", "text/xml");
+								Pm4JS.stopAlgorithm(thisUuid, {});
+							}, 100);
 						}
 						
 						function downloadCsvOcel() {
-							let csvStri = CsvOcelExporter.apply(visualization.model.ocel);
-							download(csvStri, "obj-centr-log.csv", "text/csv");
+							let thisUuid = Pm4JS.startAlgorithm({"name": "OCPM downloadCsvOcel"});
+							setTimeout(function() {
+								let csvStri = CsvOcelExporter.apply(visualization.model.ocel);
+								download(csvStri, "obj-centr-log.csv", "text/csv");
+								Pm4JS.stopAlgorithm(thisUuid, {});
+							}, 100);
 						}
 						
 						function flattenEventLog() {
-							let ot = document.getElementById("flatteningOt").value;
-							let eventLog = OcelFlattening.flatten(visualization.model.ocel, ot);
-							let xmlStri = XesExporter.apply(eventLog);
-							download(xmlStri, "flattened.xes", "text/xml");
+							let thisUuid = Pm4JS.startAlgorithm({"name": "OCPM downloadCsvOcel"});
+							setTimeout(function() {
+								let ot = document.getElementById("flatteningOt").value;
+								let eventLog = OcelFlattening.flatten(visualization.model.ocel, ot);
+								let xmlStri = XesExporter.apply(eventLog);
+								download(xmlStri, "flattened.xes", "text/xml");
+								Pm4JS.stopAlgorithm(thisUuid, {});
+							}, 100);
 						}
 						
 						function expandActivity() {
-							visualization.doExpandActivity(selectedActivity);
-							visualization.represent();
+							setTimeout(function() {
+								visualization.doExpandActivity(selectedActivity);
+								visualization.represent();
+							}, 100);
 						}
 						
 						function expandEdge() {
-							visualization.expandedEdges[selectedEdge] = 0;
-							visualization.represent();
+							setTimeout(function() {
+								visualization.expandedEdges[selectedEdge] = 0;
+								visualization.represent();
+							}, 100);
 						}
 						
 						function seeRelatedObjAct() {
@@ -1147,91 +1175,99 @@
 			<!--<script src="logs/example-jsonocel.js"></script>-->
 			<script type="text/javascript">
 				function fillAttributesLinkNetworkAnalysis() {
-					let attributesList = StreamAttrWrapper.attributesList(Object.values(visualization.model.ocel["ocel:events"]));
-					console.log(attributesList);
-					let option = null;
-					for (let att of attributesList) {
-						if (att != "ocel:activity") {
-							option = document.createElement("option");
-							option.value = att;
-							option.text = att;
-							document.getElementById("NAoutAttribute").appendChild(option);
-							option = document.createElement("option");
-							option.value = att;
-							option.text = att;
-							document.getElementById("NAinAttribute").appendChild(option);
-							option = document.createElement("option");
-							option.value = att;
-							option.text = att;
-							document.getElementById("NAsnAttribute").appendChild(option);
-							option = document.createElement("option");
-							option.value = att;
-							option.text = att;
-							document.getElementById("NAtnAttribute").appendChild(option);
-							option = document.createElement("option");
-							option.value = att;
-							option.text = att;
-							document.getElementById("NAedgeAggAttribute").appendChild(option);
+					let thisUuid = Pm4JS.startAlgorithm({"name": "OCPM fillAttributesLinkNetworkAnalysis"});
+					setTimeout(function() {
+						let attributesList = StreamAttrWrapper.attributesList(Object.values(visualization.model.ocel["ocel:events"]));
+						console.log(attributesList);
+						let option = null;
+						for (let att of attributesList) {
+							if (att != "ocel:activity") {
+								option = document.createElement("option");
+								option.value = att;
+								option.text = att;
+								document.getElementById("NAoutAttribute").appendChild(option);
+								option = document.createElement("option");
+								option.value = att;
+								option.text = att;
+								document.getElementById("NAinAttribute").appendChild(option);
+								option = document.createElement("option");
+								option.value = att;
+								option.text = att;
+								document.getElementById("NAsnAttribute").appendChild(option);
+								option = document.createElement("option");
+								option.value = att;
+								option.text = att;
+								document.getElementById("NAtnAttribute").appendChild(option);
+								option = document.createElement("option");
+								option.value = att;
+								option.text = att;
+								document.getElementById("NAedgeAggAttribute").appendChild(option);
+							}
 						}
-					}
+						Pm4JS.stopAlgorithm(thisUuid, {});
+					}, 100);
 				}
 				
 				function applyNetworkAnalysisConfiguration() {
-					let linkMethod = document.getElementById("NAlinkMethod").value;
-					let graphLink = document.getElementById("NAgraphLink").value;
-					let outAttribute = document.getElementById("NAoutAttribute").value;
-					let inAttribute = document.getElementById("NAinAttribute").value;
-					let keepFirst = document.getElementById("NAkeepFirst").checked;
-					let expandLinks = document.getElementById("NAexpandLinks").checked;
-					let snAggregation = document.getElementById("NAsnAttribute").value;
-					let tnAggregation = document.getElementById("NAtnAttribute").value;
-					let aggPlace = document.getElementById("NAedgeAggPlace").value;
-					let aggAttr = document.getElementById("NAedgeAggAttribute").value;
-					let annotation = document.getElementById("NAannotation").value;
-					
-					let links = null;
-					if (linkMethod == "graph") {
-						let graph = null;
-						if (graphLink == "descendants") {
-							graph = OcelGraphs.objectDescendantsGraph(visualization.model.ocel);
+					let thisUuid = Pm4JS.startAlgorithm({"name": "OCPM fillAttributesLinkNetworkAnalysis"});
+					setTimeout(function() {
+						let linkMethod = document.getElementById("NAlinkMethod").value;
+						let graphLink = document.getElementById("NAgraphLink").value;
+						let outAttribute = document.getElementById("NAoutAttribute").value;
+						let inAttribute = document.getElementById("NAinAttribute").value;
+						let keepFirst = document.getElementById("NAkeepFirst").checked;
+						let expandLinks = document.getElementById("NAexpandLinks").checked;
+						let snAggregation = document.getElementById("NAsnAttribute").value;
+						let tnAggregation = document.getElementById("NAtnAttribute").value;
+						let aggPlace = document.getElementById("NAedgeAggPlace").value;
+						let aggAttr = document.getElementById("NAedgeAggAttribute").value;
+						let annotation = document.getElementById("NAannotation").value;
+						
+						let links = null;
+						if (linkMethod == "graph") {
+							let graph = null;
+							if (graphLink == "descendants") {
+								graph = OcelGraphs.objectDescendantsGraph(visualization.model.ocel);
+							}
+							else if (graphLink == "interaction") {
+								graph = OcelGraphs.objectInteractionGraph(visualization.model.ocel);
+							}
+							else if (graphLink == "cobirth") {
+								graph = OcelGraphs.objectCobirthGraph(visualization.model.ocel);
+							}
+							else if (graphLink == "codeath") {
+								graph = OcelGraphs.objectCodeathGraph(visualization.model.ocel);
+							}
+							else if (graphLink == "inheritance") {
+								graph = OcelGraphs.objectInheritanceGraph(visualization.model.ocel);
+							}
+							links = OcelLinkAnalysis.linkEventsWithObjGraph(visualization.model.ocel, graph);
 						}
-						else if (graphLink == "interaction") {
-							graph = OcelGraphs.objectInteractionGraph(visualization.model.ocel);
+						else {
+							links = OcelLinkAnalysis.linkAnalysisAttributeOutIn(visualization.model.ocel, outAttribute, inAttribute);
+							links = OcelLinkAnalysis.filterLinksByTimestamp(visualization.model.ocel, links);
 						}
-						else if (graphLink == "cobirth") {
-							graph = OcelGraphs.objectCobirthGraph(visualization.model.ocel);
+						if (keepFirst) {
+							links = OcelLinkAnalysis.filterFirstLink(visualization.model.ocel, links);
 						}
-						else if (graphLink == "codeath") {
-							graph = OcelGraphs.objectCodeathGraph(visualization.model.ocel);
+						if (expandLinks) {
+							links = OcelLinkAnalysis.expandLinks(visualization.model.ocel, links);
 						}
-						else if (graphLink == "inheritance") {
-							graph = OcelGraphs.objectInheritanceGraph(visualization.model.ocel);
+						links = OcelLinkAnalysis.linksToFinalForm(visualization.model.ocel, links);
+						let aggPlace1 = false;
+						if (aggPlace == "source") {
+							aggPlace1 = true;
 						}
-						links = OcelLinkAnalysis.linkEventsWithObjGraph(visualization.model.ocel, graph);
-					}
-					else {
-						links = OcelLinkAnalysis.linkAnalysisAttributeOutIn(visualization.model.ocel, outAttribute, inAttribute);
-						links = OcelLinkAnalysis.filterLinksByTimestamp(visualization.model.ocel, links);
-					}
-					if (keepFirst) {
-						links = OcelLinkAnalysis.filterFirstLink(visualization.model.ocel, links);
-					}
-					if (expandLinks) {
-						links = OcelLinkAnalysis.expandLinks(visualization.model.ocel, links);
-					}
-					links = OcelLinkAnalysis.linksToFinalForm(visualization.model.ocel, links);
-					let aggPlace1 = false;
-					if (aggPlace == "source") {
-						aggPlace1 = true;
-					}
-					let performance = false;
-					if (annotation == "performance") {
-						performance = true;
-					}
-					let naResult = NetworkAnalysis.apply(links, snAggregation, tnAggregation, aggAttr, aggPlace1);
-					let naVis = NetworkAnalysisGraphvizVisualizer.apply(naResult, performance);
-					let svgXml = Viz(naVis, { format: "svg"});
-					document.getElementById("naGraphvizContainer").innerHTML = svgXml;
+						let performance = false;
+						if (annotation == "performance") {
+							performance = true;
+						}
+						let naResult = NetworkAnalysis.apply(links, snAggregation, tnAggregation, aggAttr, aggPlace1);
+						let naVis = NetworkAnalysisGraphvizVisualizer.apply(naResult, performance);
+						let svgXml = Viz(naVis, { format: "svg"});
+						document.getElementById("naGraphvizContainer").innerHTML = svgXml;
+						Pm4JS.stopAlgorithm(thisUuid, {});
+					}, 100);
 				}
 				
 				function filterDeviationsLifecycleObjects(objType, dev) {
@@ -1297,13 +1333,17 @@
 				}
 				
 				function populateNumEventsEventsPage() {
-					currStart = Math.max(0, Math.min(numEvents, currStart0));
-					currEnd = Math.max(0, Math.min(numEvents, currEnd0));
-					document.getElementById("numEventsEventsPage").innerHTML = numEvents;
-					document.getElementById("currStartEventsPage").innerHTML = currStart;
-					document.getElementById("currEndEventsPage").innerHTML = currEnd;
-					eventsListFactory = new EventsListFactory(visualization.model);
-					eventsListFactory.buildEventsTable(document.getElementById("eventsListTable"), null, true, null, currStart, currEnd);
+					let thisUuid = Pm4JS.startAlgorithm({"name": "OCPM showEventsList"});
+					setTimeout(function() {
+						currStart = Math.max(0, Math.min(numEvents, currStart0));
+						currEnd = Math.max(0, Math.min(numEvents, currEnd0));
+						document.getElementById("numEventsEventsPage").innerHTML = numEvents;
+						document.getElementById("currStartEventsPage").innerHTML = currStart;
+						document.getElementById("currEndEventsPage").innerHTML = currEnd;
+						eventsListFactory = new EventsListFactory(visualization.model);
+						eventsListFactory.buildEventsTable(document.getElementById("eventsListTable"), null, true, null, currStart, currEnd);
+						Pm4JS.stopAlgorithm(thisUuid, {});
+					}, 100);
 				}
 				
 				function increaseRange() {
@@ -1344,17 +1384,21 @@
 				}
 				
 				function showMachineLearning() {
-					hideAllDivsPages();
-					calculateEventFeatures();
-					calculateObjectFeatures();
-					prepareSQLDatabase();
-					insertObjectFeaturesInSQLDatabase();
-					//insertEventFeaturesInSQLDatabase();
-					showSQLexplorer();
-					document.getElementById("machineLearningPage").style.display = "";
-					if (mlNavigation == null) {
-						mlNavigation = new Navigation(document.getElementById("mlNavigation"));
-					}
+					let thisUuid = Pm4JS.startAlgorithm({"name": "OCPM ML"});
+					setTimeout(function() {
+						hideAllDivsPages();
+						calculateEventFeatures();
+						calculateObjectFeatures();
+						prepareSQLDatabase();
+						insertObjectFeaturesInSQLDatabase();
+						//insertEventFeaturesInSQLDatabase();
+						showSQLexplorer();
+						document.getElementById("machineLearningPage").style.display = "";
+						if (mlNavigation == null) {
+							mlNavigation = new Navigation(document.getElementById("mlNavigation"));
+						}
+						Pm4JS.stopAlgorithm(thisUuid, {});
+					}, 100);
 				}
 				
 				function showAdvancedFiltering() {
@@ -1444,21 +1488,18 @@
 					visualization.model.calculateConformanceNumObjs();
 					hideAllConformancePages();
 					document.getElementById("conformanceCheckingNumObjects").style.display = "";
-					visualization.model.conformanceNumObjs.populateTable(document.getElementById("conformanceCheckingNumObjectsTable"));
 				}
 				
 				function showConformancePageLifecycleObjects() {
 					visualization.model.calculateConformanceLifecycleObjects();
 					hideAllConformancePages();
 					document.getElementById("conformanceCheckingLifecycleObjects").style.display = "";
-					visualization.model.conformanceLifecycleObjects.populateTable(document.getElementById("conformanceCheckingLifecycleObjectsTable"));
 				}
 				
 				function showConformancePageDurationsObjects() {
 					visualization.model.calculateConformanceDurationObjects();
 					hideAllConformancePages();
 					document.getElementById("conformanceCheckingDurationObjects").style.display = "";
-					visualization.model.conformanceDurationObjects.populateTable(document.getElementById("conformanceCheckingDurationObjectsTable"));
 				}
 				
 				function showSpecificGraph(divName) {
@@ -1519,9 +1560,13 @@
 				}
 				
 				function showObjListOt() {
-					let selectedOt = document.getElementById("otObjListSelection").value;
-					objectsListFactory = new ObjectsListFactory(visualization.model);
-					objectsListFactory.buildObjectsTable(document.getElementById("objectsListTable"), selectedOt);
+					let thisUuid = Pm4JS.startAlgorithm({"name": "OCPM showObjListOt"});
+					setTimeout(function() {
+						let selectedOt = document.getElementById("otObjListSelection").value;
+						objectsListFactory = new ObjectsListFactory(visualization.model);
+						objectsListFactory.buildObjectsTable(document.getElementById("objectsListTable"), selectedOt);
+						Pm4JS.stopAlgorithm(thisUuid, {});
+					}, 100);
 				}
 
 				$('.hover_bkgr_fricc').click(function(){
@@ -1601,6 +1646,21 @@
 				}
 				
 				new ScrollZoom($('#graphContainer'), 4, 0.5);
+				
+				class OCPMObserver {
+					algorithmStarted(uuid, details) {
+						document.getElementById("spinningcircle").style.display = '';
+					}
+					
+					algorithmStatusUpdated(uuid, oldDetails, details) {
+					}
+					
+					algorithmStopped(uuid, details) {
+						document.getElementById("spinningcircle").style.display = 'none';
+					}
+				}
+				
+				Pm4JS.registerObserver(new OCPMObserver());
 			</script>
 			
 			<script type="text/javascript">
