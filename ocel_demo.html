@@ -540,35 +540,55 @@
 						}
 						
 						function downloadJsonOcel() {
-							let jsonStri = JsonOcelExporter.exportLog(visualization.model.ocel);
-							download(jsonStri, "obj-centr-log.jsonocel", "text/json");
+							let thisUuid = Pm4JS.startAlgorithm({"name": "OCPM downloadJsonOcel"});
+							setTimeout(function() {
+								let jsonStri = JsonOcelExporter.exportLog(visualization.model.ocel);
+								download(jsonStri, "obj-centr-log.jsonocel", "text/json");
+								Pm4JS.stopAlgorithm(thisUuid, {});
+							}, 100);
 						}
 						
 						function downloadXmlOcel() {
-							let xmlStri = XmlOcelExporter.exportLog(visualization.model.ocel);
-							download(xmlStri, "obj-centr-log.xmlocel", "text/xml");
+							let thisUuid = Pm4JS.startAlgorithm({"name": "OCPM downloadXmlOcel"});
+							setTimeout(function() {
+								let xmlStri = XmlOcelExporter.exportLog(visualization.model.ocel);
+								download(xmlStri, "obj-centr-log.xmlocel", "text/xml");
+								Pm4JS.stopAlgorithm(thisUuid, {});
+							}, 100);
 						}
 						
 						function downloadCsvOcel() {
-							let csvStri = CsvOcelExporter.apply(visualization.model.ocel);
-							download(csvStri, "obj-centr-log.csv", "text/csv");
+							let thisUuid = Pm4JS.startAlgorithm({"name": "OCPM downloadCsvOcel"});
+							setTimeout(function() {
+								let csvStri = CsvOcelExporter.apply(visualization.model.ocel);
+								download(csvStri, "obj-centr-log.csv", "text/csv");
+								Pm4JS.stopAlgorithm(thisUuid, {});
+							}, 100);
 						}
 						
 						function flattenEventLog() {
-							let ot = document.getElementById("flatteningOt").value;
-							let eventLog = OcelFlattening.flatten(visualization.model.ocel, ot);
-							let xmlStri = XesExporter.apply(eventLog);
-							download(xmlStri, "flattened.xes", "text/xml");
+							let thisUuid = Pm4JS.startAlgorithm({"name": "OCPM downloadCsvOcel"});
+							setTimeout(function() {
+								let ot = document.getElementById("flatteningOt").value;
+								let eventLog = OcelFlattening.flatten(visualization.model.ocel, ot);
+								let xmlStri = XesExporter.apply(eventLog);
+								download(xmlStri, "flattened.xes", "text/xml");
+								Pm4JS.stopAlgorithm(thisUuid, {});
+							}, 100);
 						}
 						
 						function expandActivity() {
-							visualization.doExpandActivity(selectedActivity);
-							visualization.represent();
+							setTimeout(function() {
+								visualization.doExpandActivity(selectedActivity);
+								visualization.represent();
+							}, 100);
 						}
 						
 						function expandEdge() {
-							visualization.expandedEdges[selectedEdge] = 0;
-							visualization.represent();
+							setTimeout(function() {
+								visualization.expandedEdges[selectedEdge] = 0;
+								visualization.represent();
+							}, 100);
 						}
 						
 						function seeRelatedObjAct() {
