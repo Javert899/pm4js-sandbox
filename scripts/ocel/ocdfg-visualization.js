@@ -254,247 +254,245 @@ class OcdfgVisualization {
 	}
 	
 	represent(af = null, pf = null) {
-		if (true) {
-			let oldHeight = document.getElementById("graphContainer").offsetHeight;
-			console.log(document.getElementById("graphContainer").offsetWidth);
-			this.resetVariables();
-			this.removeElements();
-			this.calculatePre();
-			if (af == null) {
-				af = this.ACTIVITY_FREQUENCY;
-			}
-			if (pf == null) {
-				pf = this.PATHS_FREQUENCY;
-			}
-			this.ACTIVITY_FREQUENCY = af;
-			this.PATHS_FREQUENCY = pf;
-			let minActiCount = (1 - af) * this.MAX_INDIPENDENT_ACT_COUNT;
-			let minEdgeCount = (1 - pf) * this.MAX_EDGE_COUNT;
-			var parent = this.graph.getDefaultParent();
-			this.graph.convertValueToString = function(cell) {
-				try {
-					var div = document.createElement('div');
-					div.innerHTML = cell.value;
-					return div;
-				}
-				catch (err) {
-					return "err";
-				}
-			}
-			for (let act in this.model.overallEventsView.activities) {
-				if (this.model.overallEventsView.satisfy(act, this.IDX, minActiCount)) {
-					let count = this.model.overallEventsView.getValue(act, this.IDX);
-					let width = Math.floor(this.model.overallEventsView.getThisWidth(act, act in this.expandedActivities) * 10);
-					let height = Math.floor(this.model.overallEventsView.getThisHeight(act, act in this.expandedActivities) * 25);
-					let label = this.model.overallEventsView.toReducedString(act, this.IDX);
-					if (act in this.expandedActivities) {
-						height = 250;
-						label = this.model.overallEventsView.toIntermediateString(act, this.IDX);
-					}
-					let cc = Math.floor(125 + 125 * (this.MAX_INDIPENDENT_ACT_COUNT - count)/(this.MAX_INDIPENDENT_ACT_COUNT - this.MIN_INDIPENDENT_ACT_COUNT + 0.000001));
-					cc = cc + 256 * cc + 256*256 * cc;
-					let hex = "#"+Number(cc).toString(16);
-					let activityObject = this.graph.insertVertex(parent, act, label, 150, 150, width, height, "fontSize=19;fillColor="+hex);
-					this.activitiesIndipendent[act] = activityObject;
-					this.invActivitiesIndipendent[activityObject.id] = act;
-					/*if (act in this.expandedActivities) {
-						for (let ot in this.model.otEventsView) {
-							let otView = this.model.otEventsView[ot];
-							if (act in otView.activities) {
-								if (otView.satisfy(act, this.IDX, minEdgeCount)) {
-									let color = this.stringToColour(ot);
-									let intermediateNode = this.graph.insertVertex(parent, act+" "+ot, otView.toCompleteString(act).replaceAll("<br />", "\n").replaceAll("<br/>", "\n").replaceAll("<b>","").replaceAll("</b>",""), 150, 150, 275, 250, "fontSize=13;fillColor="+color+";fontColor=white;shape=hexagon");
-									let arc1 = this.graph.insertEdge(parent, act+" "+ot+" -> "+act, "", intermediateNode, activityObject, "fontSize=19;strokeColor="+color+";fontColor="+color);
-									this.activitiesDependent[[act, ot]] = intermediateNode;
-									this.invActivitiesDependent[intermediateNode.id] = [act, ot];
-								}
-							}
-						}
-					}*/
-				}
-			}
-			if (this.displayType == "dfg") {
-				for (let ot in this.model.otEdges) {
-					let otEdges = this.model.otEdges[ot];
-					for (let edge in otEdges.edgesStatistics) {
-						let activities = edge.split(",");
-						if (activities[0] in this.activitiesIndipendent && activities[1] in this.activitiesIndipendent) {
-							if (otEdges.satisfy(edge, this.IDX, minEdgeCount)) {
-								let value = otEdges.getValue(edge, this.IDX);
-								let edgeVect = [activities[0], activities[1], ot];
-								let color = this.stringToColour(ot);
-								let obj1 = this.activitiesIndipendent[activities[0]];
-								let obj2 = this.activitiesIndipendent[activities[1]];
-								
-								let penwidth = Math.floor(1 + Math.log(1 + value)/2);
-								let label = otEdges.toReducedString(edge, this.IDX);
-								if (edgeVect in this.expandedEdges) {
-									label = otEdges.toIntermediateString(edge, this.IDX);
-								}
-								let arc = this.graph.insertEdge(parent, edgeVect.toString(), label, obj1, obj2, "curved=1;fontSize=19;strokeWidth="+penwidth+";strokeColor="+color+";fontColor="+color);
-								this.graphEdges[edgeVect] = arc;
-								this.invGraphEdges[arc.id] = edgeVect;
-								/*if (edgeVect in this.expandedEdges) {
-									let intermediateNode = this.graph.insertVertex(parent, "", otEdges.toCompleteString(edge), 150, 150, 275, 250, "fontSize=11;shape=doubleEllipse;fillColor="+color+";fontColor=white");
-									let arc1 = this.graph.insertEdge(parent, null, "", obj1, intermediateNode, "fontSize=19;strokeColor="+color+";fontColor="+color);
-									let arc2 = this.graph.insertEdge(parent, null, "", intermediateNode, obj2, "fontSize=19;strokeColor="+color+";fontColor="+color);
-									this.graphEdges[edgeVect] = intermediateNode;
-									this.invGraphEdges[intermediateNode.id] = edgeVect;
-								}
-								else {
-									let penwidth = Math.floor(1 + Math.log(1 + value)/2);
-									let label = otEdges.toReducedString(edge, this.IDX);
-									let arc = this.graph.insertEdge(parent, edgeVect.toString(), label, obj1, obj2, "fontSize=19;strokeWidth="+penwidth+";strokeColor="+color+";fontColor="+color);
-									this.graphEdges[edgeVect] = arc;
-									this.invGraphEdges[arc.id] = edgeVect;
-								}*/
-							}
-						}
-					}
-				}
-				for (let ot in this.model.otObjectsView) {
-					let color = this.stringToColour(ot);
-					let otObjects = this.model.otObjectsView[ot];
-					let otSa = otObjects.filteredSa(minEdgeCount, this.activitiesIndipendent);
-					let endpointWidth = ot.length * 10;
-					let endpointHeight = 2 * 25;
-					if (Object.keys(otSa).length > 0) {
-						let saNode = this.graph.insertVertex(this.parent, "SA_"+ot, ot, 150, 150, endpointWidth, endpointHeight, "shape=ellipse;fontSize=15;fontColor=white;fillColor="+color);
-						this.saNodes[ot] = saNode;
-						this.invSaNodes[saNode.id] = ot;
-						for (let act in otSa) {
-							let value = otSa[act];
-							let penwidth = Math.floor(1 + Math.log(1 + value)/2);
-							let arc = this.graph.insertEdge(parent, null, "UO="+value, saNode, this.activitiesIndipendent[act], "curved=1;fontSize=19;strokeColor="+color+";fontColor="+color+";strokeWidth="+penwidth);
-						}
-					}
-					let otEa = otObjects.filteredEa(minEdgeCount, this.activitiesIndipendent);
-					if (Object.keys(otEa).length > 0) {
-						endpointWidth = endpointHeight;
-						let eaNode = this.graph.insertVertex(this.parent, "EA_"+ot, "", 150, 150, endpointWidth, endpointHeight, "shape=ellipse;fontSize=15;fillColor="+color);
-						this.eaNodes[ot] = eaNode;
-						this.invEaNodes[eaNode.id] = ot;
-						for (let act in otEa) {
-							let value = otEa[act];
-							let penwidth = Math.floor(1 + Math.log(1 + value)/2);
-							let arc = this.graph.insertEdge(parent, null, "UO="+value, this.activitiesIndipendent[act], eaNode, "curved=1;fontSize=19;strokeColor="+color+";fontColor="+color+";strokeWidth="+penwidth);
+		if (this.displayType == "petriNet") {
+			let activities = Object.keys(this.activitiesIndipendent);
+			for (let ot in this.model.otEventLogs) {
+				let consideredLog = LogGeneralFiltering.filterEventsHavingEventAttributeValues(this.model.otEventLogs[ot], activities);
+				if (consideredLog.traces.length > 0) {
+					this.model.otInductiveModels[ot] = ProcessTreeToPetriNetConverter.apply(InductiveMiner.apply(consideredLog, "concept:name", 0.0));
+					this.model.otTransMap[ot] = {};
+					for (let tid in this.model.otInductiveModels[ot].net.transitions) {
+						let t = this.model.otInductiveModels[ot].net.transitions[tid];
+						if (t.label != null) {
+							this.model.otTransMap[ot][t.label] = t;
 						}
 					}
 				}
 			}
-			else if (this.displayType == "petriNet") {
-				for (let ot in this.model.otEventLogs) {
-					let activities = Object.keys(this.activitiesIndipendent);
-					let consideredLog = LogGeneralFiltering.filterEventsHavingEventAttributeValues(this.model.otEventLogs[ot], activities);
+			this.representDetail(af, pf);
+			let self = this;
+			setTimeout(function() {
+				for (let ot in self.model.otEventLogs) {
+					let consideredLog = LogGeneralFiltering.filterEventsHavingEventAttributeValues(self.model.otEventLogs[ot], activities);
 					if (consideredLog.traces.length > 0) {
-						this.model.otInductiveModels[ot] = ProcessTreeToPetriNetConverter.apply(InductiveMiner.apply(consideredLog, "concept:name", 0.0));
-						this.model.otReplayedTraces[ot] = TokenBasedReplay.apply(consideredLog, this.model.otInductiveModels[ot]);
-						this.model.otTransMap[ot] = {};
-						for (let tid in this.model.otInductiveModels[ot].net.transitions) {
-							let t = this.model.otInductiveModels[ot].net.transitions[tid];
-							if (t.label != null) {
-								this.model.otTransMap[ot][t.label] = t;
+						self.model.otReplayedTraces[ot] = TokenBasedReplay.apply(consideredLog, self.model.otInductiveModels[ot]);
+					}
+				}
+				self.representDetail(af, pf);
+			}, 500);
+		}
+		else {
+			this.representDetail(af, pf);
+		}
+	}
+	
+	representDetail(af = null, pf = null) {
+		let oldHeight = document.getElementById("graphContainer").offsetHeight;
+		console.log(document.getElementById("graphContainer").offsetWidth);
+		this.resetVariables();
+		this.removeElements();
+		this.calculatePre();
+		if (af == null) {
+			af = this.ACTIVITY_FREQUENCY;
+		}
+		if (pf == null) {
+			pf = this.PATHS_FREQUENCY;
+		}
+		this.ACTIVITY_FREQUENCY = af;
+		this.PATHS_FREQUENCY = pf;
+		let minActiCount = (1 - af) * this.MAX_INDIPENDENT_ACT_COUNT;
+		let minEdgeCount = (1 - pf) * this.MAX_EDGE_COUNT;
+		var parent = this.graph.getDefaultParent();
+		this.graph.convertValueToString = function(cell) {
+			try {
+				var div = document.createElement('div');
+				div.innerHTML = cell.value;
+				return div;
+			}
+			catch (err) {
+				return "err";
+			}
+		}
+		for (let act in this.model.overallEventsView.activities) {
+			if (this.model.overallEventsView.satisfy(act, this.IDX, minActiCount)) {
+				let count = this.model.overallEventsView.getValue(act, this.IDX);
+				let width = Math.floor(this.model.overallEventsView.getThisWidth(act, act in this.expandedActivities) * 10);
+				let height = Math.floor(this.model.overallEventsView.getThisHeight(act, act in this.expandedActivities) * 25);
+				let label = this.model.overallEventsView.toReducedString(act, this.IDX);
+				if (act in this.expandedActivities) {
+					height = 250;
+					label = this.model.overallEventsView.toIntermediateString(act, this.IDX);
+				}
+				let cc = Math.floor(125 + 125 * (this.MAX_INDIPENDENT_ACT_COUNT - count)/(this.MAX_INDIPENDENT_ACT_COUNT - this.MIN_INDIPENDENT_ACT_COUNT + 0.000001));
+				cc = cc + 256 * cc + 256*256 * cc;
+				let hex = "#"+Number(cc).toString(16);
+				let activityObject = this.graph.insertVertex(parent, act, label, 150, 150, width, height, "fontSize=19;fillColor="+hex);
+				this.activitiesIndipendent[act] = activityObject;
+				this.invActivitiesIndipendent[activityObject.id] = act;
+			}
+		}
+		if (this.displayType == "dfg") {
+			for (let ot in this.model.otEdges) {
+				let otEdges = this.model.otEdges[ot];
+				for (let edge in otEdges.edgesStatistics) {
+					let activities = edge.split(",");
+					if (activities[0] in this.activitiesIndipendent && activities[1] in this.activitiesIndipendent) {
+						if (otEdges.satisfy(edge, this.IDX, minEdgeCount)) {
+							let value = otEdges.getValue(edge, this.IDX);
+							let edgeVect = [activities[0], activities[1], ot];
+							let color = this.stringToColour(ot);
+							let obj1 = this.activitiesIndipendent[activities[0]];
+							let obj2 = this.activitiesIndipendent[activities[1]];
+							
+							let penwidth = Math.floor(1 + Math.log(1 + value)/2);
+							let label = otEdges.toReducedString(edge, this.IDX);
+							if (edgeVect in this.expandedEdges) {
+								label = otEdges.toIntermediateString(edge, this.IDX);
 							}
+							let arc = this.graph.insertEdge(parent, edgeVect.toString(), label, obj1, obj2, "curved=1;fontSize=19;strokeWidth="+penwidth+";strokeColor="+color+";fontColor="+color);
+							this.graphEdges[edgeVect] = arc;
+							this.invGraphEdges[arc.id] = edgeVect;
 						}
-						let color = this.stringToColour(ot);
-						let acceptingPetriNet = this.model.otInductiveModels[ot];
-						let replayResult = this.model.otReplayedTraces[ot];
-						for (let placeId in acceptingPetriNet.net.places) {
-							let place = acceptingPetriNet.net.places[placeId];
-							let placeSizeX = 40;
-							let placeSizeY = 40;
-							let fontSize = "16";
-							let placeLabel = "";
-							let tokensPlaceEnum = "p="+replayResult.totalProducedPerPlace[place]+";m="+replayResult.totalMissingPerPlace[place]+"<br />c="+replayResult.totalConsumedPerPlace[place]+";r="+replayResult.totalRemainingPerPlace[place];
-							if (this.petriNetEnableDecorations || place in acceptingPetriNet.im.tokens) {
-								placeLabel = tokensPlaceEnum;
-								placeSizeX = 100;
-								placeSizeY = 100;
+					}
+				}
+			}
+			for (let ot in this.model.otObjectsView) {
+				let color = this.stringToColour(ot);
+				let otObjects = this.model.otObjectsView[ot];
+				let otSa = otObjects.filteredSa(minEdgeCount, this.activitiesIndipendent);
+				let endpointWidth = ot.length * 10;
+				let endpointHeight = 2 * 25;
+				if (Object.keys(otSa).length > 0) {
+					let saNode = this.graph.insertVertex(this.parent, "SA_"+ot, ot, 150, 150, endpointWidth, endpointHeight, "shape=ellipse;fontSize=15;fontColor=white;fillColor="+color);
+					this.saNodes[ot] = saNode;
+					this.invSaNodes[saNode.id] = ot;
+					for (let act in otSa) {
+						let value = otSa[act];
+						let penwidth = Math.floor(1 + Math.log(1 + value)/2);
+						let arc = this.graph.insertEdge(parent, null, "UO="+value, saNode, this.activitiesIndipendent[act], "curved=1;fontSize=19;strokeColor="+color+";fontColor="+color+";strokeWidth="+penwidth);
+					}
+				}
+				let otEa = otObjects.filteredEa(minEdgeCount, this.activitiesIndipendent);
+				if (Object.keys(otEa).length > 0) {
+					endpointWidth = endpointHeight;
+					let eaNode = this.graph.insertVertex(this.parent, "EA_"+ot, "", 150, 150, endpointWidth, endpointHeight, "shape=ellipse;fontSize=15;fillColor="+color);
+					this.eaNodes[ot] = eaNode;
+					this.invEaNodes[eaNode.id] = ot;
+					for (let act in otEa) {
+						let value = otEa[act];
+						let penwidth = Math.floor(1 + Math.log(1 + value)/2);
+						let arc = this.graph.insertEdge(parent, null, "UO="+value, this.activitiesIndipendent[act], eaNode, "curved=1;fontSize=19;strokeColor="+color+";fontColor="+color+";strokeWidth="+penwidth);
+					}
+				}
+			}
+		}
+		else if (this.displayType == "petriNet") {
+			for (let ot in this.model.otEventLogs) {
+				let activities = Object.keys(this.activitiesIndipendent);
+				if (ot in this.model.otInductiveModels) {
+					let color = this.stringToColour(ot);
+					let acceptingPetriNet = this.model.otInductiveModels[ot];
+					let replayResult = this.model.otReplayedTraces[ot];
+					for (let placeId in acceptingPetriNet.net.places) {
+						let place = acceptingPetriNet.net.places[placeId];
+						let placeSizeX = 40;
+						let placeSizeY = 40;
+						let fontSize = "16";
+						let placeLabel = "";
+						let tokensPlaceEnum = "";
+						if (replayResult != null) {
+							tokensPlaceEnum = "p="+replayResult.totalProducedPerPlace[place]+";m="+replayResult.totalMissingPerPlace[place]+"<br />c="+replayResult.totalConsumedPerPlace[place]+";r="+replayResult.totalRemainingPerPlace[place];
+						}
+						
+						if (this.petriNetEnableDecorations || place in acceptingPetriNet.im.tokens) {
+							placeLabel = tokensPlaceEnum;
+							placeSizeX = 100;
+							placeSizeY = 100;
+							fontSize = "16";
+							if (place in acceptingPetriNet.im.tokens) {
+								placeLabel = ot;
+								placeSizeX = 170;
+								placeSizeY = 40;
 								fontSize = "16";
-								if (place in acceptingPetriNet.im.tokens) {
-									placeLabel = ot;
-									placeSizeX = 170;
-									placeSizeY = 40;
-									fontSize = "16";
-								}
 							}
-							let placeNode = this.graph.insertVertex(parent, "netPlace@@"+place.name, placeLabel, 150, 150, placeSizeX, placeSizeY, "fontSize="+fontSize+";shape=ellipse;fillColor="+color+";fontColor=white");
-							this.placesDict[place] = placeNode;
-							this.invPlacesDict[placeNode] = place;
-							this.elementStatistics[placeNode.id] = tokensPlaceEnum;
 						}
-						for (let transId in acceptingPetriNet.net.transitions) {
-							let t = acceptingPetriNet.net.transitions[transId];
-							let transNode = null;
-							if (t.label == null) {
-								transNode = this.graph.insertVertex(parent, "netTrans@@"+t.name, " ", 150, 150, 25, 30, "fontSize=11;shape=box;fillColor="+color+";fontColor=white");
+						let placeNode = this.graph.insertVertex(parent, "netPlace@@"+place.name, placeLabel, 150, 150, placeSizeX, placeSizeY, "fontSize="+fontSize+";shape=ellipse;fillColor="+color+";fontColor=white");
+						this.placesDict[place] = placeNode;
+						this.invPlacesDict[placeNode] = place;
+						this.elementStatistics[placeNode.id] = tokensPlaceEnum;
+					}
+					for (let transId in acceptingPetriNet.net.transitions) {
+						let t = acceptingPetriNet.net.transitions[transId];
+						let transNode = null;
+						if (t.label == null) {
+							transNode = this.graph.insertVertex(parent, "netTrans@@"+t.name, " ", 150, 150, 25, 30, "fontSize=11;shape=box;fillColor="+color+";fontColor=white");
+							
+							if (replayResult != null) {
 								this.elementStatistics[transNode.id] = "number of executions for invisible = " + replayResult.transExecutions[transId];
 							}
 							else {
-								transNode = this.activitiesIndipendent[t.label];
+								this.elementStatistics[transNode.id] = "";
 							}
-							this.transDict[t] = transNode;
-							this.invTransDict[transNode] = t;
 						}
-						for (let arcId in acceptingPetriNet.net.arcs) {
-							let arc = acceptingPetriNet.net.arcs[arcId];
-							let source = null;
-							let target = null;
-							let isDouble = false;
-							if (arc.source in this.placesDict) {
-								source = this.placesDict[arc.source];
-								target = this.transDict[arc.target];
-								if (arc.target.label != null) {
-									let numEvents = this.model.otEventsView[ot].getValue(arc.target.label, 0);
-									let numObjects = this.model.otEventsView[ot].getValue(arc.target.label, 1);
-									if (numObjects > numEvents) {
-										isDouble = true;
-									}
+						else {
+							transNode = this.activitiesIndipendent[t.label];
+						}
+						this.transDict[t] = transNode;
+						this.invTransDict[transNode] = t;
+					}
+					for (let arcId in acceptingPetriNet.net.arcs) {
+						let arc = acceptingPetriNet.net.arcs[arcId];
+						let source = null;
+						let target = null;
+						let isDouble = false;
+						if (arc.source in this.placesDict) {
+							source = this.placesDict[arc.source];
+							target = this.transDict[arc.target];
+							if (arc.target.label != null) {
+								let numEvents = this.model.otEventsView[ot].getValue(arc.target.label, 0);
+								let numObjects = this.model.otEventsView[ot].getValue(arc.target.label, 1);
+								if (numObjects > numEvents) {
+									isDouble = true;
 								}
 							}
-							else {
-								source = this.transDict[arc.source];
-								target = this.placesDict[arc.target];
-								if (arc.source.label != null) {
-									let numEvents = this.model.otEventsView[ot].getValue(arc.source.label, 0);
-									let numObjects = this.model.otEventsView[ot].getValue(arc.source.label, 1);
-									if (numObjects > numEvents) {
-										isDouble = true;
-									}
+						}
+						else {
+							source = this.transDict[arc.source];
+							target = this.placesDict[arc.target];
+							if (arc.source.label != null) {
+								let numEvents = this.model.otEventsView[ot].getValue(arc.source.label, 0);
+								let numObjects = this.model.otEventsView[ot].getValue(arc.source.label, 1);
+								if (numObjects > numEvents) {
+									isDouble = true;
 								}
 							}
-							let edgeLabel = "TO="+replayResult.arcExecutions[arc];
-							let strokeWidth = "1";
-							if (isDouble) {
-								strokeWidth = "5";
-							}
-							this.graph.insertEdge(parent, arc.toString(), edgeLabel, source, target, "curved=1;fontSize=10;strokeColor="+color+";fontColor="+color+";strokeWidth="+strokeWidth);
 						}
+						let edgeLabel = "";
+						if (replayResult != null) {
+							edgeLabel = "TO="+replayResult.arcExecutions[arc];
+						}
+						let strokeWidth = "1";
+						if (isDouble) {
+							strokeWidth = "5";
+						}
+						this.graph.insertEdge(parent, arc.toString(), edgeLabel, source, target, "curved=1;fontSize=10;strokeColor="+color+";fontColor="+color+";strokeWidth="+strokeWidth);
 					}
 				}
 			}
-			
-			var layout = new mxHierarchicalLayout(this.graph, mxConstants.DIRECTION_WEST);
-			layout.edgeStyle=2;
-			if (this.displayType == "petriNet") {
-				layout.intraCellSpacing=17;
-				layout.interRankCellSpacing=40;
-			}
-			else {
-				//layout.intraCellSpacing=40;
-				//layout.interRankCellSpacing=40;
-			}
-			this.graph.getModel().beginUpdate();
-			layout.execute(parent);
-			this.graph.getModel().endUpdate();
-			this.graph.fit();
-			this.graph.isCellMovable = function() { return false; };
-			this.graph.view.rendering = true;
-			this.graph.refresh();
-
-			/*document.getElementById(this.targetContainer).style.height = oldHeight;
-			console.log(oldHeight);
-			console.log(document.getElementById("graphContainer").offsetHeight);*/
 		}
+		
+		var layout = new mxHierarchicalLayout(this.graph, mxConstants.DIRECTION_WEST);
+		layout.edgeStyle=2;
+		if (this.displayType == "petriNet") {
+			layout.intraCellSpacing=17;
+			layout.interRankCellSpacing=40;
+		}
+		this.graph.getModel().beginUpdate();
+		layout.execute(parent);
+		this.graph.getModel().endUpdate();
+		this.graph.fit();
+		this.graph.isCellMovable = function() { return false; };
+		this.graph.view.rendering = true;
+		this.graph.refresh();
 	}
 }
