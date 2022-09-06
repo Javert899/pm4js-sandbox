@@ -254,36 +254,41 @@ class OcdfgVisualization {
 	}
 	
 	represent(af = null, pf = null) {
-		if (this.displayType == "petriNet") {
-			let activities = Object.keys(this.activitiesIndipendent);
-			for (let ot in this.model.otEventLogs) {
-				let consideredLog = LogGeneralFiltering.filterEventsHavingEventAttributeValues(this.model.otEventLogs[ot], activities);
-				if (consideredLog.traces.length > 0) {
-					this.model.otInductiveModels[ot] = ProcessTreeToPetriNetConverter.apply(InductiveMiner.apply(consideredLog, "concept:name", 0.0));
-					this.model.otTransMap[ot] = {};
-					for (let tid in this.model.otInductiveModels[ot].net.transitions) {
-						let t = this.model.otInductiveModels[ot].net.transitions[tid];
-						if (t.label != null) {
-							this.model.otTransMap[ot][t.label] = t;
-						}
-					}
-				}
-			}
-			this.representDetail(af, pf);
-			let self = this;
-			setTimeout(function() {
+		let thisUuid = Pm4JS.startAlgorithm({"name": "OcdfgVisualization"});
+		let self = this;
+		setTimeout(function() {
+			if (self.displayType == "petriNet") {
+				let activities = Object.keys(self.activitiesIndipendent);
 				for (let ot in self.model.otEventLogs) {
 					let consideredLog = LogGeneralFiltering.filterEventsHavingEventAttributeValues(self.model.otEventLogs[ot], activities);
 					if (consideredLog.traces.length > 0) {
-						self.model.otReplayedTraces[ot] = TokenBasedReplay.apply(consideredLog, self.model.otInductiveModels[ot]);
+						self.model.otInductiveModels[ot] = ProcessTreeToPetriNetConverter.apply(InductiveMiner.apply(consideredLog, "concept:name", 0.0));
+						self.model.otTransMap[ot] = {};
+						for (let tid in self.model.otInductiveModels[ot].net.transitions) {
+							let t = self.model.otInductiveModels[ot].net.transitions[tid];
+							if (t.label != null) {
+								self.model.otTransMap[ot][t.label] = t;
+							}
+						}
 					}
 				}
 				self.representDetail(af, pf);
-			}, 500);
-		}
-		else {
-			this.representDetail(af, pf);
-		}
+				setTimeout(function() {
+					for (let ot in self.model.otEventLogs) {
+						let consideredLog = LogGeneralFiltering.filterEventsHavingEventAttributeValues(self.model.otEventLogs[ot], activities);
+						if (consideredLog.traces.length > 0) {
+							self.model.otReplayedTraces[ot] = TokenBasedReplay.apply(consideredLog, self.model.otInductiveModels[ot]);
+						}
+					}
+					self.representDetail(af, pf);
+					Pm4JS.stopAlgorithm(thisUuid, {});
+				}, 500);
+			}
+			else {
+				self.representDetail(af, pf);
+				Pm4JS.stopAlgorithm(thisUuid, {});
+			}
+		}, 100);
 	}
 	
 	representDetail(af = null, pf = null) {

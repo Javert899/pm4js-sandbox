@@ -293,6 +293,9 @@
 						<div class="navigation-body">		
 							<ul class="navigation-menu">
 								<li class="navigation-item">
+									<div class="spinningcircle" id="spinningcircle" style="display: none"></div>
+								</li>
+								<li class="navigation-item">
 									<a href="ocel.html"><img src="static/ocpm_red.png"></img></a>&nbsp;&nbsp;&nbsp;&nbsp;
 								</li>
 								<li class="navigation-item">
@@ -1601,6 +1604,21 @@
 				}
 				
 				new ScrollZoom($('#graphContainer'), 4, 0.5);
+				
+				class OCPMObserver {
+					algorithmStarted(uuid, details) {
+						document.getElementById("spinningcircle").style.display = '';
+					}
+					
+					algorithmStatusUpdated(uuid, oldDetails, details) {
+					}
+					
+					algorithmStopped(uuid, details) {
+						document.getElementById("spinningcircle").style.display = 'none';
+					}
+				}
+				
+				Pm4JS.registerObserver(new OCPMObserver());
 			</script>
 			
 			<script type="text/javascript">
