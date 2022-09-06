@@ -508,11 +508,16 @@
 						}
 						
 						function addFilter(filterDescription, filterMethod, addToPage=true) {
-							if (addToPage) {
-								this.allFilters.push([filterDescription, filterMethod]);
-							}
-							setFiltersOnPage();
-							return eval(filterMethod);
+							let thisUuid = Pm4JS.startAlgorithm({"name": "OCPM addFilter"});
+							
+							setTimeout(function() {
+								if (addToPage) {
+									this.allFilters.push([filterDescription, filterMethod]);
+								}
+								setFiltersOnPage();
+								eval(filterMethod);
+								Pm4JS.stopAlgorithm(thisUuid, {});
+							}, 100);
 						}
 						
 						function setFiltersOnPage() {
