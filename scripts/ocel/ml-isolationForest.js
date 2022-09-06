@@ -71,16 +71,20 @@ function rulesPerObjectType(ocel, ot, percAnom=0.1) {
 }
 
 function showRulesPerObjectType(percAnom=0.1) {
-	let ocel = visualization.model.ocel;
-	let ot = document.getElementById("conformanceRulesOtSelection").value;
-	let rules = rulesPerObjectType(ocel, ot, percAnom=0.1);
-	document.getElementById("conformanceRulesTbody").innerHTML = "";
-	for (let rule of rules) {
-		let tr = document.createElement("tr");
-		document.getElementById("conformanceRulesTbody").appendChild(tr);
-		tr.innerHTML = "<td>"+rule[0]+"</td><td>"+rule[1]+"</td><td>"+rule[2]+"</td><td>"+rule[3]+"</td><td>"+rule[4].length+"</td><td><a href=\"javascript:filterExactSetObjects('"+rule[4].join(',')+"')\"><i class=\"fas fa-filter\"></i></a></td>";
-		console.log(rule);
-	}
+	let thisUuid = Pm4JS.startAlgorithm({"name": "OCPM showRulesPerObjectType"});
+	setTimeout(function() {
+		let ocel = visualization.model.ocel;
+		let ot = document.getElementById("conformanceRulesOtSelection").value;
+		let rules = rulesPerObjectType(ocel, ot, percAnom=0.1);
+		document.getElementById("conformanceRulesTbody").innerHTML = "";
+		for (let rule of rules) {
+			let tr = document.createElement("tr");
+			document.getElementById("conformanceRulesTbody").appendChild(tr);
+			tr.innerHTML = "<td>"+rule[0]+"</td><td>"+rule[1]+"</td><td>"+rule[2]+"</td><td>"+rule[3]+"</td><td>"+rule[4].length+"</td><td><a href=\"javascript:filterExactSetObjects('"+rule[4].join(',')+"')\"><i class=\"fas fa-filter\"></i></a></td>";
+			console.log(rule);
+		}
+		Pm4JS.stopAlgorithm(thisUuid, {});
+	}, 100);
 }
 
 function identifyAnomalousObjects(ocel) {
@@ -95,25 +99,29 @@ function identifyAnomalousObjects(ocel) {
 }
 
 function calculateIsolationForest(ocel, targetDiv="machineLearningIsolationForestResult") {
-	let combo = identifyAnomalousObjects(ocel);
-	let objects = Object.keys(ocel["ocel:objects"]);
-	let objTypes = {};
-	for (let objId of objects) {
-		objTypes[objId] = ocel["ocel:objects"][objId]["ocel:type"];
-	}
-	let resp = ["<table><thead><tr>"];
-	resp.push("<th>Object ID</th><th>Object Type</th><th>Anomaly Score</th>");
-	resp.push("</tr></thead><tbody>");
-	let count = 0;
-	for (let c of combo) {
-		count = count + 1;
-		resp.push("<tr>");
-		resp.push("<td><a href=\"javascript:clickedObjectInEveTable('"+c[0]+"')\">"+c[0]+"</a></td>");
-		resp.push("<td>"+objTypes[c[0]]+"</td>");
-		resp.push("<td>"+c[1]+"</td>");
-		resp.push("</tr>");
-	}
-	resp.push("</tbody></table>");
-	resp = resp.join("");
-	document.getElementById(targetDiv).innerHTML = resp;
+	let thisUuid = Pm4JS.startAlgorithm({"name": "OCPM calculateIsolationForest"});
+	setTimeout(function() {
+		let combo = identifyAnomalousObjects(ocel);
+		let objects = Object.keys(ocel["ocel:objects"]);
+		let objTypes = {};
+		for (let objId of objects) {
+			objTypes[objId] = ocel["ocel:objects"][objId]["ocel:type"];
+		}
+		let resp = ["<table><thead><tr>"];
+		resp.push("<th>Object ID</th><th>Object Type</th><th>Anomaly Score</th>");
+		resp.push("</tr></thead><tbody>");
+		let count = 0;
+		for (let c of combo) {
+			count = count + 1;
+			resp.push("<tr>");
+			resp.push("<td><a href=\"javascript:clickedObjectInEveTable('"+c[0]+"')\">"+c[0]+"</a></td>");
+			resp.push("<td>"+objTypes[c[0]]+"</td>");
+			resp.push("<td>"+c[1]+"</td>");
+			resp.push("</tr>");
+		}
+		resp.push("</tbody></table>");
+		resp = resp.join("");
+		document.getElementById(targetDiv).innerHTML = resp;
+		Pm4JS.stopAlgorithm(thisUuid, {});
+	}, 100);
 }

@@ -11,10 +11,14 @@ function prepareMLStats() {
 }
 
 function applyMLStats() {
-	let targetVariable = document.getElementById("mlstatstargetvariable").value;
-	let metric = document.getElementById("mlstattypestatistic").value;
-	let stats = MLgetStatistic(objFeatures, targetVariable, metric);
-	MLdrawStatisticsInPlot(stats);
+	let thisUuid = Pm4JS.startAlgorithm({"name": "OCPM applyMLStats"});
+	setTimeout(function() {
+		let targetVariable = document.getElementById("mlstatstargetvariable").value;
+		let metric = document.getElementById("mlstattypestatistic").value;
+		let stats = MLgetStatistic(objFeatures, targetVariable, metric);
+		MLdrawStatisticsInPlot(stats);
+		Pm4JS.stopAlgorithm(thisUuid, {});
+	}, 100);
 }
 
 function MLgetStatistic(fea, targetVariable, metric) {

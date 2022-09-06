@@ -1,6 +1,10 @@
 function applyDT() {
-	populateDToptions(objFeatures);
-	buildDT();
+	let thisUuid = Pm4JS.startAlgorithm({"name": "OCPM applyDT"});
+	setTimeout(function() {
+		populateDToptions(objFeatures);
+		buildDT();
+		Pm4JS.stopAlgorithm(thisUuid, {});
+	}, 100);
 }
 
 function populateDToptions(fea) {

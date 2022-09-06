@@ -1,6 +1,6 @@
 function applyPca(targetDiv="plotlyPCA") {
-		//let pca = new ML.PCA(objFeaturesNormalizedFiltered["data"]);
-		//let proj = pca.predict(objFeaturesNormalizedFiltered["data"]).data;
+	let thisUuid = Pm4JS.startAlgorithm({"name": "OCPM applyPca"});
+	setTimeout(function() {
 		let dimRedTechnique = document.getElementById("dimensionalityReductionTechnique").value;
 		let matrix = druid.Matrix.from(objFeaturesNormalizedFiltered["data"]);
 		let proj = null;
@@ -46,4 +46,6 @@ function applyPca(targetDiv="plotlyPCA") {
 			}
 		};
 		Plotly.newPlot('plotlyPCA', data, layout, {responsive: true});
+		Pm4JS.stopAlgorithm(thisUuid, {});
+	}, 100);
 }
