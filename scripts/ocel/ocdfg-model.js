@@ -1,6 +1,7 @@
 class OcdfgModel {
 	constructor(ocel) {
 		this.ocel = ocel;
+		this.parentOcel = ocel;
 		this.overallEventsView = new EventsView(ocel, this);
 		this.overallObjectsView = new ObjectsView(ocel);
 		this.otEventsView = {};
