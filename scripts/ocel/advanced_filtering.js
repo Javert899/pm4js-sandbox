@@ -153,10 +153,12 @@ function fillTableAdvancedFiltering() {
 	let stat = GeneralOcelStatistics.eventsPerTypePerActivity(ocel);
 	let otypes = Object.keys(stat);
 	
-	fillTableAdvancedFiltering1(parentActivities, parentStat, parentOtypes, activities, stat, otypes);
+	let parentObjTypePerAct = GeneralOcelStatistics.objectsPerTypePerActivity(parentOcel, true);
+	
+	fillTableAdvancedFiltering1(parentActivities, parentStat, parentOtypes, activities, stat, otypes, parentObjTypePerAct);
 }
 
-function fillTableAdvancedFiltering1(parentActivities, parentStat, parentOtypes, activities, stat, otypes) {
+function fillTableAdvancedFiltering1(parentActivities, parentStat, parentOtypes, activities, stat, otypes, parentObjTypePerAct) {
 	let table = document.createElement("table");
 	let thead = document.createElement("thead");
 	let tbody = document.createElement("tbody");
@@ -211,6 +213,7 @@ function fillTableAdvancedFiltering1(parentActivities, parentStat, parentOtypes,
 	for (let act of parentActivities) {
 		let tr = document.createElement("tr");
 		tbody.appendChild(tr);
+		tr.style = "border-bottom: 1pt solid black";
 		let tdActName = document.createElement("td");
 		tdActName.style = "border-left: 1pt solid black";
 		tr.appendChild(tdActName);
@@ -244,7 +247,7 @@ function fillTableAdvancedFiltering1(parentActivities, parentStat, parentOtypes,
 		tdActCheckboxSpan2.innerHTML = "&nbsp;&nbsp;";
 		for (let ot of parentOtypes) {
 			let td = document.createElement("td");
-			td.style="text-align: center";
+			td.style="text-align: center; border-right: 1pt solid black;";
 			tr.appendChild(td);
 			let span = document.createElement("span");
 			
@@ -275,6 +278,14 @@ function fillTableAdvancedFiltering1(parentActivities, parentStat, parentOtypes,
 				if (ot in parentStat && act in parentStat[ot]) {
 					checkb.checked = true;
 				}
+			}
+			let span2 = document.createElement("span");
+			span.appendChild(span2);
+			if (act in parentObjTypePerAct && ot in parentObjTypePerAct[act]) {
+				span2.innerHTML = "UO="+parentObjTypePerAct[act][ot]+"<br />";
+			}
+			else {
+				span2.innerHTML = "<br />";
 			}
 			span.appendChild(checkb);
 			td.appendChild(span);
