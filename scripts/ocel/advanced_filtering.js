@@ -144,9 +144,19 @@ function anomalousObjectsFiltering() {
 
 function fillTableAdvancedFiltering() {
 	let ocel = visualization.model.ocel;
+	let parentOcel = visualization.model.parentOcel;
+	
+	let parentActivities = Object.keys(GeneralOcelStatistics.eventsPerActivityCount(parentOcel));
+	let parentStat = GeneralOcelStatistics.eventsPerTypePerActivity(parentOcel);
+	let parentOtypes = Object.keys(parentStat);
 	let activities = Object.keys(GeneralOcelStatistics.eventsPerActivityCount(ocel));
 	let stat = GeneralOcelStatistics.eventsPerTypePerActivity(ocel);
 	let otypes = Object.keys(stat);
+	
+	fillTableAdvancedFiltering1(parentActivities, parentStat, parentOtypes, activities, stat, otypes);
+}
+
+function fillTableAdvancedFiltering1(parentActivities, parentStat, parentOtypes, activities, stat, otypes) {
 	let table = document.createElement("table");
 	let thead = document.createElement("thead");
 	let tbody = document.createElement("tbody");
@@ -156,18 +166,18 @@ function fillTableAdvancedFiltering() {
 	thead.appendChild(trHead);
 	let tdTopLeft = document.createElement("th");
 	trHead.appendChild(tdTopLeft);
-	for (let ot of otypes) {
+	for (let ot of parentOtypes) {
 		let td = document.createElement("th");
 		trHead.appendChild(td);
 		td.innerHTML = ot;
 	}
-	for (let act of activities) {
+	for (let act of parentActivities) {
 		let tr = document.createElement("tr");
 		tbody.appendChild(tr);
 		let tdActName = document.createElement("td");
 		tr.appendChild(tdActName);
 		tdActName.innerHTML = act;
-		for (let ot of otypes) {
+		for (let ot of parentOtypes) {
 			let td = document.createElement("td");
 			tr.appendChild(td);
 			let checkb = document.createElement("input");
@@ -175,8 +185,10 @@ function fillTableAdvancedFiltering() {
 			checkb.name = act+"@#@#@#"+ot;
 			checkb.value = act+"@#@#@#"+ot;
 			checkb.classList.add("actOtSelectionCheckbox");
-			if (act in stat[ot]) {
-				checkb.checked = true;
+			if (act in parentStat[ot]) {
+				if (ot in stat && act in stat[ot]) {
+					checkb.checked = true;
+				}
 			}
 			else {
 				checkb.disabled = true;
@@ -203,8 +215,9 @@ function actOtApplyFilterFromTable() {
 			actOtDct[act].push(ot);
 		}
 	}
-	let filteredOcel = OcelGeneralFiltering.filterActivityOtAssociation(visualization.model.ocel, actOtDct);
+	let filteredOcel = OcelGeneralFiltering.filterActivityOtAssociation(visualization.model.parentOcel, actOtDct);
 	let filteredModel = new OcdfgModel(filteredOcel);
+	filteredModel.parentOcel = visualization.model.parentOcel;
 	visualization.setFilteredModel(filteredModel);
 }
 
