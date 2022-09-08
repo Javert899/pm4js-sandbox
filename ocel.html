@@ -285,7 +285,7 @@
 				<button onclick="javascript:CSVconvertToOCEL()">Obtain OCEL</button>
 			</div>
 			<div id="mainApplication" style="display: none" class="container-fluid">
-				<div id="header" style="background-color:" class="border-bottom">
+				<div id="header" style="background-color:" class="border-bottom" style="height: 81px">
 					<nav id="navigationHeader" class="navigation navigation-justified" style="background-image: url('static/top-background.png'); background-size:100% 100%;">
 						<div class="navigation-header">
 
@@ -299,39 +299,39 @@
 									<a href="ocel.html"><img src="static/ocpm_red.png"></img></a>&nbsp;&nbsp;&nbsp;&nbsp;
 								</li>
 								<li class="navigation-item">
-									<a class="navigation-link" href="javascript:showProcessModelPage()"><i class="fas fa-project-diagram"></i>&nbsp;<span style="font-size: 15pt">Process Schema</span></a>
+									<a class="navigation-link" href="javascript:showProcessModelPage()"><i class="fas fa-project-diagram"></i>&nbsp;<span style="font-size: 8pt">&nbsp;Process&nbsp;Schema</span></a>
 								</li>
 								
 								<li class="navigation-item">
-									<a class="navigation-link" href="javascript:showEventsList()"><i class="fas fa-atom"></i><span style="font-size: 15pt">Events</span></a>
+									<a class="navigation-link" href="javascript:showEventsList()"><i class="fas fa-atom"></i><span style="font-size: 10pt">&nbsp;Events</span></a>
 								</li>
 								
 								<li class="navigation-item">
-									<a class="navigation-link" href="javascript:showObjectsList()"><i class="fas fa-database"></i>&nbsp;<span style="font-size: 15pt">Objects</span></a>
+									<a class="navigation-link" href="javascript:showObjectsList()"><i class="fas fa-database"></i>&nbsp;<span style="font-size: 10pt">&nbsp;Objects</span></a>
 								</li>
 								
 								<li class="navigation-item">
-									<a class="navigation-link" href="javascript:showNetworkAnalysis()"><i class="fas fa-address-card"></i>&nbsp;<span style="font-size: 15pt">Network Analysis</span></a>
+									<a class="navigation-link" href="javascript:showNetworkAnalysis()"><i class="fas fa-address-card"></i>&nbsp;<span style="font-size: 8pt">&nbsp;Network&nbsp;Analysis</span></a>
 								</li>
 								
 								<li class="navigation-item">
-									<a class="navigation-link" href="javascript:showMachineLearning()"><i class="fab fa-mixer"></i>&nbsp;<span style="font-size: 15pt">Machine Learning</span></a>
+									<a class="navigation-link" href="javascript:showMachineLearning()"><i class="fab fa-mixer"></i>&nbsp;<span style="font-size: 8pt">&nbsp;Machine&nbsp;Learning</span></a>
 								</li>
 								
 								<li class="navigation-item">
-									<a class="navigation-link" href="javascript:showAdvancedFiltering()"><i class="fas fa-camera"></i>&nbsp;<span style="font-size: 15pt">Advanced Filtering</span></a>
+									<a class="navigation-link" href="javascript:showAdvancedFiltering()"><i class="fas fa-camera"></i>&nbsp;<span style="font-size: 8pt">&nbsp;Advanced&nbsp;Filtering</span></a>
 								</li>
 								
 								<li class="navigation-item">
-									<a class="navigation-link" href="javascript:showGraphs()"><i class="fas fa-chart-pie"></i>&nbsp;<span style="font-size: 15pt">Statistics</span></a>
+									<a class="navigation-link" href="javascript:showGraphs()"><i class="fas fa-chart-pie"></i>&nbsp;<span style="font-size: 10pt">&nbsp;Statistics</span></a>
 								</li>
 								
 								<li class="navigation-item">
-									<a class="navigation-link" href="javascript:showConformance()"><i class="fas fa-bell"></i>&nbsp;<span style="font-size: 15pt">Conformance</span></a>
+									<a class="navigation-link" href="javascript:showConformance()"><i class="fas fa-bell"></i>&nbsp;<span style="font-size: 10pt">&nbsp;Conformance</span></a>
 								</li>
 							
 								<li class="navigation-item">
-									<a class="navigation-link" href="#"><i class="fas fa-download"></i>&nbsp;<span style="font-size: 15pt">Download Log</span></a>
+									<a class="navigation-link" href="#"><i class="fas fa-download"></i>&nbsp;<span style="font-size: 8pt">&nbsp;Download&nbsp;Log</span></a>
 									<div class="navigation-megamenu">
 										<div class="navigation-megamenu-container">
 											<div class="navigation-row">
@@ -354,9 +354,9 @@
 					</nav>
 				</div>
 				<div id="processModelPage" style="display:; overflow: hidden">
-					<div class="row" style="height: 85%">
+					<div class="row" id="processModelStatsModelContainer" style="height: calc(100vh - 81px);">
 						<!-- style="background-image: url('static/left-background.png'); background-size:100% 100%;"-->
-						<div class="col-2 align-self-center text-center">
+						<div class="align-self-center text-center" style="width: 190px">
 							<div class="panel panel-default">
 								<div class="panel-heading"><h4>Statistics</h4></div>
 								<div class="panel-body">
@@ -387,7 +387,7 @@
 								</div>
 							</div>
 						</div>
-						<div class="col-10 border-left">
+						<div class="border-left" style="width: calc(98vw - 190px);">
 							<div id="graphContainerHeader">
 								<nav id="navigationGraph" class="navigation navigation-justified border-bottom">
 									<div class="navigation-header">
@@ -453,7 +453,7 @@
 									</div>
 								</nav>
 							</div>
-							<div id="graphContainer0" style="height: 90%; width: 100%; background-color: white; overflow: scroll;">
+							<div id="graphContainer0" style="height: calc(100vh - 162px); width: 100%; background-color: white; overflow: scroll;">
 								<div id="graphContainer"></div>
 							</div>
 						</div>
