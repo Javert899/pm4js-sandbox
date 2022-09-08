@@ -189,6 +189,7 @@ function fillTableAdvancedFiltering1(parentActivities, parentStat, parentOtypes,
 		td.appendChild(tdSpan);
 		let checkb = document.createElement("input");
 		checkb.type = "checkbox";
+		checkb.id = "enablerot&&&&&"+ot.replace(/[^0-9a-z]/gi);
 		checkb.name = "enablerot&&&&&"+ot;
 		checkb.style = "transform: scale(1.25)";
 		checkb.classList.add("enablerot");
@@ -200,7 +201,7 @@ function fillTableAdvancedFiltering1(parentActivities, parentStat, parentOtypes,
 				}
 				else {
 					let act = otherCheckb.getAttribute("activity");
-					otherCheckb.disabled = !(act in parentStat[ot]);
+					otherCheckb.disabled = (!(act in parentStat[ot]));
 				}
 			}
 		});
@@ -223,6 +224,7 @@ function fillTableAdvancedFiltering1(parentActivities, parentStat, parentOtypes,
 		tdActCheckboxSpan.appendChild(checkbAct);
 		checkbAct.type = "checkbox";
 		checkbAct.name = "enableract&&&&&"+act;
+		checkbAct.id = "enableract&&&&&"+act.replace(/[^0-9a-z]/gi);
 		checkbAct.style = "transform: scale(1.25)";
 		checkbAct.classList.add("enableract");
 		checkbAct.checked = activities.includes(act);
@@ -233,7 +235,7 @@ function fillTableAdvancedFiltering1(parentActivities, parentStat, parentOtypes,
 				}
 				else {
 					let ot = otherCheckb.getAttribute("objecttype");
-					otherCheckb.disabled = !(act in parentStat[ot]);
+					otherCheckb.disabled = (!(act in parentStat[ot]));
 				}
 			}
 		});
