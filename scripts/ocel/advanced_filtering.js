@@ -201,7 +201,7 @@ function fillTableAdvancedFiltering1(parentActivities, parentStat, parentOtypes,
 				}
 				else {
 					let act = otherCheckb.getAttribute("activity");
-					otherCheckb.disabled = (!(act in parentStat[ot]));
+					otherCheckb.disabled = (!(act in parentStat[ot])) || (!(document.getElementById("enableract&&&&&"+(act.replace(/[^0-9a-z]/gi))).checked));
 				}
 			}
 		});
@@ -235,7 +235,7 @@ function fillTableAdvancedFiltering1(parentActivities, parentStat, parentOtypes,
 				}
 				else {
 					let ot = otherCheckb.getAttribute("objecttype");
-					otherCheckb.disabled = (!(act in parentStat[ot]));
+					otherCheckb.disabled = (!(act in parentStat[ot])) || (!(document.getElementById("enablerot&&&&&"+(ot.replace(/[^0-9a-z]/gi))).checked));
 				}
 			}
 		});
