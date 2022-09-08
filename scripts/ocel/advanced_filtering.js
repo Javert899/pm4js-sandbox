@@ -265,10 +265,16 @@ function fillTableAdvancedFiltering1(parentActivities, parentStat, parentOtypes,
 				}
 				else if (!(act in activities)) {
 					checkb.disabled = true;
+					if (ot in parentStat && act in parentStat[ot]) {
+						checkb.checked = true;
+					}
 				}
 			}
 			else {
 				checkb.disabled = true;
+				if (ot in parentStat && act in parentStat[ot]) {
+					checkb.checked = true;
+				}
 			}
 			span.appendChild(checkb);
 			td.appendChild(span);
