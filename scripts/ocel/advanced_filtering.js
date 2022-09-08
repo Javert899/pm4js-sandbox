@@ -163,37 +163,113 @@ function fillTableAdvancedFiltering1(parentActivities, parentStat, parentOtypes,
 	table.appendChild(thead);
 	table.appendChild(tbody);
 	let trHead = document.createElement("tr");
+	trHead.style = "border-top: 1pt solid black; border-bottom: 1pt solid black";
 	thead.appendChild(trHead);
+	let trHead2 = document.createElement("tr");
+	trHead2.style = "border-bottom: 1pt solid black";
+	thead.appendChild(trHead2);
 	let tdTopLeft = document.createElement("th");
 	trHead.appendChild(tdTopLeft);
+	let tdTopLeft2 = document.createElement("th");
+	trHead.appendChild(tdTopLeft2);
+	let tdTopLeft3 = document.createElement("th");
+	trHead2.appendChild(tdTopLeft3);
+	let tdTopLeft4 = document.createElement("th");
+	trHead2.appendChild(tdTopLeft4);
 	for (let ot of parentOtypes) {
 		let td = document.createElement("th");
 		trHead.appendChild(td);
 		td.innerHTML = ot;
 	}
+	for (let ot of parentOtypes) {
+		let td = document.createElement("th");
+		td.style="text-align: center";
+		trHead2.appendChild(td);
+		let tdSpan = document.createElement("span");
+		td.appendChild(tdSpan);
+		let checkb = document.createElement("input");
+		checkb.type = "checkbox";
+		checkb.name = "enablerot&&&&&"+ot;
+		checkb.style = "transform: scale(1.25)";
+		checkb.classList.add("enablerot");
+		checkb.checked = otypes.includes(ot);
+		checkb.addEventListener("click", function() {
+			for (let otherCheckb of document.getElementsByClassName("actOtSelectionCheckboxOt"+ot.replace(/[^0-9a-z]/gi, ''))) {
+				if (!(checkb.checked)) {
+					otherCheckb.disabled = true;
+				}
+				else {
+					let act = otherCheckb.getAttribute("activity");
+					otherCheckb.disabled = !(act in parentStat[ot]);
+				}
+			}
+		});
+		tdSpan.appendChild(checkb);
+		tdSpan.appendChild(document.createElement("tr"));
+	}
 	for (let act of parentActivities) {
 		let tr = document.createElement("tr");
 		tbody.appendChild(tr);
 		let tdActName = document.createElement("td");
+		tdActName.style = "border-left: 1pt solid black";
 		tr.appendChild(tdActName);
 		tdActName.innerHTML = act;
+		let tdActCheckbox = document.createElement("td");
+		tdActCheckbox.style = "border-left: 1pt solid black; border-right: 1pt solid black";
+		tr.appendChild(tdActCheckbox);
+		let tdActCheckboxSpan = document.createElement("span");
+		tdActCheckbox.appendChild(tdActCheckboxSpan);
+		let checkbAct = document.createElement("input");
+		tdActCheckboxSpan.appendChild(checkbAct);
+		checkbAct.type = "checkbox";
+		checkbAct.name = "enableract&&&&&"+act;
+		checkbAct.style = "transform: scale(1.25)";
+		checkbAct.classList.add("enableract");
+		checkbAct.checked = activities.includes(act);
+		checkbAct.addEventListener("click", function() {
+			for (let otherCheckb of document.getElementsByClassName("actOtSelectionCheckboxAct"+act.replace(/[^0-9a-z]/gi, ''))) {
+				if (!(checkbAct.checked)) {
+					otherCheckb.disabled = true;
+				}
+				else {
+					let ot = otherCheckb.getAttribute("objecttype");
+					otherCheckb.disabled = !(act in parentStat[ot]);
+				}
+			}
+		});
+		let tdActCheckboxSpan2 = document.createElement("span");
+		tdActCheckboxSpan.appendChild(tdActCheckboxSpan2);
+		tdActCheckboxSpan2.innerHTML = "&nbsp;&nbsp;";
 		for (let ot of parentOtypes) {
 			let td = document.createElement("td");
+			td.style="text-align: center";
 			tr.appendChild(td);
+			let span = document.createElement("span");
+			
 			let checkb = document.createElement("input");
 			checkb.type = "checkbox";
 			checkb.name = act+"@#@#@#"+ot;
 			checkb.value = act+"@#@#@#"+ot;
 			checkb.classList.add("actOtSelectionCheckbox");
+			let actClass = "actOtSelectionCheckboxAct"+act.replace(/[^0-9a-z]/gi, '');
+			let otClass = "actOtSelectionCheckboxOt"+ot.replace(/[^0-9a-z]/gi, '');
+			checkb.classList.add(actClass);
+			checkb.classList.add(otClass);
+			checkb.setAttribute("activity", act);
+			checkb.setAttribute("objecttype", ot);
 			if (act in parentStat[ot]) {
 				if (ot in stat && act in stat[ot]) {
 					checkb.checked = true;
+				}
+				else if (!(act in activities)) {
+					checkb.disabled = true;
 				}
 			}
 			else {
 				checkb.disabled = true;
 			}
-			td.appendChild(checkb);
+			span.appendChild(checkb);
+			td.appendChild(span);
 		}
 	}
 	document.getElementById("actOtFilterContainer").innerHTML = "";
@@ -206,9 +282,10 @@ function actOtApplyFilterFromTable() {
 	for (let el of document.getElementsByClassName("actOtSelectionCheckbox")) {
 		let name = el.name;
 		let isChecked = el.checked;
+		let isEnabled = !el.disabled;
 		let ot = name.split("@#@#@#")[1];
 		let act = name.split("@#@#@#")[0];
-		if (isChecked) {
+		if (isChecked && isEnabled) {
 			if (!(act in actOtDct)) {
 				actOtDct[act] = [];
 			}
