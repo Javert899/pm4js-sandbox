@@ -350,6 +350,7 @@
 				fontColorPayment = "black";
 			}
 			
+			let alternator = true;
 			
 			let sourceOrder = graph.insertVertex(parent, "sourceOrder", " ", 150, 150, 40, 40, "fontSize=18;shape=ellipse;fillColor="+orderColor+";strokeColor="+orderColor+";fontColor=white");
 			let sourceItem = graph.insertVertex(parent, "sourceItem", " ", 150, 150, 40, 40, "fontSize=18;shape=ellipse;fillColor="+itemColor+";strokeColor="+itemColor+";fontColor=white");
@@ -390,7 +391,7 @@
 			let e6 = graph.insertEdge(parent, "produceItemCollectItems", "UO=4", produceItem, collectItems, "rounded=1;fontSize=16;strokeColor="+itemColor+";fontColor="+itemColor);
 			e6.setVisible(itemVisible);
 			let e7 = graph.insertEdge(parent, "createPOCollectItems", "UO=2", createPO, collectItems, "rounded=1;fontSize=16;strokeColor="+orderColor+";fontColor="+orderColor);
-			e7.setVisible(orderVisible);
+			e7.setVisible(orderVisible && (!(alternator)));
 			let e8 = graph.insertEdge(parent, "replaceItemCollectItems", "UO=1", replace, collectItems, "rounded=1;fontSize=16;strokeColor="+itemColor+";fontColor="+itemColor);
 			e8.setVisible(itemVisible);
 			let e9 = graph.insertEdge(parent, "collectItemsStartDelivery", "UO=2", collectItems, startDelivery, "rounded=1;fontSize=16;strokeColor="+orderColor+";fontColor="+orderColor);
@@ -443,7 +444,16 @@
 			e32.setVisible(invoiceVisible);
 			let e33 = graph.insertEdge(parent, "revertInvoiceTargetInvoice", "UO=1", revertInvoice, targetInvoice, "rounded=1;fontSize=16;strokeColor="+invoiceColor+";fontColor="+invoiceColor);
 			e33.setVisible(invoiceVisible);
-
+			let e34 = graph.insertEdge(parent, "ORDERcreatePOProduceItem", "UO=2", createPO, produceItem, "rounded=1;fontSize=16;strokeColor="+orderColor+";fontColor="+orderColor);
+			e34.setVisible(orderVisible && alternator);
+			let e35 = graph.insertEdge(parent, "ORDERproduceItemItemIssue", "UO=1", produceItem, goodsIssue, "rounded=1;fontSize=16;strokeColor="+orderColor+";fontColor="+orderColor);
+			e35.setVisible(orderVisible && alternator);
+			let e36 = graph.insertEdge(parent, "ORDERItemIssueReplaceItem", "UO=1", goodsIssue, replace, "rounded=1;fontSize=16;strokeColor="+orderColor+";fontColor="+orderColor);
+			e36.setVisible(orderVisible && alternator);
+			let e37 = graph.insertEdge(parent, "ORDERReplaceItemCollectItems", "UO=1", replace, collectItems, "rounded=1;fontSize=16;strokeColor="+orderColor+";fontColor="+orderColor);
+			e37.setVisible(orderVisible && alternator);
+			let e38 = graph.insertEdge(parent, "ORDERProduceItemCollectItems", "UO=1", produceItem, collectItems, "rounded=1;fontSize=16;strokeColor="+orderColor+";fontColor="+orderColor);
+			e38.setVisible(orderVisible && alternator);
 			var layout = new mxHierarchicalLayout(graph, mxConstants.DIRECTION_WEST);
 			//layout.edgeStyle=1;
 			//layout.intraCellSpacing=27;
