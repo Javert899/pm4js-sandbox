@@ -281,6 +281,76 @@
 			let deliveryColor = "gray";
 			let lineColor = "blue";
 			
+			let orderVisible = true;
+			let itemVisible = true;
+			let lineVisible = true;
+			let goodsIssueVisible = true;
+			let deliveryVisible = true;
+			let invoiceVisible = true;
+			let paymentVisible = true;
+
+			
+			if (!(orderVisible)) {
+				orderColor = "white";
+			}
+			if (!(itemVisible)) {
+				itemColor = "white";
+			}
+			if (!(invoiceVisible)) {
+				invoiceColor = "white";
+			}
+			if (!(paymentVisible)) {
+				paymentColor = "white";
+			}
+			if (!(goodsIssueVisible)) {
+				goodsIssueColor = "white";
+			}
+			if (!(deliveryVisible)) {
+				deliveryColor = "white";
+			}
+			if (!(lineVisible)) {
+				lineColor = "white";
+			}
+			
+			let fontColorCreatePO = "white";
+			let fontColorProduceItem = "white";
+			let fontColorCollectItems = "white";
+			let fontColorStartDelivery = "white";
+			let fontColorDeliverySuccessful = "white";
+			let fontColorSendInvoice = "white";
+			let fontColorPayment = "white";
+			let fontColorGoodsIssue = "white";
+			let fontColorReplace = "white";
+			let fontColorRevertInvoice = "white";
+			
+			if (orderVisible || itemVisible) {
+				fontColorCreatePO = "black";
+				fontColorCollectItems = "black";
+			}
+			if (itemVisible || lineVisible) {
+				fontColorProduceItem = "black";
+			}
+			if (itemVisible || lineVisible ||goodsIssueVisible) {
+				fontColorReplace = "black";
+				fontColorGoodsIssue = "black";
+			}
+			if (orderVisible || deliveryVisible) {
+				fontColorStartDelivery = "black";
+			}
+			if (deliveryVisible) {
+				fontColorDeliverySuccessful = "black";
+			}
+			if (orderVisible ||invoiceVisible) {
+				fontColorSendInvoice = "black";
+			}
+			if (invoiceVisible) {
+				fontColorRevertInvoice = "black";
+			}
+			if (invoiceVisible || paymentVisible) {
+				fontColorPayment = "black";
+			}
+			
+			
 			let sourceOrder = graph.insertVertex(parent, "sourceOrder", " ", 150, 150, 40, 40, "fontSize=18;shape=ellipse;fillColor="+orderColor+";strokeColor="+orderColor+";fontColor=white");
 			let sourceItem = graph.insertVertex(parent, "sourceItem", " ", 150, 150, 40, 40, "fontSize=18;shape=ellipse;fillColor="+itemColor+";strokeColor="+itemColor+";fontColor=white");
 			let sourceInvoice = graph.insertVertex(parent, "sourceInvoice", " ", 150, 150, 40, 40, "fontSize=18;shape=ellipse;fillColor="+invoiceColor+";strokeColor="+invoiceColor+";fontColor=white");
@@ -297,46 +367,82 @@
 			let targetDelivery = graph.insertVertex(parent, "targetDelivery", " ", 150, 150, 40, 40, "fontSize=18;shape=ellipse;fillColor="+deliveryColor+";strokeColor="+deliveryColor+";fontColor=white");
 			let targetLine = graph.insertVertex(parent, "targetLine", " ", 150, 150, 40, 40, "fontSize=18;shape=ellipse;fillColor="+lineColor+";strokeColor="+lineColor+";fontColor=white");
 
-			let createPO = graph.insertVertex(parent, "Create Purchase Order", "Create\nPurchase\nOrder", 150, 150, 100, 68, "fontSize=18;shape=box;fillColor=white;fontColor=black;strokeColor=black;");
-			let produceItem = graph.insertVertex(parent, "Produce Item", "Produce\nItem", 150, 150, 100, 68, "fontSize=18;shape=box;fillColor=white;fontColor=black;strokeColor=black;");
-			let collectItems = graph.insertVertex(parent, "Collect Items", "Collect\nItems", 150, 150, 100, 68, "fontSize=18;shape=box;fillColor=white;fontColor=black;strokeColor=black;");
-			let startDelivery = graph.insertVertex(parent, "Start Delivery", "Start\nDelivery", 150, 150, 100, 68, "fontSize=18;shape=box;fillColor=white;fontColor=black;strokeColor=black;");
-			let deliverySuccessful = graph.insertVertex(parent, "Delivery Successful", "Delivery\nSuccessful", 150, 150, 100, 68, "fontSize=18;shape=box;fillColor=white;fontColor=black;strokeColor=black;");
-			let sendInvoice = graph.insertVertex(parent, "Send Invoice", "Send\nInvoice", 150, 150, 100, 68, "fontSize=18;shape=box;fillColor=white;fontColor=black;strokeColor=black;");
-			let payment = graph.insertVertex(parent, "Payment", "Payment", 150, 150, 100, 68, "fontSize=18;shape=box;fillColor=white;fontColor=black;strokeColor=black;");
-			let goodsIssue = graph.insertVertex(parent, "Item Issue", "Item\nIssue", 150, 150, 100, 68, "fontSize=18;shape=box;fillColor=white;fontColor=black;strokeColor=black;");
-			let replace = graph.insertVertex(parent, "Replace Item", "Replace\nItem", 150, 150, 100, 68, "fontSize=18;shape=box;fillColor=white;fontColor=black;strokeColor=black;");
-
+			let createPO = graph.insertVertex(parent, "Create Purchase Order", "Create\nPurchase\nOrder", 150, 150, 100, 68, "fontSize=18;shape=box;fillColor=white;fontColor="+fontColorCreatePO+";strokeColor="+fontColorCreatePO+";");
+			let produceItem = graph.insertVertex(parent, "Produce Item", "Produce\nItem", 150, 150, 100, 68, "fontSize=18;shape=box;fillColor=white;fontColor="+fontColorProduceItem+";strokeColor="+fontColorProduceItem+";");
+			let collectItems = graph.insertVertex(parent, "Collect Items", "Collect\nItems", 150, 150, 100, 68, "fontSize=18;shape=box;fillColor=white;fontColor="+fontColorCollectItems+";strokeColor="+fontColorCollectItems+";");
+			let startDelivery = graph.insertVertex(parent, "Start Delivery", "Start\nDelivery", 150, 150, 100, 68, "fontSize=18;shape=box;fillColor=white;fontColor="+fontColorStartDelivery+";strokeColor="+fontColorStartDelivery+";");
+			let deliverySuccessful = graph.insertVertex(parent, "Delivery Successful", "Delivery\nSuccessful", 150, 150, 100, 68, "fontSize=18;shape=box;fillColor=white;fontColor="+fontColorDeliverySuccessful+";strokeColor="+fontColorDeliverySuccessful+";");
+			let sendInvoice = graph.insertVertex(parent, "Send Invoice", "Send\nInvoice", 150, 150, 100, 68, "fontSize=18;shape=box;fillColor=white;fontColor="+fontColorSendInvoice+";strokeColor="+fontColorSendInvoice+";");
+			let payment = graph.insertVertex(parent, "Payment", "Payment", 150, 150, 100, 68, "fontSize=18;shape=box;fillColor=white;fontColor="+fontColorPayment+";strokeColor="+fontColorPayment+";");
+			let goodsIssue = graph.insertVertex(parent, "Item Issue", "Item\nIssue", 150, 150, 100, 68, "fontSize=18;shape=box;fillColor=white;fontColor="+fontColorGoodsIssue+";strokeColor="+fontColorGoodsIssue+";");
+			let replace = graph.insertVertex(parent, "Replace Item", "Replace\nItem", 150, 150, 100, 68, "fontSize=18;shape=box;fillColor=white;fontColor="+fontColorReplace+";strokeColor="+fontColorReplace+";");
+			let revertInvoice = graph.insertVertex(parent, "Revert Invoice", "Revert\nInvoice", 150, 150, 100, 68, "fontSize=18;shape=box;fillColor=white;fontColor="+fontColorRevertInvoice+";strokeColor="+fontColorRevertInvoice+";");
 			let e1 = graph.insertEdge(parent, "sourceOrderCreateOrder", "UO=2", sourceOrder, createPO, "rounded=1;fontSize=16;strokeColor="+orderColor+";fontColor="+orderColor);
+			e1.setVisible(orderVisible);
 			let e2 = graph.insertEdge(parent, "sourceItemCreateOrder", "UO=5", sourceItem, createPO, "rounded=1;fontSize=16;strokeColor="+itemColor+";fontColor="+itemColor);
+			e2.setVisible(itemVisible);
 			let e3 = graph.insertEdge(parent, "createOrderProduceItem", "UO=5", createPO, produceItem, "rounded=1;fontSize=16;strokeColor="+itemColor+";fontColor="+itemColor);
+			e3.setVisible(itemVisible);
 			let e4 = graph.insertEdge(parent, "produceItemItemIssue", "UO=1", produceItem, goodsIssue, "rounded=1;fontSize=16;strokeColor="+itemColor+";fontColor="+itemColor);
+			e4.setVisible(itemVisible);
 			let e5 = graph.insertEdge(parent, "itemIssueReplaceItem", "UO=1", goodsIssue, replace, "rounded=1;fontSize=16;strokeColor="+itemColor+";fontColor="+itemColor);
+			e5.setVisible(itemVisible);
 			let e6 = graph.insertEdge(parent, "produceItemCollectItems", "UO=4", produceItem, collectItems, "rounded=1;fontSize=16;strokeColor="+itemColor+";fontColor="+itemColor);
+			e6.setVisible(itemVisible);
 			let e7 = graph.insertEdge(parent, "createPOCollectItems", "UO=2", createPO, collectItems, "rounded=1;fontSize=16;strokeColor="+orderColor+";fontColor="+orderColor);
+			e7.setVisible(orderVisible);
 			let e8 = graph.insertEdge(parent, "replaceItemCollectItems", "UO=1", replace, collectItems, "rounded=1;fontSize=16;strokeColor="+itemColor+";fontColor="+itemColor);
+			e8.setVisible(itemVisible);
 			let e9 = graph.insertEdge(parent, "collectItemsStartDelivery", "UO=2", collectItems, startDelivery, "rounded=1;fontSize=16;strokeColor="+orderColor+";fontColor="+orderColor);
+			e9.setVisible(orderVisible);
 			let e10 = graph.insertEdge(parent, "startDeliverySendInvoice", "UO=2", startDelivery, sendInvoice, "rounded=1;fontSize=16;strokeColor="+orderColor+";fontColor="+orderColor);
+			e10.setVisible(orderVisible);
 			let e11 = graph.insertEdge(parent, "sendInvoiceTargetOrder", "UO=2", sendInvoice, targetOrder, "rounded=1;fontSize=16;strokeColor="+orderColor+";fontColor="+orderColor);
+			e11.setVisible(orderVisible);
 			let e12 = graph.insertEdge(parent, "sourceLineProduceItem", "UO=1", sourceLine, produceItem, "rounded=1;fontSize=16;strokeColor="+lineColor+";fontColor="+lineColor);
+			e12.setVisible(lineVisible);
 			let e13 = graph.insertEdge(parent, "produceItemItemIssueLine", "UO=1", produceItem, goodsIssue, "rounded=1;fontSize=16;strokeColor="+lineColor+";fontColor="+lineColor);
+			e13.setVisible(lineVisible);
 			let e14 = graph.insertEdge(parent, "itemIssueReplaceItemLine", "UO=1", goodsIssue, replace, "rounded=1;fontSize=16;strokeColor="+lineColor+";fontColor="+lineColor);
+			e14.setVisible(lineVisible);
 			let e15 = graph.insertEdge(parent, "replaceItemProduceItem", "UO=1", replace, produceItem, "rounded=1;fontSize=16;strokeColor="+lineColor+";fontColor="+lineColor);
+			e15.setVisible(lineVisible);
 			let e16 = graph.insertEdge(parent, "produceItemLineEnd", "UO=1", produceItem, targetLine, "rounded=1;fontSize=16;strokeColor="+lineColor+";fontColor="+lineColor);
+			e16.setVisible(lineVisible);
 			let e17 = graph.insertEdge(parent, "sourceGoodsIssueItemIssue", "UO=1", sourceGoodsIssue, goodsIssue, "rounded=1;fontSize=16;strokeColor="+goodsIssueColor+";fontColor="+goodsIssueColor);
+			e17.setVisible(goodsIssueVisible);
 			let e18 = graph.insertEdge(parent, "itemIssueReplaceItemGoods", "UO=1", goodsIssue, replace, "rounded=1;fontSize=16;strokeColor="+goodsIssueColor+";fontColor="+goodsIssueColor);
+			e18.setVisible(goodsIssueVisible);
 			let e19 = graph.insertEdge(parent, "replaceItemTargetGoodsIssue", "UO=1", replace, targetGoodsIssue, "rounded=1;fontSize=16;strokeColor="+goodsIssueColor+";fontColor="+goodsIssueColor);
+			e19.setVisible(goodsIssueVisible);
 			let e20 = graph.insertEdge(parent, "sourceDeliveryStartDelivery", "UO=1", sourceDelivery, startDelivery, "rounded=1;fontSize=16;strokeColor="+deliveryColor+";fontColor="+deliveryColor);
+			e20.setVisible(deliveryVisible);
 			let e21 = graph.insertEdge(parent, "startDeliveryDeliverySuccessful", "UO=2", startDelivery, deliverySuccessful, "rounded=1;fontSize=16;strokeColor="+deliveryColor+";fontColor="+deliveryColor);
+			e21.setVisible(deliveryVisible);
 			let e22 = graph.insertEdge(parent, "deliverySuccessfulTargetDelivery", "UO=2", deliverySuccessful, targetDelivery, "rounded=1;fontSize=16;strokeColor="+deliveryColor+";fontColor="+deliveryColor);
+			e22.setVisible(deliveryVisible);
 			let e23 = graph.insertEdge(parent, "sourceInvoiceSendInvoice", "UO=2", sourceInvoice, sendInvoice, "rounded=1;fontSize=16;strokeColor="+invoiceColor+";fontColor="+invoiceColor);
+			e23.setVisible(invoiceVisible);
 			let e24 = graph.insertEdge(parent, "sendInvoicePayment", "UO=1", sendInvoice, payment, "rounded=1;fontSize=16;strokeColor="+invoiceColor+";fontColor="+invoiceColor);
+			e24.setVisible(invoiceVisible);
 			let e25 = graph.insertEdge(parent, "paymentTargetInvoice", "UO=1", payment, targetInvoice, "rounded=1;fontSize=16;strokeColor="+invoiceColor+";fontColor="+invoiceColor);
+			e25.setVisible(invoiceVisible);
 			let e26 = graph.insertEdge(parent, "sendInvoiceTargetInvoice", "UO=1", sendInvoice, targetInvoice, "rounded=1;fontSize=16;strokeColor="+invoiceColor+";fontColor="+invoiceColor);
+			e26.setVisible(invoiceVisible);
 			let e27 = graph.insertEdge(parent, "sourcePaymentPayment", "UO=1", sourcePayment, payment, "rounded=1;fontSize=16;strokeColor="+paymentColor+";fontColor="+paymentColor);
+			e27.setVisible(paymentVisible);
 			let e28 = graph.insertEdge(parent, "paymentTargetPayment", "UO=1", payment, targetPayment, "rounded=1;fontSize=16;strokeColor="+paymentColor+";fontColor="+paymentColor);
+			e28.setVisible(paymentVisible);
 			let e29 = graph.insertEdge(parent, "collectItemsTargetOrder", "UO=2", collectItems, targetOrder, "rounded=1;fontSize=16;strokeColor="+orderColor+";fontColor="+orderColor);
+			e29.setVisible(orderVisible);
 			let e30 = graph.insertEdge(parent, "collectItemsTargetItem", "UO=2", collectItems, targetItem, "rounded=1;fontSize=16;strokeColor="+itemColor+";fontColor="+itemColor);
+			e30.setVisible(itemVisible);
+			let e31 = graph.insertEdge(parent, "sendInvoiceRevertInvoice", "UO=1", sendInvoice, revertInvoice, "rounded=1;fontSize=16;strokeColor="+invoiceColor+";fontColor="+invoiceColor);
+			e31.setVisible(invoiceVisible);
+			let e32 = graph.insertEdge(parent, "revertInvoiceSendInvoice", "UO=1", revertInvoice, sendInvoice, "rounded=1;fontSize=16;strokeColor="+invoiceColor+";fontColor="+invoiceColor);
+			e32.setVisible(invoiceVisible);
+			let e33 = graph.insertEdge(parent, "revertInvoiceTargetInvoice", "UO=1", revertInvoice, targetInvoice, "rounded=1;fontSize=16;strokeColor="+invoiceColor+";fontColor="+invoiceColor);
+			e33.setVisible(invoiceVisible);
 
 			var layout = new mxHierarchicalLayout(graph, mxConstants.DIRECTION_WEST);
 			//layout.edgeStyle=1;
