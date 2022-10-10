@@ -18463,11 +18463,13 @@ class OcelGraphs {
 		for (let evId of evIds) {
 			let eve = events[evId];
 			for (let objId of eve["ocel:omap"]) {
-				if (objId in lastEventLifecycle && lastEventLifecycle[objId] == evId) {
-					for (let objId2 of eve["ocel:omap"]) {
-						if (objId != objId2) {
-							if (!(objId2 in seenObjects)) {
-								ret[[objId, objId2]] = 0;
+				if (objId in seenObjects) {
+					if (objId in lastEventLifecycle && lastEventLifecycle[objId] == evId) {
+						for (let objId2 of eve["ocel:omap"]) {
+							if (objId != objId2) {
+								if (!(objId2 in seenObjects)) {
+									ret[[objId, objId2]] = 0;
+								}
 							}
 						}
 					}
@@ -18478,6 +18480,188 @@ class OcelGraphs {
 			}
 		}
 		return OcelGraphs.transformArrayToDictArray(Object.keys(ret));
+	}
+	
+	static graphFindInterrupts(ocel) {
+		let objInteractionGraph = OcelGraphs.objectInteractionGraph(ocel);
+		let objects = ocel["ocel:objects"];
+		let objTypes = {};
+		for (let objId in objects) {
+			let objType = objects[objId]["ocel:type"];
+			objTypes[objId] = objType;
+		}
+		let lifecycleObj = OcelObjectFeatures.getObjectsLifecycle(ocel);
+		let lifecycleStartEnd = {};
+		for (let objId in lifecycleObj) {
+			if (lifecycleObj[objId].length > 0) {
+				lifecycleStartEnd[objId] = [lifecycleObj[objId][0]["ocel:timestamp"].getTime()/1000.0, lifecycleObj[objId][lifecycleObj[objId].length-1]["ocel:timestamp"].getTime()/1000.0];
+			}
+		}
+		let interrupts = {};
+		for (let objId in objInteractionGraph) {
+			if (objId in lifecycleStartEnd) {
+				let lifse = lifecycleStartEnd[objId];
+				for (let objId2 of objInteractionGraph[objId]) {
+					if (objId2 in lifecycleStartEnd) {
+						if (objTypes[objId2] != objTypes[objId]) {
+							let lifse2 = lifecycleStartEnd[objId2];
+							if (lifse[0] > lifse2[0] && lifse[1] < lifse2[1]) {
+								let lif = lifecycleObj[objId];
+								let lif2 = lifecycleObj[objId2];
+								let isOk = true;
+								let i = 0;
+								while (i < lif2.length) {
+									let currTime = lif2[i]["ocel:timestamp"].getTime()/1000.0;
+									if (currTime > lifse[0] && currTime < lifse[1]) {
+										if (!(lif.includes(lif2[i]))) {
+											isOk = false;
+											break;
+										}
+									}
+									i++;
+								}
+								if (isOk) {
+									if (!(objId in interrupts)) {
+										interrupts[objId] = [];
+									}
+									interrupts[objId].push(objId2);
+								}
+							}
+						}
+					}
+				}
+			}
+		}
+		return interrupts;
+	}
+	
+	static graphFindLocks(ocel) {
+		let objInteractionGraph = OcelGraphs.objectInteractionGraph(ocel);
+		let objects = ocel["ocel:objects"];
+		let objTypes = {};
+		for (let objId in objects) {
+			let objType = objects[objId]["ocel:type"];
+			objTypes[objId] = objType;
+		}
+		let lifecycleObj = OcelObjectFeatures.getObjectsLifecycle(ocel);
+		let lifecycleStartEnd = {};
+		for (let objId in lifecycleObj) {
+			if (lifecycleObj[objId].length > 0) {
+				lifecycleStartEnd[objId] = [lifecycleObj[objId][0]["ocel:timestamp"].getTime()/1000.0, lifecycleObj[objId][lifecycleObj[objId].length-1]["ocel:timestamp"].getTime()/1000.0];
+			}
+		}
+		let interactionDivided = {};
+		for (let objId in objInteractionGraph) {
+			interactionDivided[objId] = {};
+			for (let objId2 of objInteractionGraph[objId]) {
+				let objType = objTypes[objId2];
+				if (!(objType in interactionDivided[objId])) {
+					interactionDivided[objId][objType] = [];
+				}
+				interactionDivided[objId][objType].push(objId2);
+			}
+		}
+		let locks = {};
+		for (let objId in interactionDivided) {
+			if (objId in lifecycleStartEnd) {
+				let lifse = lifecycleStartEnd[objId];
+				let currObjType = objTypes[objId];
+				for (let objType in interactionDivided[objId]) {
+					if (objType != currObjType) {
+						if (interactionDivided[objId][objType].length == 1) {
+							let objId2 = interactionDivided[objId][objType][0];
+							let otherInteractions = interactionDivided[objId2][currObjType];
+							let otherInteractionsLifStartEnd = [];
+							for (let objId3 of otherInteractions) {
+								if (objId3 != objId) {
+									if (objId3 in lifecycleStartEnd) {
+										otherInteractionsLifStartEnd.push(lifecycleStartEnd[objId3]);
+									}
+								}
+							}
+							let isOk = true;
+							let i = 0;
+							while (i < otherInteractionsLifStartEnd.length) {
+								let lifse2 = otherInteractionsLifStartEnd[i];
+								if (!(lifse2[i][1] < lifse[i][0] || lifse2[i][0] > lifse[i][1])) {
+									isOk = false;
+									break;
+								}
+								i++;
+							}
+							if (isOk) {
+								if (!(objId in locks)) {
+									locks[objId] = [];
+								}
+								locks[objId].push(objId2);
+							}
+						}
+					}
+				}
+			}
+		}
+		return locks;
+	}
+	
+	
+	static graphFindParents(ocel) {
+		let objInteractionGraph = OcelGraphs.objectInteractionGraph(ocel);
+		let objects = ocel["ocel:objects"];
+		let objTypes = {};
+		for (let objId in objects) {
+			let objType = objects[objId]["ocel:type"];
+			objTypes[objId] = objType;
+		}
+		let lifecycleObj = OcelObjectFeatures.getObjectsLifecycle(ocel);
+		let lifecycleStartEnd = {};
+		for (let objId in lifecycleObj) {
+			if (lifecycleObj[objId].length > 0) {
+				lifecycleStartEnd[objId] = [lifecycleObj[objId][0]["ocel:timestamp"].getTime()/1000.0, lifecycleObj[objId][lifecycleObj[objId].length-1]["ocel:timestamp"].getTime()/1000.0];
+			}
+		}
+		let interactionDivided = {};
+		for (let objId in objInteractionGraph) {
+			interactionDivided[objId] = {};
+			for (let objId2 of objInteractionGraph[objId]) {
+				let objType = objTypes[objId2];
+				if (!(objType in interactionDivided[objId])) {
+					interactionDivided[objId][objType] = [];
+				}
+				interactionDivided[objId][objType].push(objId2);
+			}
+		}
+		let parents = {};
+		for (let objId in interactionDivided) {
+			let currType = objTypes[objId];
+			for (let objType in interactionDivided[objId]) {
+				if (objType != currType) {
+					if (interactionDivided[objId][objType].length == 1) {
+						let objId2 = interactionDivided[objId][objType][0];
+						if (objId in lifecycleStartEnd && objId2 in lifecycleStartEnd) {
+							let lif = lifecycleStartEnd[objId];
+							let lif2 = lifecycleStartEnd[objId2];
+							if (lif[0] >= lif2[0] && lif[1] <= lif2[1]) {
+								parents[objId] = objId2;
+							}
+						}
+					}
+				}
+			}
+		}
+		return parents;
+	}
+	
+	static graphFindChildren(ocel) {
+		let parents = OcelGraphs.graphFindParents(ocel);
+		let children = {};
+		for (let child in parents) {
+			let par = parents[child];
+			if (!(par in children)) {
+				children[par] = [];
+			}
+			children[par].push(child);
+		}
+		return children;
 	}
 	
 	static transformArrayToDictArray(arr) {
@@ -21402,5 +21586,262 @@ catch (err) {
 	//console.log(err);
 }
 
+
+
+class OcelObjRelationsVisualizer {
+	static uuidv4() {
+	  return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
+		var r = Math.random() * 16 | 0, v = c == 'x' ? r : (r & 0x3 | 0x8);
+		return v.toString(16);
+	  });
+	}
+	
+	static nodeUuid() {
+		let uuid = PetriNetVanillaVisualizer.uuidv4();
+		return "n"+uuid.replace(/-/g, "");
+	}
+
+	static stringToColour(str) {
+	  var hash = 0;
+	  for (var i = 0; i < str.length; i++) {
+		hash = str.charCodeAt(i) + ((hash << 5) - hash);
+	  }
+	  var colour = '#';
+	  for (var i = 0; i < 3; i++) {
+		var value = (hash >> (i * 8)) & 0xFF;
+		colour += ('00' + value.toString(16)).substr(-2);
+	  }
+	  return colour;
+	}
+	
+	static apply(ocel, objectsInteractionGraph, objectsDescendantsGraph, objectsCobirthGraph, objectsCodeathGraph, objectInheritanceGraph, enableInteractionGraph=true, enableDescendantsGraph=true, enableCobirthGraph=true, enableCodeathGraph=true, enableObjectInheritanceGraph=true) {
+		let ret = [];
+		let uidMap = {};
+		ret.push("digraph G {");
+		ret.push("rankdir=\"LR\"");
+		let objectsArray = Object.keys(ocel["ocel:objects"]);
+		for (let objId of objectsArray) {
+			let obj = ocel["ocel:objects"][objId];
+			let objType = obj["ocel:type"];
+			let objTypeColor = OcelObjRelationsVisualizer.stringToColour(objType);
+			let objGuid = OcelObjRelationsVisualizer.nodeUuid();
+			ret.push(objGuid+" [label=\""+objId+"\n"+objType+"\", color=\""+objTypeColor+"\", textcolor=\""+objTypeColor+"\"]");
+			uidMap[objId] = objGuid;
+		}
+		let interactionColor = "white";
+		let descendantsColor = "white";
+		let inheritanceColor = "white";
+		let cobirthColor = "white";
+		let codeathColor = "white";
+		
+		if (enableInteractionGraph) {
+			interactionColor = "black";
+		}
+		if (enableDescendantsGraph) {
+			descendantsColor = "gray";
+		}
+		if (enableCobirthGraph) {
+			cobirthColor = "green";
+		}
+		if (enableCodeathGraph) {
+			codeathColor = "red";
+		}
+		if (enableObjectInheritanceGraph) {
+			inheritanceColor = "blue";
+		}
+		
+		if (objectsInteractionGraph != null) {
+			for (let obj1 in objectsInteractionGraph) {
+				let objuid1 = uidMap[obj1];
+				for (let obj2 of objectsInteractionGraph[obj1]) {
+					if (obj1 < obj2) {
+						let objuid2 = uidMap[obj2];
+						ret.push(objuid1 + " -> "+objuid2+" [label=\"Interacts\", dir=none, color="+interactionColor+", fontcolor="+interactionColor+"]");
+					}
+				}
+			}
+		}
+		if (objectsDescendantsGraph != null) {
+			for (let obj1 in objectsDescendantsGraph) {
+				let objuid1 = uidMap[obj1];
+				for (let obj2 of objectsDescendantsGraph[obj1]) {
+					let objuid2 = uidMap[obj2];
+					ret.push(objuid2+" -> "+objuid1+" [label=\"Descends\", color="+descendantsColor+", fontcolor="+descendantsColor+"]");
+				}
+			}
+		}
+		if (objectInheritanceGraph != null) {
+			for (let obj1 in objectInheritanceGraph) {
+				let objuid1 = uidMap[obj1];
+				for (let obj2 of objectInheritanceGraph[obj1]) {
+					let objuid2 = uidMap[obj2];
+					ret.push(objuid2+" -> "+objuid1+" [label=\"Inherits\", color="+inheritanceColor+", fontcolor="+inheritanceColor+"]");
+				}
+			}
+		}
+		if (objectsCobirthGraph != null) {
+			for (let obj1 in objectsCobirthGraph) {
+				let objuid1 = uidMap[obj1];
+				for (let obj2 of objectsCobirthGraph[obj1]) {
+					if (obj1 < obj2) {
+						let objuid2 = uidMap[obj2];
+						ret.push(objuid1 + " -> "+objuid2+" [label=\"CoBirth\", dir=none, color="+cobirthColor+", fontcolor="+cobirthColor+"]");
+					}
+				}
+			}
+		}
+		if (objectsCodeathGraph != null) {
+			for (let obj1 in objectsCodeathGraph) {
+				let objuid1 = uidMap[obj1];
+				for (let obj2 of objectsCodeathGraph[obj1]) {
+					if (obj1 < obj2) {
+						let objuid2 = uidMap[obj2];
+						ret.push(objuid1 + " -> "+objuid2+" [label=\"CoDeath\", dir=none, color="+codeathColor+", fontcolor="+codeathColor+"]");
+					}
+				}
+			}
+		}
+		
+		ret.push("}");
+		return ret.join('\n');
+	}
+}
+
+try {
+	require('../../pm4js.js');
+	module.exports = {OcelObjRelationsVisualizer: OcelObjRelationsVisualizer};
+	global.OcelObjRelationsVisualizer = OcelObjRelationsVisualizer;
+}
+catch (err) {
+	// not in node
+}
+
+
+class OcelObjRelations2Visualizer {
+	static uuidv4() {
+	  return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
+		var r = Math.random() * 16 | 0, v = c == 'x' ? r : (r & 0x3 | 0x8);
+		return v.toString(16);
+	  });
+	}
+	
+	static nodeUuid() {
+		let uuid = PetriNetVanillaVisualizer.uuidv4();
+		return "n"+uuid.replace(/-/g, "");
+	}
+	
+	static stringToColour(str) {
+	  var hash = 0;
+	  for (var i = 0; i < str.length; i++) {
+		hash = str.charCodeAt(i) + ((hash << 5) - hash);
+	  }
+	  var colour = '#';
+	  for (var i = 0; i < 3; i++) {
+		var value = (hash >> (i * 8)) & 0xFF;
+		colour += ('00' + value.toString(16)).substr(-2);
+	  }
+	  return colour;
+	}
+	
+	static apply(ocel, objectsInteractionGraph, objectsDescendantsGraph, objectsParents, objectsLocks, objectsInterrupts, enableInteraction=true, enableDescendants=true, enableParents=true, enableLocks=true, enableInterrupts=true) {
+		let ret = [];
+		let uidMap = {};
+		ret.push("digraph G {");
+		ret.push("rankdir=\"LR\"");
+		let objectsArray = Object.keys(ocel["ocel:objects"]);
+		for (let objId of objectsArray) {
+			let obj = ocel["ocel:objects"][objId];
+			let objType = obj["ocel:type"];
+			let objTypeColor = OcelObjRelations2Visualizer.stringToColour(objType);
+			let objGuid = OcelObjRelationsVisualizer.nodeUuid();
+			ret.push(objGuid+" [label=\""+objId+"\n"+objType+"\", color=\""+objTypeColor+"\", textcolor=\""+objTypeColor+"\"]");
+			uidMap[objId] = objGuid;
+		}
+		let interactionColor = "white";
+		let descendantsColor = "white";
+		let parentsColor = "white";
+		let locksColor = "white";
+		let interruptsColor = "white";
+		
+		if (enableInteraction) {
+			interactionColor = "black";
+		}
+		if (enableDescendants) {
+			descendantsColor = "gray";
+		}
+		if (enableParents) {
+			parentsColor = "lightblue";
+		}
+		if (enableLocks) {
+			locksColor = "violet";
+		}
+		if (enableInterrupts) {
+			interruptsColor = "brown";
+		}
+		
+		if (objectsInteractionGraph != null) {
+			for (let obj1 in objectsInteractionGraph) {
+				let objuid1 = uidMap[obj1];
+				for (let obj2 of objectsInteractionGraph[obj1]) {
+					if (obj1 < obj2) {
+						let objuid2 = uidMap[obj2];
+						ret.push(objuid1 + " -> "+objuid2+" [label=\"Interacts\", dir=none, color="+interactionColor+", fontcolor="+interactionColor+"]");
+					}
+				}
+			}
+		}
+		
+		if (objectsDescendantsGraph != null) {
+			for (let obj1 in objectsDescendantsGraph) {
+				let objuid1 = uidMap[obj1];
+				for (let obj2 of objectsDescendantsGraph[obj1]) {
+					let objuid2 = uidMap[obj2];
+					ret.push(objuid2+" -> "+objuid1+" [label=\"Descends\", color="+descendantsColor+", fontcolor="+descendantsColor+"]");
+				}
+			}
+		}
+		
+		if (objectsParents != null) {
+			for (let obj1 in objectsParents) {
+				let objuid1 = uidMap[obj1];
+				let obj2 = objectsParents[obj1];
+				let objuid2 = uidMap[obj2];
+				ret.push(objuid2+" -> "+objuid1+" [label=\"IsParent\", color="+parentsColor+", fontcolor="+parentsColor+"]");
+			}
+		}
+		
+		if (objectsLocks != null) {
+			for (let obj1 in objectsLocks) {
+				let objuid1 = uidMap[obj1];
+				for (let obj2 of objectsLocks[obj1]) {
+					let objuid2 = uidMap[obj2];
+					ret.push(objuid1+" -> "+objuid2+" [label=\"Locks\", color="+locksColor+", fontcolor="+locksColor+"]");
+				}
+			}
+		}
+		
+		if (objectsInterrupts != null) {
+			for (let obj1 in objectsInterrupts) {
+				let objuid1 = uidMap[obj1];
+				for (let obj2 of objectsInterrupts[obj1]) {
+					let objuid2 = uidMap[obj2];
+					ret.push(objuid1+" -> "+objuid2+" [label=\"Interrupts\", color="+interruptsColor+", fontcolor="+interruptsColor+"]");
+				}
+			}
+		}
+		
+		ret.push("}");
+		return ret.join('\n');
+	}
+}
+
+try {
+	require('../../pm4js.js');
+	module.exports = {OcelObjRelations2Visualizer: OcelObjRelations2Visualizer};
+	global.OcelObjRelations2Visualizer = OcelObjRelations2Visualizer;
+}
+catch (err) {
+	// not in node
+}
 
 

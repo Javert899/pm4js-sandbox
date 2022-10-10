@@ -810,16 +810,49 @@
 					</table>
 				</div>
 				<div id="objectsListPage" style="display: none; font-size: 15pt;">
-					<p>The page shows the properties of the objects, after the selection of an object type. Each object is distinguished by the timestamp of the first
-					event of its lifecycle, the timestamp of the last event of its lifecycle, and the difference between them.</p>
-					<p>To start, please select an object type:
-					<select id="otObjListSelection" class="form-select">
-					</select>
-					<button id="showObjListOt" onclick="showObjListOt()" class="btn btn-primary">Show the list of Objects</button>
-					</p>
-					<div style="height: 80%; overflow-y: scroll">
-						<table id="objectsListTable" border="1" class="table">
-						</table>
+					<nav id="objectsPageNavigation" class="navigation navigation-justified border-bottom">
+						<div class="navigation-header">
+
+						</div>
+						<div class="navigation-body">
+							<ul class="navigation-menu">
+								<li class="navigation-item">
+									<a class="navigation-link" href="javascript:showObjectsList1()"><i class="fas fa-database"></i>&nbsp;<span style="font-size: 13pt">Objects List</span></a>
+								</li>
+
+								<li class="navigation-item">
+									<a class="navigation-link" href="javascript:showObjectsObjRelations1()"><i class="fas fa-database"></i>&nbsp;<span style="font-size: 13pt">Relations Visualization (1)</span></a>
+								</li>
+
+								<li class="navigation-item">
+									<a class="navigation-link" href="javascript:showObjectsObjRelations2()"><i class="fas fa-database"></i>&nbsp;<span style="font-size: 13pt">Relations Visualization (2)</span></a>
+								</li>
+							</ul>
+						</div>
+					</nav>
+					
+					<div id="objectsListPage1" style="display: none">
+						<p>The page shows the properties of the objects, after the selection of an object type. Each object is distinguished by the timestamp of the first
+						event of its lifecycle, the timestamp of the last event of its lifecycle, and the difference between them.</p>
+						<p>To start, please select an object type:
+						<select id="otObjListSelection" class="form-select">
+						</select>
+						<button id="showObjListOt" onclick="showObjListOt()" class="btn btn-primary">Show the list of Objects</button>
+						</p>
+						<div style="height: 80%; overflow-y: scroll">
+							<table id="objectsListTable" border="1" class="table">
+							</table>
+						</div>
+					</div>
+					
+					<div id="objectsObjRelations1" style="display: none">
+						<div id="objectsObjRelations1Vis">
+						</div>
+					</div>
+					
+					<div id="objectsObjRelations2" style="display: none">
+						<div id="objectsObjRelations2Vis">
+						</div>
 					</div>
 				</div>
 				<div id="executionsPage" style="display: none; font-size: 15pt;">
@@ -1358,9 +1391,65 @@
 					populateNumEventsEventsPage();
 				}
 				
+				function hideAllObjectsSubpages() {
+					document.getElementById("objectsListPage1").style.display = "none";
+					document.getElementById("objectsObjRelations1").style.display = "none";
+					document.getElementById("objectsObjRelations2").style.display = "none";
+				}
+				
+				function showObjectsList1() {
+					hideAllObjectsSubpages();
+					document.getElementById("objectsListPage1").style.display = "";
+				}
+				
+				function showObjectsObjRelations1() {
+					let thisUuid = Pm4JS.startAlgorithm({"name": "OCPM showObjectsObjRelations1"});
+					
+					setTimeout(function() {
+						let objectsInteractionGraph = OcelGraphs.objectInteractionGraph(visualization.model.ocel);
+						let objectsDescendantsGraph = OcelGraphs.objectDescendantsGraph(visualization.model.ocel);
+						let objectsCobirthGraph = OcelGraphs.objectCobirthGraph(visualization.model.ocel);
+						let objectsCodeathGraph = OcelGraphs.objectCodeathGraph(visualization.model.ocel);
+						let objectInheritanceGraph = OcelGraphs.objectInheritanceGraph(visualization.model.ocel);
+						
+						let gviz = OcelObjRelationsVisualizer.apply(visualization.model.ocel, objectsInteractionGraph, objectsDescendantsGraph, objectsCobirthGraph, objectsCodeathGraph, objectInheritanceGraph);
+
+						let svgXml = Viz(gviz, { format: "svg"});
+
+						document.getElementById("objectsObjRelations1Vis").innerHTML = svgXml;
+						
+						hideAllObjectsSubpages();
+						document.getElementById("objectsObjRelations1").style.display = "";
+						Pm4JS.stopAlgorithm(thisUuid, {});
+					}, 100);
+				}
+				
+				function showObjectsObjRelations2() {
+					let thisUuid = Pm4JS.startAlgorithm({"name": "OCPM showObjectsObjRelations2"});
+
+					setTimeout(function() {
+						let objectsInteractionGraph = OcelGraphs.objectInteractionGraph(visualization.model.ocel);
+						let objectsDescendantsGraph = OcelGraphs.objectDescendantsGraph(visualization.model.ocel);
+						let objectsParents = OcelGraphs.graphFindParents(visualization.model.ocel);
+						let objectsLocks = OcelGraphs.graphFindLocks(visualization.model.ocel);
+						let objectsInterrupts = OcelGraphs.graphFindInterrupts(visualization.model.ocel);
+						
+						let gviz = OcelObjRelations2Visualizer.apply(visualization.model.ocel, objectsInteractionGraph, objectsDescendantsGraph, objectsParents, objectsLocks, objectsInterrupts);
+						
+						let svgXml = Viz(gviz, { format: "svg"});
+						
+						document.getElementById("objectsObjRelations2Vis").innerHTML = svgXml;
+						
+						hideAllObjectsSubpages();
+						document.getElementById("objectsObjRelations2").style.display = "";
+						Pm4JS.stopAlgorithm(thisUuid, {});
+					}, 100);
+				}
+				
 				function showObjectsList() {
 					//visualization.model.calculateExecutions();
 					hideAllDivsPages();
+					showObjectsList1();
 					document.getElementById("objectsListPage").style.display = "";
 				}
 				
