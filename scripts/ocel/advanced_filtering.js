@@ -1,3 +1,13 @@
+function filterParentsChildren0() {
+	let filteredModel = new OcdfgModel(OcelGeneralFiltering.parentChildrenFiltering(visualization.model.ocel));
+	visualization.setFilteredModel(filteredModel);
+}
+
+function filterParentsChildren() {
+	showProcessModelPage();
+	return addFilter("<i class=\"fas fa-user-minus\"></i>&nbsp;Parents-Children Filter&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;", "filterParentsChildren0()");
+}
+
 function stageBasedFiltering0() {
 	let ot1 = prompt("Insert the source object type");
 	let ot2 = prompt("Insert the target object type");

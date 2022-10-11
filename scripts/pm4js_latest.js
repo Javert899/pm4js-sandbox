@@ -112,7 +112,7 @@ class Pm4JSObserverExample {
 	}
 }
 
-Pm4JS.VERSION = "0.0.29";
+Pm4JS.VERSION = "0.0.30";
 Pm4JS.registrationEnabled = false;
 Pm4JS.objects = [];
 Pm4JS.algorithms = [];
@@ -19550,6 +19550,22 @@ class OcelObjectFeatures {
 		return lif;
 	}
 	
+	static getObjectsLifecycleId(ocel) {
+		let lif = {};
+		let objects = ocel["ocel:objects"];
+		for (let objId in objects) {
+			lif[objId] = [];
+		}
+		let events = ocel["ocel:events"];
+		for (let evId in events) {
+			let eve = events[evId];
+			for (let objId of eve["ocel:omap"]) {
+				lif[objId].push(evId);
+			}
+		}
+		return lif;
+	}
+	
 	static encodeLifecycleActivities(ocel) {
 		let events = ocel["ocel:events"];
 		let objects = ocel["ocel:objects"];
@@ -21414,6 +21430,96 @@ class OcelGeneralFiltering {
 		}
 		console.log(allowedObjects);
 		return OcelGeneralFiltering.filterObjects(ocel, allowedObjects);
+	}
+	
+	static parentChildrenFiltering(ocel) {
+		let parentsGraph = OcelGraphs.graphFindParents(ocel);
+		let lifecycleObj = OcelObjectFeatures.getObjectsLifecycleId(ocel);
+		let startEveObj = {};
+		let endEveObj = {};
+		for (let objId in lifecycleObj) {
+			if (lifecycleObj[objId].length > 0) {
+				startEveObj[objId] = lifecycleObj[objId][0];
+				endEveObj[objId] = lifecycleObj[objId][lifecycleObj[objId].length - 1];
+			}
+		}
+		let filteredOcel = {};
+		filteredOcel["ocel:global-event"] = ocel["ocel:global-event"];
+		filteredOcel["ocel:global-object"] = ocel["ocel:global-object"];
+		filteredOcel["ocel:global-log"] = {};
+		filteredOcel["ocel:global-log"]["ocel:attribute-names"] = ocel["ocel:global-log"]["ocel:attribute-names"];
+		filteredOcel["ocel:global-log"]["ocel:object-types"] = ocel["ocel:global-log"]["ocel:object-types"];
+		filteredOcel["ocel:objects"] = ocel["ocel:objects"];
+		filteredOcel["ocel:events"] = {};
+		for (let evId in ocel["ocel:events"]) {
+			let eve = ocel["ocel:events"][evId];
+			let newEve = {};
+			newEve["ocel:activity"] = eve["ocel:activity"];
+			newEve["ocel:timestamp"] = eve["ocel:timestamp"];
+			newEve["ocel:vmap"] = eve["ocel:vmap"];
+			newEve["ocel:omap"] = [];
+			
+			let objectsMapParents = {};
+			for (let o of eve["ocel:omap"]) {
+				if (o in parentsGraph && eve["ocel:omap"].includes(parentsGraph[o])) {
+					objectsMapParents[o] = parentsGraph[o];
+				}
+				else {
+					objectsMapParents[o] = o
+				}
+			}
+			let objectsMapChildren = {};
+			for (let o of eve["ocel:omap"]) {
+				if (o in parentsGraph && eve["ocel:omap"].includes(parentsGraph[o])) {
+					let pare = parentsGraph[o];
+					if (!(pare in objectsMapChildren)) {
+						objectsMapChildren[pare] = {};
+					}
+					objectsMapChildren[pare][o] = 0;
+				}
+				
+				if (!(o in objectsMapChildren)) {
+					objectsMapChildren[o] = {};
+				}
+			}
+			
+			for (let o of eve["ocel:omap"]) {
+				if (Object.keys(objectsMapChildren[o]).length == 0 && objectsMapParents[o] != o) {
+					let pare = objectsMapParents[o];
+					let inte = {};
+					for (let o2 of eve["ocel:omap"]) {
+						if (o2 in objectsMapChildren[pare]) {
+							inte[o2] = 0;
+						}
+					}
+					if (Object.keys(inte).length < Object.keys(objectsMapChildren[pare]).length) {
+						newEve["ocel:omap"].push(o);
+					}
+				}
+				else if (objectsMapParents[o] == o && Object.keys(objectsMapChildren[o]).length > 0) {
+					let inte = {};
+					for (let o2 of eve["ocel:omap"]) {
+						if (o2 in objectsMapChildren[o]) {
+							inte[o2] = 0;
+						}
+					}
+					if (Object.keys(inte).length == Object.keys(objectsMapChildren[o]).length) {
+						newEve["ocel:omap"].push(o);
+					}
+				}
+				else if (startEveObj[o] == evId || endEveObj[o] == evId) {
+					newEve["ocel:omap"].push(o);
+				}
+				else if (objectsMapParents[o] == o && Object.keys(objectsMapChildren[o]).length == 0) {
+					newEve["ocel:omap"].push(o);
+				}
+			}
+
+			if (newEve["ocel:omap"].length > 0) {
+				filteredOcel["ocel:events"][evId] = newEve;
+			}
+		}
+		return filteredOcel;
 	}
 }
 
