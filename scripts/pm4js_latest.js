@@ -21321,6 +21321,100 @@ class OcelGeneralFiltering {
 		}
 		return OcelGeneralFiltering.filterActivityOtAssociation(ocel, actOtMap);
 	}
+	
+	static filterObjects(ocel, allowedObjects) {
+		let filteredOcel = {};
+		filteredOcel["ocel:global-event"] = ocel["ocel:global-event"];
+		filteredOcel["ocel:global-object"] = ocel["ocel:global-object"];
+		filteredOcel["ocel:global-log"] = {};
+		filteredOcel["ocel:global-log"]["ocel:attribute-names"] = ocel["ocel:global-log"]["ocel:attribute-names"];
+		filteredOcel["ocel:global-log"]["ocel:object-types"] = ocel["ocel:global-log"]["ocel:object-types"];
+		filteredOcel["ocel:objects"] = {};
+		for (let objId in ocel["ocel:objects"]) {
+			if (objId in allowedObjects) {
+				let obj = ocel["ocel:objects"][objId];
+				filteredOcel["ocel:objects"][objId] = obj;
+			}
+		}
+		filteredOcel["ocel:events"] = {};
+		for (let eveId in ocel["ocel:events"]) {
+			let eve = ocel["ocel:events"][eveId];
+			let relObj = [];
+			for (let objId of eve["ocel:omap"]) {
+				if (objId in allowedObjects) {
+					relObj.push(objId);
+				}
+			}
+			if (relObj.length > 0) {
+				let newEve = {};
+				newEve["ocel:activity"] = eve["ocel:activity"];
+				newEve["ocel:timestamp"] = eve["ocel:timestamp"];
+				newEve["ocel:vmap"] = eve["ocel:vmap"];
+				newEve["ocel:omap"] = relObj;
+				filteredOcel["ocel:events"][eveId] = newEve;
+			}
+		}
+		return filteredOcel;
+	}
+	
+	static stageBasedFiltering(ocel, ot1, ot2) {
+		let objectsDescendantsGraph = OcelGraphs.objectDescendantsGraph(ocel);
+		let objectsParents = OcelGraphs.graphFindParents(ocel);
+		for (let child in objectsParents) {
+			let pare = objectsParents[child];
+			if (!(pare in objectsDescendantsGraph)) {
+				objectsDescendantsGraph[pare] = [];
+			}
+			if (!(child in objectsDescendantsGraph[pare])) {
+				objectsDescendantsGraph[pare].push(child);
+			}
+		}
+		let objTypesDct = {};
+		for (let objId in ocel["ocel:objects"]) {
+			let obj = ocel["ocel:objects"][objId];
+			objTypesDct[objId] = obj["ocel:type"];
+		}
+		let expGraph = OcelGraphs.expandGraph(objectsDescendantsGraph);
+		let expGraphKeys = Object.keys(expGraph);
+		for (let o of expGraphKeys) {
+			if (objTypesDct[o] == ot1) {
+				continue;
+			}
+			let isOk = false;
+			for (let o2 of expGraph[o]) {
+				if (objTypesDct[o2] == ot2) {
+					isOk = true;
+					break;
+				}
+			}
+			if (!(isOk)) {
+				delete expGraph[o];
+			}
+		}
+		let allowedObjects1 = Object.keys(expGraph);
+		let allowedObjects2 = {};
+		for (let o in expGraph) {
+			if (objTypesDct[o] == ot1) {
+				allowedObjects2[o] = 0;
+				for (let o2 of expGraph[o]) {
+					allowedObjects2[o2] = 0;
+				}
+			}
+		}
+		let allowedObjects = {};
+		for (let objId in objTypesDct) {
+			if (objTypesDct[objId] == ot2 || objTypesDct[objId] == ot1) {
+				allowedObjects[objId] = 0;
+			}
+		}
+		for (let obj of allowedObjects1) {
+			if (obj in allowedObjects2) {
+				allowedObjects[obj] = 0;
+			}
+		}
+		console.log(allowedObjects);
+		return OcelGeneralFiltering.filterObjects(ocel, allowedObjects);
+	}
 }
 
 try {

@@ -1,3 +1,15 @@
+function stageBasedFiltering0() {
+	let ot1 = prompt("Insert the source object type");
+	let ot2 = prompt("Insert the target object type");
+	let filteredModel = new OcdfgModel(OcelGeneralFiltering.stageBasedFiltering(visualization.model.ocel, ot1, ot2));
+	visualization.setFilteredModel(filteredModel);
+}
+
+function stageBasedFiltering() {
+	showProcessModelPage();
+	return addFilter("<i class=\"fas fa-user-minus\"></i>&nbsp;Stage-Based Filter&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;", "stageBasedFiltering0()");
+}
+
 function filterMinOccurrencesActivity0() {
 	let minEvents = parseInt(prompt("Insert the minimum number of occurrences for an activity to be kept"));
 	let filteredModel = new OcdfgModel(OcelGeneralFiltering.filterMinOccActivities(visualization.model.ocel, minEvents));
