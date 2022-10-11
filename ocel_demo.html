@@ -1413,6 +1413,7 @@
 						let objectInheritanceGraph = OcelGraphs.objectInheritanceGraph(visualization.model.ocel);
 						
 						let gviz = OcelObjRelationsVisualizer.apply(visualization.model.ocel, objectsInteractionGraph, objectsDescendantsGraph, objectsCobirthGraph, objectsCodeathGraph, objectInheritanceGraph);
+						console.log(gviz);
 
 						let svgXml = Viz(gviz, { format: "svg"});
 
@@ -1428,13 +1429,14 @@
 					let thisUuid = Pm4JS.startAlgorithm({"name": "OCPM showObjectsObjRelations2"});
 
 					setTimeout(function() {
-						let objectsInteractionGraph = OcelGraphs.objectInteractionGraph(visualization.model.ocel);
 						let objectsDescendantsGraph = OcelGraphs.objectDescendantsGraph(visualization.model.ocel);
+						let objectInheritanceGraph = OcelGraphs.objectInheritanceGraph(visualization.model.ocel);
 						let objectsParents = OcelGraphs.graphFindParents(visualization.model.ocel);
 						let objectsLocks = OcelGraphs.graphFindLocks(visualization.model.ocel);
 						let objectsInterrupts = OcelGraphs.graphFindInterrupts(visualization.model.ocel);
 						
-						let gviz = OcelObjRelations2Visualizer.apply(visualization.model.ocel, objectsInteractionGraph, objectsDescendantsGraph, objectsParents, objectsLocks, objectsInterrupts);
+						let gviz = OcelObjRelations2Visualizer.apply(visualization.model.ocel, objectsDescendantsGraph, objectInheritanceGraph, objectsParents, objectsLocks, objectsInterrupts);
+						console.log(gviz);
 						
 						let svgXml = Viz(gviz, { format: "svg"});
 						
