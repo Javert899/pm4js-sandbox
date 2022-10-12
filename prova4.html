@@ -434,8 +434,10 @@
 			e27.setVisible(paymentVisible);
 			let e28 = graph.insertEdge(parent, "paymentTargetPayment", "UO=1", payment, targetPayment, "rounded=1;fontSize=16;strokeColor="+paymentColor+";fontColor="+paymentColor);
 			e28.setVisible(paymentVisible);
-			let e29 = graph.insertEdge(parent, "collectItemsTargetOrder", "UO=1", collectItems, targetOrder, "rounded=1;fontSize=16;strokeColor="+orderColor+";fontColor="+orderColor);
-			e29.setVisible(orderVisible);
+			/*let e29 = graph.insertEdge(parent, "collectItemsTargetOrder", "UO=2", collectItems, targetOrder, "rounded=1;fontSize=16;strokeColor="+orderColor+";fontColor="+orderColor);
+			e29.setVisible(orderVisible);*/
+			let e29 = graph.insertEdge(parent, "produceItemProduceItem", "UO=1", produceItem, produceItem, "rounded=1;fontSize=16;strokeColor="+orderColor+";fontColor="+orderColor);
+			e29.setVisible(orderVisible && alternator);
 			let e30 = graph.insertEdge(parent, "collectItemsTargetItem", "UO=1", collectItems, targetItem, "rounded=1;fontSize=16;strokeColor="+itemColor+";fontColor="+itemColor);
 			e30.setVisible(itemVisible);
 			let e31 = graph.insertEdge(parent, "sendInvoiceRevertInvoice", "UO=1", sendInvoice, revertInvoice, "rounded=1;fontSize=16;strokeColor="+invoiceColor+";fontColor="+invoiceColor);
