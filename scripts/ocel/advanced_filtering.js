@@ -1,3 +1,9 @@
+function addParentToChildren() {
+	let childOt = prompt("insert the child object type");
+	let pareOt = prompt("insert the parent object type");
+	visualization.model.ocel = OcelParentChildrenAttribute.apply(visualization.model.ocel, childOt, pareOt);
+}
+
 function filterParentsChildren0() {
 	let filteredModel = new OcdfgModel(OcelGeneralFiltering.parentChildrenFiltering(visualization.model.ocel));
 	visualization.setFilteredModel(filteredModel);
