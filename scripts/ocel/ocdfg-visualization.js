@@ -283,7 +283,7 @@ class OcdfgVisualization {
 				for (let ot in self.model.otEventLogs) {
 					let consideredLog = LogGeneralFiltering.filterEventsHavingEventAttributeValues(self.model.otEventLogs[ot], activitiesFilter);
 					if (consideredLog.traces.length > 0) {
-						self.model.otInductiveModels[ot] = ProcessTreeToPetriNetConverter.apply(InductiveMiner.apply(consideredLog, "concept:name", 0.0));
+						self.model.otInductiveModels[ot] = ProcessTreeToPetriNetConverter.apply(InductiveMiner.apply(consideredLog, "concept:name", pf));
 						self.model.otInductiveModelsBPMN[ot] = WfNetToBpmnConverter.apply(self.model.otInductiveModels[ot]);
 						self.model.otTransMap[ot] = {};
 						for (let tid in self.model.otInductiveModels[ot].net.transitions) {
