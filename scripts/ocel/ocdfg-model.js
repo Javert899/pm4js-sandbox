@@ -9,8 +9,10 @@ class OcdfgModel {
 		this.otEdges = {};
 		this.otEventLogs = {};
 		this.otInductiveModels = {};
+		this.otInductiveModelsBPMN = {};
 		this.otReplayedTraces = {};
 		this.otTransMap = {};
+		this.otTransMapBPMN = {};
 		this.executionGraph = null;
 		this.executions = null;
 		this.conformanceNumObjs = null;

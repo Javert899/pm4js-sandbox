@@ -257,16 +257,34 @@ class OcdfgVisualization {
 		let thisUuid = Pm4JS.startAlgorithm({"name": "OcdfgVisualization"});
 		let self = this;
 		this.model.otInductiveModels = null;
+		this.model.otInductiveModelsBPMN = null;
 		this.model.otTransMap = null;
+		this.model.otTransMapBPMN = null;
 		this.model.otInductiveModels = {};
+		this.model.otInductiveModelsBPMN = {};
 		this.model.otTransMap = {};
+		this.model.otTransMapBPMN = {};
+		
+		let activitiesFilter = [];
+		if (af == null) {
+			af = this.ACTIVITY_FREQUENCY;
+		}
+		this.calculatePre();
+		let minActiCount = (1 - af) * this.MAX_INDIPENDENT_ACT_COUNT;
+		
+		for (let act in this.model.overallEventsView.activities) {
+			if (this.model.overallEventsView.satisfy(act, this.IDX, minActiCount)) {
+				activitiesFilter.push(act);
+			}
+		}
+		
 		setTimeout(function() {
-			if (self.displayType == "petriNet") {
-				let activities = Object.keys(self.activitiesIndipendent);
+			if (self.displayType == "petriNet" || self.displayType == "bpmn") {
 				for (let ot in self.model.otEventLogs) {
-					let consideredLog = LogGeneralFiltering.filterEventsHavingEventAttributeValues(self.model.otEventLogs[ot], activities);
+					let consideredLog = LogGeneralFiltering.filterEventsHavingEventAttributeValues(self.model.otEventLogs[ot], activitiesFilter);
 					if (consideredLog.traces.length > 0) {
 						self.model.otInductiveModels[ot] = ProcessTreeToPetriNetConverter.apply(InductiveMiner.apply(consideredLog, "concept:name", 0.0));
+						self.model.otInductiveModelsBPMN[ot] = WfNetToBpmnConverter.apply(self.model.otInductiveModels[ot]);
 						self.model.otTransMap[ot] = {};
 						for (let tid in self.model.otInductiveModels[ot].net.transitions) {
 							let t = self.model.otInductiveModels[ot].net.transitions[tid];
@@ -274,21 +292,33 @@ class OcdfgVisualization {
 								self.model.otTransMap[ot][t.label] = t;
 							}
 						}
+						self.model.otTransMapBPMN[ot]= {};
+						for (let nodeId in self.model.otInductiveModelsBPMN[ot].nodes) {
+							let node = self.model.otInductiveModelsBPMN[ot].nodes[nodeId];
+							if (node.type == "task") {
+								self.model.otTransMapBPMN[ot][node.name] = node;
+							}
+						}
 					}
 				}
 				self.representDetail(af, pf);
-				setTimeout(function() {
-					for (let ot in self.model.otEventLogs) {
-						let consideredLog = LogGeneralFiltering.filterEventsHavingEventAttributeValues(self.model.otEventLogs[ot], activities);
-						if (consideredLog.traces.length > 0) {
-							self.model.otReplayedTraces[ot] = TokenBasedReplay.apply(consideredLog, self.model.otInductiveModels[ot]);
+				if (self.displayType == "petriNet") {
+					setTimeout(function() {
+						for (let ot in self.model.otEventLogs) {
+							let consideredLog = LogGeneralFiltering.filterEventsHavingEventAttributeValues(self.model.otEventLogs[ot], activitiesFilter);
+							if (consideredLog.traces.length > 0) {
+								self.model.otReplayedTraces[ot] = TokenBasedReplay.apply(consideredLog, self.model.otInductiveModels[ot]);
+							}
 						}
-					}
-					self.representDetail(af, pf);
+						self.representDetail(af, pf);
+						Pm4JS.stopAlgorithm(thisUuid, {});
+					}, 500);
+				}
+				else if (self.displayType == "bpmn") {
 					Pm4JS.stopAlgorithm(thisUuid, {});
-				}, 500);
+				}
 			}
-			else {
+			else if (self.displayType == "dfg") {
 				self.representDetail(af, pf);
 				Pm4JS.stopAlgorithm(thisUuid, {});
 			}
@@ -297,7 +327,6 @@ class OcdfgVisualization {
 	
 	representDetail(af = null, pf = null) {
 		let oldHeight = document.getElementById("graphContainer").offsetHeight;
-		console.log(document.getElementById("graphContainer").offsetWidth);
 		this.resetVariables();
 		this.removeElements();
 		this.calculatePre();
@@ -391,6 +420,62 @@ class OcdfgVisualization {
 						let value = otEa[act];
 						let penwidth = Math.floor(1 + Math.log(1 + value)/2);
 						let arc = this.graph.insertEdge(parent, null, "UO="+value, this.activitiesIndipendent[act], eaNode, "curved=1;fontSize=19;strokeColor="+color+";fontColor="+color+";strokeWidth="+penwidth);
+					}
+				}
+			}
+		}
+		else if (this.displayType == "bpmn") {
+			for (let ot in this.model.otObjectsView) {
+				let color = this.stringToColour(ot);
+				if (ot in this.model.otInductiveModelsBPMN) {
+					for (let nodeId in this.model.otInductiveModelsBPMN[ot].nodes) {
+						let node = this.model.otInductiveModelsBPMN[ot].nodes[nodeId];
+						let transNode = null;
+						if (node.type == "startEvent") {
+							let thisLabel = ot;
+							let sizeX = 170;
+							let sizeY = 40;
+							let fontSize = "16";
+							transNode = this.graph.insertVertex(parent, "startEvent@@"+nodeId, thisLabel, 150, 150, sizeX, sizeY, "fontSize="+fontSize+";shape=ellipse;fillColor="+color+";fontColor=white");
+						}
+						else if (node.type == "endEvent") {
+							let thisLabel = " ";
+							let sizeX = 40;
+							let sizeY = 40;
+							let fontSize = "16";
+							transNode = this.graph.insertVertex(parent, "endEvent@@"+nodeId, thisLabel, 150, 150, sizeX, sizeY, "fontSize="+fontSize+";shape=ellipse;fillColor="+color+";fontColor=white");
+						}
+						else if (node.type == "parallelGateway") {
+							let thisLabel = "+";
+							let sizeX = 40;
+							let sizeY = 40;
+							let fontSize = "16";
+							transNode = this.graph.insertVertex(parent, "parallelGateway@@"+nodeId, thisLabel, 150, 150, sizeX, sizeY, "fontSize="+fontSize+";shape=rhombus;fillColor="+color+";fontColor=white");
+						}
+						else if (node.type == "exclusiveGateway") {
+							let thisLabel = "X";
+							let sizeX = 40;
+							let sizeY = 40;
+							let fontSize = "16";
+							transNode = this.graph.insertVertex(parent, "exclusiveGateway@@"+nodeId, thisLabel, 150, 150, sizeX, sizeY, "fontSize="+fontSize+";shape=rhombus;fillColor="+color+";fontColor=white");
+						}
+						else if (node.type == "task") {
+							transNode = this.activitiesIndipendent[node.name];
+						}
+						
+						if (transNode != null) {
+							this.transDict[nodeId] = transNode;
+							this.invTransDict[transNode] = node;
+						}
+					}
+					for (let edgeId in this.model.otInductiveModelsBPMN[ot].edges) {
+						let edge = this.model.otInductiveModelsBPMN[ot].edges[edgeId];
+						let sourceId = edge.source.id;
+						let targetId = edge.target.id;
+						console.log(sourceId + " " + targetId);
+						let source = this.transDict[sourceId];
+						let target = this.transDict[targetId];
+						this.graph.insertEdge(parent, edgeId, " ", source, target, "curved=1;fontSize=10;strokeColor="+color+";fontColor="+color+";strokeWidth=1");
 					}
 				}
 			}
