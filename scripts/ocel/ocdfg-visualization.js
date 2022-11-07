@@ -283,7 +283,7 @@ class OcdfgVisualization {
 		}
 		
 		setTimeout(function() {
-			if (self.displayType == "petriNet" || self.displayType == "bpmn") {
+			if (self.displayType.startsWith("petriNet") || self.displayType.startsWith("bpmn")) {
 				for (let ot in self.model.otEventLogs) {
 					let consideredLog = LogGeneralFiltering.filterEventsHavingEventAttributeValues(self.model.otEventLogs[ot], activitiesFilter);
 					if (consideredLog.traces.length > 0) {
@@ -306,7 +306,7 @@ class OcdfgVisualization {
 					}
 				}
 				self.representDetail(af, pf);
-				if (self.displayType == "petriNet") {
+				if (self.displayType.startsWith("petriNet")) {
 					setTimeout(function() {
 						for (let ot in self.model.otEventLogs) {
 							let consideredLog = LogGeneralFiltering.filterEventsHavingEventAttributeValues(self.model.otEventLogs[ot], activitiesFilter);
@@ -318,7 +318,7 @@ class OcdfgVisualization {
 						Pm4JS.stopAlgorithm(thisUuid, {});
 					}, 500);
 				}
-				else if (self.displayType == "bpmn") {
+				else if (self.displayType.startsWith("bpmn")) {
 					setTimeout(function() {
 						for (let ot in self.model.otEventLogs) {
 							let consideredLog = LogGeneralFiltering.filterEventsHavingEventAttributeValues(self.model.otEventLogs[ot], activitiesFilter);
@@ -337,7 +337,7 @@ class OcdfgVisualization {
 					}, 500);
 				}
 			}
-			else if (self.displayType == "dfg") {
+			else if (self.displayType.startsWith("dfg")) {
 				self.representDetail(af, pf);
 				Pm4JS.stopAlgorithm(thisUuid, {});
 			}
@@ -388,7 +388,7 @@ class OcdfgVisualization {
 				this.invActivitiesIndipendent[activityObject.id] = act;
 			}
 		}
-		if (this.displayType == "dfg") {
+		if (this.displayType.startsWith("dfg")) {
 			for (let ot in this.model.otEdges) {
 				let otEdges = this.model.otEdges[ot];
 				for (let edge in otEdges.edgesStatistics) {
@@ -443,7 +443,7 @@ class OcdfgVisualization {
 				}
 			}
 		}
-		else if (this.displayType == "bpmn") {
+		else if (this.displayType.startsWith("bpmn")) {
 			for (let ot in this.model.otObjectsView) {
 				let color = this.stringToColour(ot);
 				if (ot in this.model.otInductiveModelsBPMN) {
@@ -502,7 +502,7 @@ class OcdfgVisualization {
 				}
 			}
 		}
-		else if (this.displayType == "petriNet") {
+		else if (this.displayType.startsWith("petriNet")) {
 			for (let ot in this.model.otEventLogs) {
 				let activities = Object.keys(this.activitiesIndipendent);
 				if (ot in this.model.otInductiveModels) {
@@ -599,7 +599,7 @@ class OcdfgVisualization {
 		
 		var layout = new mxHierarchicalLayout(this.graph, mxConstants.DIRECTION_WEST);
 		layout.edgeStyle=2;
-		if (this.displayType == "petriNet") {
+		if (this.displayType.startsWith("petriNet")) {
 			layout.intraCellSpacing=17;
 			layout.interRankCellSpacing=40;
 		}
