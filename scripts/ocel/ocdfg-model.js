@@ -11,6 +11,7 @@ class OcdfgModel {
 		this.otInductiveModels = {};
 		this.otInductiveModelsBPMN = {};
 		this.otReplayedTraces = {};
+		this.otReplayedTracesBPMN = {};
 		this.otTransMap = {};
 		this.otTransMapBPMN = {};
 		this.executionGraph = null;

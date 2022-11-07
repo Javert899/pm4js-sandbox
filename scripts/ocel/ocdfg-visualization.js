@@ -260,10 +260,14 @@ class OcdfgVisualization {
 		this.model.otInductiveModelsBPMN = null;
 		this.model.otTransMap = null;
 		this.model.otTransMapBPMN = null;
+		this.model.replayedTraces = null;
+		this.model.replayedTracesBPMN = null;
 		this.model.otInductiveModels = {};
 		this.model.otInductiveModelsBPMN = {};
 		this.model.otTransMap = {};
 		this.model.otTransMapBPMN = {};
+		this.model.replayedTraces = {};
+		this.model.replayedTracesBPMN = {};
 		
 		let activitiesFilter = [];
 		if (af == null) {
@@ -315,7 +319,22 @@ class OcdfgVisualization {
 					}, 500);
 				}
 				else if (self.displayType == "bpmn") {
-					Pm4JS.stopAlgorithm(thisUuid, {});
+					setTimeout(function() {
+						for (let ot in self.model.otEventLogs) {
+							let consideredLog = LogGeneralFiltering.filterEventsHavingEventAttributeValues(self.model.otEventLogs[ot], activitiesFilter);
+							if (consideredLog.traces.length > 0) {
+								let netPlusMap = BpmnToPetriNetConverter.apply(self.model.otInductiveModelsBPMN[ot], false, true);
+								let tbrResult = TokenBasedReplay.apply(consideredLog, netPlusMap[0]);
+								tbrResult["bpmnArcMap"] = {};
+								for (let arcId in netPlusMap[1]) {
+									tbrResult["bpmnArcMap"][arcId] = tbrResult["totalConsumedPerPlace"][netPlusMap[1][arcId]] + tbrResult["totalMissingPerPlace"][netPlusMap[1][arcId]];
+								}
+								self.model.otReplayedTracesBPMN[ot] = tbrResult;
+							}
+						}
+						self.representDetail(af, pf);
+						Pm4JS.stopAlgorithm(thisUuid, {});
+					}, 500);
 				}
 			}
 			else if (self.displayType == "dfg") {
@@ -472,10 +491,13 @@ class OcdfgVisualization {
 						let edge = this.model.otInductiveModelsBPMN[ot].edges[edgeId];
 						let sourceId = edge.source.id;
 						let targetId = edge.target.id;
-						console.log(sourceId + " " + targetId);
 						let source = this.transDict[sourceId];
 						let target = this.transDict[targetId];
-						this.graph.insertEdge(parent, edgeId, " ", source, target, "curved=1;fontSize=10;strokeColor="+color+";fontColor="+color+";strokeWidth=1");
+						let edgeLabel = " ";
+						if (ot in this.model.otReplayedTracesBPMN) {
+							edgeLabel = "TO="+this.model.otReplayedTracesBPMN[ot]["bpmnArcMap"][edgeId];
+						}
+						this.graph.insertEdge(parent, edgeId, edgeLabel, source, target, "curved=1;fontSize=10;strokeColor="+color+";fontColor="+color+";strokeWidth=1");
 					}
 				}
 			}
