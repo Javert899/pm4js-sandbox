@@ -253,6 +253,16 @@ class OcdfgVisualization {
 		this.expandedActivities[act] = 0;
 	}
 	
+	somma(arr) {
+		let i = 0;
+		let sum = 0.0;
+		while (i < arr.length) {
+			sum += arr[i];
+			i++;
+		}
+		return sum;
+	}
+	
 	represent(af = null, pf = null) {
 		let thisUuid = Pm4JS.startAlgorithm({"name": "OcdfgVisualization"});
 		let self = this;
@@ -311,7 +321,9 @@ class OcdfgVisualization {
 						for (let ot in self.model.otEventLogs) {
 							let consideredLog = LogGeneralFiltering.filterEventsHavingEventAttributeValues(self.model.otEventLogs[ot], activitiesFilter);
 							if (consideredLog.traces.length > 0) {
-								self.model.otReplayedTraces[ot] = TokenBasedReplay.apply(consideredLog, self.model.otInductiveModels[ot]);
+								let tbrResult = TokenBasedReplay.apply(consideredLog, self.model.otInductiveModels[ot]);
+								console.log(tbrResult);
+								self.model.otReplayedTraces[ot] = tbrResult;
 							}
 						}
 						self.representDetail(af, pf);
@@ -326,9 +338,22 @@ class OcdfgVisualization {
 								let netPlusMap = BpmnToPetriNetConverter.apply(self.model.otInductiveModelsBPMN[ot], false, true);
 								let tbrResult = TokenBasedReplay.apply(consideredLog, netPlusMap[0]);
 								tbrResult["bpmnArcMap"] = {};
+								tbrResult["bpmnNodeMap"] = {};
 								for (let arcId in netPlusMap[1]) {
 									tbrResult["bpmnArcMap"][arcId] = tbrResult["totalConsumedPerPlace"][netPlusMap[1][arcId]] + tbrResult["totalMissingPerPlace"][netPlusMap[1][arcId]];
 								}
+								for (let nodeId in netPlusMap[2]) {
+									tbrResult["bpmnNodeMap"][nodeId] = [];
+									
+									for (let el of netPlusMap[2][nodeId]) {
+										let xx = tbrResult["transExecutionPerformance"][el];
+										let xxSum = self.somma(xx);
+										if (xxSum > 0) {
+											tbrResult["bpmnNodeMap"][nodeId] = [...tbrResult["bpmnNodeMap"][nodeId], ...xx];
+										}
+									}
+								}
+								console.log(tbrResult);
 								self.model.otReplayedTracesBPMN[ot] = tbrResult;
 							}
 						}
