@@ -586,9 +586,13 @@ class OcdfgVisualization {
 						let source = null;
 						let target = null;
 						let isDouble = false;
+						let arcPerformance = 0;
 						if (arc.source in this.placesDict) {
 							source = this.placesDict[arc.source];
 							target = this.transDict[arc.target];
+							if (ot in this.model.otReplayedTraces) { 
+								arcPerformance = this.somma(this.model.otReplayedTraces[ot]["transExecutionPerformance"][arc.target]);
+							}
 							if (arc.target.label != null) {
 								let numEvents = this.model.otEventsView[ot].getValue(arc.target.label, 0);
 								let numObjects = this.model.otEventsView[ot].getValue(arc.target.label, 1);
@@ -609,14 +613,26 @@ class OcdfgVisualization {
 							}
 						}
 						let edgeLabel = "";
+						let fontSize = "10";
 						if (replayResult != null) {
-							edgeLabel = "TO="+replayResult.arcExecutions[arc];
+							if (this.displayType.endsWith("Performance")) {
+								if (arcPerformance > 0) {
+									edgeLabel = "TOp=<br />"+humanizeDuration(arcPerformance).replaceAll(" ","<br />");
+									fontSize = "5";
+								}
+								else {
+									edgeLabel = "";
+								}
+							}
+							else {
+								edgeLabel = "TO="+replayResult.arcExecutions[arc];
+							}
 						}
 						let strokeWidth = "1";
 						if (isDouble) {
 							strokeWidth = "5";
 						}
-						this.graph.insertEdge(parent, arc.toString(), edgeLabel, source, target, "curved=1;fontSize=10;strokeColor="+color+";fontColor="+color+";strokeWidth="+strokeWidth);
+						this.graph.insertEdge(parent, arc.toString(), edgeLabel, source, target, "curved=1;fontSize="+fontSize+";strokeColor="+color+";fontColor="+color+";strokeWidth="+strokeWidth);
 					}
 				}
 			}
