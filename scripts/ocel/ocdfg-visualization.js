@@ -285,6 +285,9 @@ class OcdfgVisualization {
 		if (af == null) {
 			af = this.ACTIVITY_FREQUENCY;
 		}
+		if (pf == null) {
+			pf = this.PATHS_FREQUENCY;
+		}
 		this.calculatePre();
 		let minActiCount = (1 - af) * this.MAX_INDIPENDENT_ACT_COUNT;
 		
@@ -299,7 +302,7 @@ class OcdfgVisualization {
 				for (let ot in self.model.otEventLogs) {
 					let consideredLog = LogGeneralFiltering.filterEventsHavingEventAttributeValues(self.model.otEventLogs[ot], activitiesFilter);
 					if (consideredLog.traces.length > 0) {
-						self.model.otInductiveModels[ot] = ProcessTreeToPetriNetConverter.apply(InductiveMiner.apply(consideredLog, "concept:name", pf));
+						self.model.otInductiveModels[ot] = ProcessTreeToPetriNetConverter.apply(InductiveMiner.apply(consideredLog, "concept:name", 1.0-pf, null, false, true));
 						self.model.otInductiveModelsBPMN[ot] = WfNetToBpmnConverter.apply(self.model.otInductiveModels[ot]);
 						self.model.otTransMap[ot] = {};
 						for (let tid in self.model.otInductiveModels[ot].net.transitions) {
