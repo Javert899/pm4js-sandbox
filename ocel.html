@@ -395,62 +395,33 @@
 									</div>
 									<div class="navigation-body">		
 										<ul class="navigation-menu">
-
-											<li class="navigation-item">
-												<a class="navigation-link" href="#"><i class="fas fa-cog"></i>&nbsp;<span style="font-size: 15pt">Options</span></a>
-												<div class="navigation-megamenu">
-													<div class="navigation-megamenu-container">
-														<div class="navigation-row" style="font-size: 15pt">
-															<div>Visualization:
-															<select id="visualizationType" class="form-select">
-																<option value="dfg" selected>OC-DFG</option>
-																<option value="petriNet">OC-Petri Net</option>
-																<option value="bpmn">OC-BPMN</option>
-																<option value="petriNetPerformance">OC-Petri Net (performance)</option>
-																<option value="bpmnPerformance">OC-BPMN (performance)</option>
-															</select></div>
-															<div>Annotation:
-															<select id="annotationSelector" class="form-select">
-																<option id="events" value="0">Events (E/EC)</option>
-																<option id="unique_objects" value="1" selected>Unique Objects (UO)</option>
-																<option id="total_objects" value="2">Total Objects (TO)</option>
-															</select></div>
-															<div><button id="apply_changes2" onclick="doVisualization()" class="btn btn-primary">Apply</button></div>
-														</div>
-													</div>
-												</div>
-											</li>
 										
-											<!--<li class="navigation-item">
-												<a class="navigation-link" href="#"><i class="fab fa-superpowers"></i>&nbsp;<span style="font-size: 15pt">Object Types</span></a>
-												<div class="navigation-megamenu">
-													<div class="navigation-megamenu-container">
-														<div class="navigation-row" style="font-size: 15pt">
-															<div>
-															Select the object types: <select id="objectTypes" multiple style="height: 40px" class="form-select">
-															</select></div>
-															<div>
-															<button id="filterObjectTypes" onclick="filterObjectTypes()" class="btn btn-primary">Filter on Obj Types</button></div>
-															<div></div>
-														</div>
-													</div>
+											<div class="navigation-row" style="font-size: 13pt">
+												<div>Visualization:
+												<select id="visualizationType" class="form-select">
+													<option value="dfg" selected>OC-DFG</option>
+													<option value="petriNet">OC-Petri Net</option>
+													<option value="bpmn">OC-BPMN</option>
+													<option value="dfgPerformance">OC-DFG (performance)</option>
+													<option value="petriNetPerformance">OC-Petri Net (performance)</option>
+													<option value="bpmnPerformance">OC-BPMN (performance)</option>
+												</select></div>
+												<div>Annotation:
+												<select id="annotationSelector" class="form-select">
+													<option id="events" value="0">Events (E/EC)</option>
+													<option id="unique_objects" value="1" selected>Unique Objects (UO)</option>
+													<option id="total_objects" value="2">Total Objects (TO)</option>
+												</select></div>
+												<div><button id="apply_changes2" onclick="doVisualization()" class="btn btn-primary">Apply</button></div>
+											</div>
+
+											<div class="navigation-row" style="font-size: 13pt">
+												<div>Filters:</div>
+												<div id="filtersList" style="font-weight: bold">
+													No filter is applied currently.&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 												</div>
-											</li>-->
-											
-											<li class="navigation-item">
-												<a class="navigation-link" href="#"><i class="fas fa-filter"></i>&nbsp;<span style="font-size: 15pt">Filters</span></a>
-												<div class="navigation-megamenu">
-													<div class="navigation-megamenu-container">
-														<div class="navigation-row" style="font-size: 15pt">
-															Filters:
-															<span id="filtersList" style="font-weight: bold">
-																No filter is applied currently.&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-															</span>
-															<button id="reset_filters" onclick="resetFilters()" class="btn btn-primary">Reset All Filters</button>
-														</div>
-													</div>
-												</div>
-											</li>
+												<div><button id="reset_filters" onclick="resetFilters()" class="btn btn-primary">Reset All Filters</button></div>
+											</div>
 											
 										</ul>
 									</div>

@@ -433,7 +433,7 @@ class OcdfgVisualization {
 							let label = "";
 							if (this.displayType.endsWith("Performance")) {
 								if (edgePerformance >= 1) {
-									label = "ECp=<br/>"+humanizeDuration(edgePerformance*1000).replaceAll(",","<br/>");
+									label = "ECp=<br/>"+humanizeDuration(edgePerformance).replaceAll(",","<br/>");
 								}
 							}
 							else {
@@ -552,7 +552,7 @@ class OcdfgVisualization {
 						if (ot in this.model.otReplayedTracesBPMN) {
 							if (this.displayType.endsWith("Performance")) {
 								if (arcPerformance >= 1) {
-									edgeLabel = "TOp=<br />"+humanizeDuration(arcPerformance*1000).replaceAll(",","<br />");
+									edgeLabel = "TOp=<br />"+humanizeDuration(arcPerformance).replaceAll(",","<br />");
 									fontSize = "10";
 								}
 								else {
@@ -658,7 +658,7 @@ class OcdfgVisualization {
 						if (replayResult != null) {
 							if (this.displayType.endsWith("Performance")) {
 								if (arcPerformance >= 1) {
-									edgeLabel = "TOp=<br />"+humanizeDuration(arcPerformance*1000).replaceAll(",","<br />");
+									edgeLabel = "TOp=<br />"+humanizeDuration(arcPerformance).replaceAll(",","<br />");
 									fontSize = "10";
 								}
 								else {
