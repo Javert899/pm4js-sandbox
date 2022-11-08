@@ -7,7 +7,7 @@ class OcdfgVisualization {
 		//this.graph.updateCellSize(cell, true);
 		this.original = model;
 		this.ACTIVITY_FREQUENCY = 0.7;
-		this.PATHS_FREQUENCY = 0.85;
+		this.PATHS_FREQUENCY = 0.0;
 		this.IDX = 0;
 		this.expandedActivities = {};
 		this.expandedEdges = {};
@@ -18,7 +18,7 @@ class OcdfgVisualization {
 		this.callbackActivity = null;
 		this.callbackEdge = null;
 		this.callbackStatistics = null;
-		this.displayType = "dfg";
+		this.displayType = "bpmn";
 		this.petriNetEnableDecorations = false;
 	}
 	
