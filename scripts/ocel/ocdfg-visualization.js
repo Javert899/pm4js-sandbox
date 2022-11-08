@@ -272,14 +272,14 @@ class OcdfgVisualization {
 		this.model.otInductiveModelsBPMN = null;
 		this.model.otTransMap = null;
 		this.model.otTransMapBPMN = null;
-		this.model.replayedTraces = null;
-		this.model.replayedTracesBPMN = null;
+		this.model.otReplayedTraces = null;
+		this.model.otReplayedTracesBPMN = null;
 		this.model.otInductiveModels = {};
 		this.model.otInductiveModelsBPMN = {};
 		this.model.otTransMap = {};
 		this.model.otTransMapBPMN = {};
-		this.model.replayedTraces = {};
-		this.model.replayedTracesBPMN = {};
+		this.model.otReplayedTraces = {};
+		this.model.otReplayedTracesBPMN = {};
 		
 		let activitiesFilter = [];
 		if (af == null) {
