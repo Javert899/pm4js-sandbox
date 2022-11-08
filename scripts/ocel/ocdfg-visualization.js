@@ -516,13 +516,35 @@ class OcdfgVisualization {
 						let edge = this.model.otInductiveModelsBPMN[ot].edges[edgeId];
 						let sourceId = edge.source.id;
 						let targetId = edge.target.id;
+						let arcPerformance = 0;
+						if (ot in this.model.otReplayedTracesBPMN) {
+							
+							let nodePerf = this.model.otReplayedTracesBPMN[ot]["bpmnNodeMap"][edge.source];
+							if (nodePerf != null) {
+								if (nodePerf.length > 0) {
+									arcPerformance = this.somma(nodePerf);
+								}
+							}
+						}
 						let source = this.transDict[sourceId];
 						let target = this.transDict[targetId];
 						let edgeLabel = " ";
+						let fontSize = "10";
 						if (ot in this.model.otReplayedTracesBPMN) {
-							edgeLabel = "TO="+this.model.otReplayedTracesBPMN[ot]["bpmnArcMap"][edgeId];
+							if (this.displayType.endsWith("Performance")) {
+								if (arcPerformance > 0) {
+									edgeLabel = "TOp=<br />"+humanizeDuration(arcPerformance).replaceAll(" ","<br />");
+									fontSize = "6";
+								}
+								else {
+									edgeLabel = "";
+								}
+							}
+							else {
+								edgeLabel = "TO="+this.model.otReplayedTracesBPMN[ot]["bpmnArcMap"][edgeId];
+							}
 						}
-						this.graph.insertEdge(parent, edgeId, edgeLabel, source, target, "curved=1;fontSize=10;strokeColor="+color+";fontColor="+color+";strokeWidth=1");
+						this.graph.insertEdge(parent, edgeId, edgeLabel, source, target, "curved=1;fontSize="+fontSize+";strokeColor="+color+";fontColor="+color+";strokeWidth=1");
 					}
 				}
 			}
@@ -618,7 +640,7 @@ class OcdfgVisualization {
 							if (this.displayType.endsWith("Performance")) {
 								if (arcPerformance > 0) {
 									edgeLabel = "TOp=<br />"+humanizeDuration(arcPerformance).replaceAll(" ","<br />");
-									fontSize = "5";
+									fontSize = "6";
 								}
 								else {
 									edgeLabel = "";
