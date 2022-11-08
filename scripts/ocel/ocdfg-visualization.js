@@ -256,9 +256,11 @@ class OcdfgVisualization {
 	somma(arr) {
 		let i = 0;
 		let sum = 0.0;
-		while (i < arr.length) {
-			sum += arr[i];
-			i++;
+		if (arr != null) {
+			while (i < arr.length) {
+				sum += arr[i];
+				i++;
+			}
 		}
 		return sum;
 	}
@@ -420,6 +422,7 @@ class OcdfgVisualization {
 					let activities = edge.split(",");
 					if (activities[0] in this.activitiesIndipendent && activities[1] in this.activitiesIndipendent) {
 						if (otEdges.satisfy(edge, this.IDX, minEdgeCount)) {
+							let edgePerformance = this.somma(otEdges.edgesPerformance[[activities[0],activities[1]]]);
 							let value = otEdges.getValue(edge, this.IDX);
 							let edgeVect = [activities[0], activities[1], ot];
 							let color = this.stringToColour(ot);
@@ -427,9 +430,17 @@ class OcdfgVisualization {
 							let obj2 = this.activitiesIndipendent[activities[1]];
 							
 							let penwidth = Math.floor(1 + Math.log(1 + value)/2);
-							let label = otEdges.toReducedString(edge, this.IDX);
-							if (edgeVect in this.expandedEdges) {
-								label = otEdges.toIntermediateString(edge, this.IDX);
+							let label = "";
+							if (this.displayType.endsWith("Performance")) {
+								if (edgePerformance >= 1) {
+									label = "ECp=<br/>"+humanizeDuration(edgePerformance*1000).replaceAll(",","<br/>");
+								}
+							}
+							else {
+								label = otEdges.toReducedString(edge, this.IDX);
+								if (edgeVect in this.expandedEdges) {
+									label = otEdges.toIntermediateString(edge, this.IDX);
+								}
 							}
 							let arc = this.graph.insertEdge(parent, edgeVect.toString(), label, obj1, obj2, "curved=1;fontSize=19;strokeWidth="+penwidth+";strokeColor="+color+";fontColor="+color);
 							this.graphEdges[edgeVect] = arc;
@@ -451,7 +462,11 @@ class OcdfgVisualization {
 					for (let act in otSa) {
 						let value = otSa[act];
 						let penwidth = Math.floor(1 + Math.log(1 + value)/2);
-						let arc = this.graph.insertEdge(parent, null, "UO="+value, saNode, this.activitiesIndipendent[act], "curved=1;fontSize=19;strokeColor="+color+";fontColor="+color+";strokeWidth="+penwidth);
+						let label = "UO="+value;
+						if (this.displayType.endsWith("Performance")) {
+							label = "";
+						}
+						let arc = this.graph.insertEdge(parent, null, label, saNode, this.activitiesIndipendent[act], "curved=1;fontSize=19;strokeColor="+color+";fontColor="+color+";strokeWidth="+penwidth);
 					}
 				}
 				let otEa = otObjects.filteredEa(minEdgeCount, this.activitiesIndipendent);
@@ -463,7 +478,11 @@ class OcdfgVisualization {
 					for (let act in otEa) {
 						let value = otEa[act];
 						let penwidth = Math.floor(1 + Math.log(1 + value)/2);
-						let arc = this.graph.insertEdge(parent, null, "UO="+value, this.activitiesIndipendent[act], eaNode, "curved=1;fontSize=19;strokeColor="+color+";fontColor="+color+";strokeWidth="+penwidth);
+						let label = "UO="+value;
+						if (this.displayType.endsWith("Performance")) {
+							label = "";
+						}
+						let arc = this.graph.insertEdge(parent, null, label, this.activitiesIndipendent[act], eaNode, "curved=1;fontSize=19;strokeColor="+color+";fontColor="+color+";strokeWidth="+penwidth);
 					}
 				}
 			}
@@ -533,7 +552,7 @@ class OcdfgVisualization {
 						if (ot in this.model.otReplayedTracesBPMN) {
 							if (this.displayType.endsWith("Performance")) {
 								if (arcPerformance >= 1) {
-									edgeLabel = "TOp=<br />"+humanizeDuration(arcPerformance).replaceAll(" ","<br />");
+									edgeLabel = "TOp=<br />"+humanizeDuration(arcPerformance*1000).replaceAll(",","<br />");
 									fontSize = "10";
 								}
 								else {
@@ -639,7 +658,7 @@ class OcdfgVisualization {
 						if (replayResult != null) {
 							if (this.displayType.endsWith("Performance")) {
 								if (arcPerformance >= 1) {
-									edgeLabel = "TOp=<br />"+humanizeDuration(arcPerformance).replaceAll(" ","<br />");
+									edgeLabel = "TOp=<br />"+humanizeDuration(arcPerformance*1000).replaceAll(",","<br />");
 									fontSize = "10";
 								}
 								else {
