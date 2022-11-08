@@ -532,9 +532,9 @@ class OcdfgVisualization {
 						let fontSize = "10";
 						if (ot in this.model.otReplayedTracesBPMN) {
 							if (this.displayType.endsWith("Performance")) {
-								if (arcPerformance > 0) {
+								if (arcPerformance >= 1) {
 									edgeLabel = "TOp=<br />"+humanizeDuration(arcPerformance).replaceAll(" ","<br />");
-									fontSize = "6";
+									fontSize = "10";
 								}
 								else {
 									edgeLabel = "";
@@ -638,9 +638,9 @@ class OcdfgVisualization {
 						let fontSize = "10";
 						if (replayResult != null) {
 							if (this.displayType.endsWith("Performance")) {
-								if (arcPerformance > 0) {
+								if (arcPerformance >= 1) {
 									edgeLabel = "TOp=<br />"+humanizeDuration(arcPerformance).replaceAll(" ","<br />");
-									fontSize = "6";
+									fontSize = "10";
 								}
 								else {
 									edgeLabel = "";
