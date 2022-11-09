@@ -34,6 +34,8 @@
 		<script src="scripts/ocel/ml-isolationForest.js"></script>
 		<script src="scripts/ocel/ml-pca.js"></script>
 		<script src="scripts/ocel/advanced_filtering.js"></script>
+		<script src="scripts/generic/jszip.min.js"></script>
+		<script src="scripts/generic/jszip-utils.min.js"></script>
 		<!--<script src="scripts/generic/ml.min.js"></script>-->
 		<script src="scripts/generic/decision-tree-min.js"></script>
 		<script src="scripts/ocel/ml-dt.js"></script>
@@ -715,7 +717,8 @@
 							reader.onload = function(e) {
 								loadFileCommon(e, f);
 							}
-							reader.readAsText(f);
+							reader.readAsBinaryString(f);
+							//reader.readAsText(f);
 						}
 						
 						function handleFileSelect(evt) {
@@ -726,16 +729,31 @@
 							reader.onload = function(e) {
 								loadFileCommon(e, f);
 							}
-							reader.readAsText(f);
+							reader.readAsBinaryString(f);
+							//reader.readAsText(f);
 						}
 						
 						function loadFileCommon(e, f) {
 							let contentStri = e.target.result;
-							if (f.name.endsWith(".xmlocel")) {
+							return loadContentStri(f.name, contentStri);
+						}
+						
+						function loadContentStri(fileName, contentStri) {
+							if (fileName.endsWith(".zip")) {
+								JSZip.loadAsync(contentStri).then(function (zip) {
+									for (f in zip.files) {
+										zip.file(f).async("string").then(function(unzipped) {
+											loadContentStri(f, unzipped);
+										});
+										break;
+									}
+								});
+							}
+							else if (fileName.endsWith(".xmlocel")) {
 								eventLog = XmlOcelImporter.importLog(contentStri);
 								createVisualization();
 							}
-							else if (f.name.endsWith(".jsonocel")) {
+							else if (fileName.endsWith(".jsonocel")) {
 								eventLog = JsonOcelImporter.importLog(contentStri);
 								createVisualization();
 							}
@@ -1734,6 +1752,25 @@
 				}
 				
 				Pm4JS.registerObserver(new OCPMObserver());
+				const queryString = window.location.search;
+				const urlParams = new URLSearchParams(queryString);
+				
+				if (urlParams.get("ocel") != null) {
+					let fileName = urlParams.get("ocel");
+					if (fileName.endsWith(".zip")) {
+						JSZipUtils.getBinaryContent(fileName, function(err, data) {
+							if(err) {
+								throw err; // or handle err
+							}
+							loadContentStri(fileName, data);
+						});
+					}
+					else {
+						$.get(fileName).then(function(data) {
+							loadContentStri(fileName, data);
+						});
+					}
+				}
 			</script>
 			
 			<script type="text/javascript">
