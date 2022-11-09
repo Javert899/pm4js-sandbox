@@ -1752,6 +1752,25 @@
 				}
 				
 				Pm4JS.registerObserver(new OCPMObserver());
+				const queryString = window.location.search;
+				const urlParams = new URLSearchParams(queryString);
+				
+				if (urlParams.get("ocel") != null) {
+					let fileName = urlParams.get("ocel");
+					if (fileName.endsWith(".zip")) {
+						JSZipUtils.getBinaryContent(fileName, function(err, data) {
+							if(err) {
+								throw err; // or handle err
+							}
+							loadContentStri(fileName, data);
+						});
+					}
+					else {
+						$.get(fileName).then(function(data) {
+							loadContentStri(fileName, data);
+						});
+					}
+				}
 			</script>
 			
 			<script type="text/javascript">
