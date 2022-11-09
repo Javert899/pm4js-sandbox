@@ -3,6 +3,8 @@
 		<script src="scripts/generic/jquery.min.js"></script>
 		<script src="scripts/generic/statistics.min.js"></script>
 		<script src="scripts/generic/plotly-2.1.0.min.js"></script>
+		<script src="scripts/generic/jszip.min.js"></script>
+		<script src="scripts/generic/jszip-utils.min.js"></script>
 		<script src="scripts/pm4js_latest.js"></script>
 	</head>
 	<body>
@@ -10,7 +12,22 @@
 			
 		</div>
 		<script type="text/javascript">
-			function getStatistic(fea, targetVariable, metric) {
+		JSZipUtils.getBinaryContent('running-example.jsonocel.zip', function(err, data) {
+			if(err) {
+				throw err; // or handle err
+			}
+
+			JSZip.loadAsync(data).then(function (zip) {
+				console.log(zip);
+				for (f in zip.files) {
+					console.log(f);
+					zip.file(f).async("string").then(function(unzipped) {
+						console.log(unzipped);
+					});
+				}
+			});
+		});
+			/*function getStatistic(fea, targetVariable, metric) {
 				let fea2 = OcelObjectFeatures.transformToDct(fea);
 				let metricVariables = {};
 				for (let v of fea["featureNames"]) {
@@ -71,7 +88,7 @@
 			let varValues = getStatistic(fea, "@@obj_lif_dur", "spearmansRho");
 			console.log(varValues);
 			drawStatisticsInPlot(varValues);
-		});
+		});*/
 		</script>
 	</body>
 </html>
