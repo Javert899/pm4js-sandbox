@@ -19,11 +19,33 @@ class OcdfgModel {
 		this.conformanceNumObjs = null;
 		this.conformanceLifecycleObjects = null;
 		this.conformanceDurationObjects = null;
+		this.fixedObjectTypeColors = ["#a6cee3", "#1f78b4", "#b2df8a", "#33a02c", "#fb9a99", "#e31a1c", "#fdbf6f", "#ff7f00", "#cab2d6", "#6a3d9a", "#ffff99", "#b15928"];
+		this.fixedObjectTypeAssociation = {};
 		this.calculate();
 	}
 	
 	getOcel() {
 		console.log(this.ocel);
+	}
+	
+	stringToColour0(str) {
+	  var hash = 0;
+	  for (var i = 0; i < str.length; i++) {
+		hash = str.charCodeAt(i) + ((hash << 5) - hash);
+	  }
+	  var colour = '#';
+	  for (var i = 0; i < 3; i++) {
+		var value = (hash >> (i * 8)) & 0xFF;
+		colour += ('00' + value.toString(16)).substr(-2);
+	  }
+	  return colour;
+	}
+	
+	stringToColour(str) {
+		if (str in this.fixedObjectTypeAssociation) {
+			return this.fixedObjectTypeAssociation[str];
+		}
+		return this.stringToColour0(str);
 	}
 	
 	calculate() {
@@ -59,6 +81,15 @@ class OcdfgModel {
 			this.otEventsView[ot].calculate();
 			this.otObjectsView[ot].calculate();
 			this.otEdges[ot] = new EdgesView(this.ocel, this.otObjectsView[ot], this.otEventsView[ot]);
+		}
+		let objectTypes = this.parentOcel["ocel:global-log"]["ocel:object-types"];
+		objectTypes.sort();
+		let i = 0;
+		while (i < objectTypes.length) {
+			if (i < this.fixedObjectTypeColors.length) {
+				this.fixedObjectTypeAssociation[objectTypes[i]] = this.fixedObjectTypeColors[i];
+			}
+			i++;
 		}
 	}
 	

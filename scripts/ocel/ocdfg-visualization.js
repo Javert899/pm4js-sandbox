@@ -236,19 +236,6 @@ class OcdfgVisualization {
 		}
 	}
 	
-	stringToColour(str) {
-	  var hash = 0;
-	  for (var i = 0; i < str.length; i++) {
-		hash = str.charCodeAt(i) + ((hash << 5) - hash);
-	  }
-	  var colour = '#';
-	  for (var i = 0; i < 3; i++) {
-		var value = (hash >> (i * 8)) & 0xFF;
-		colour += ('00' + value.toString(16)).substr(-2);
-	  }
-	  return colour;
-	}
-	
 	doExpandActivity(act) {
 		this.expandedActivities[act] = 0;
 	}
@@ -428,7 +415,7 @@ class OcdfgVisualization {
 							let edgePerformance = this.somma(otEdges.edgesPerformance[[activities[0],activities[1]]]);
 							let value = otEdges.getValue(edge, this.IDX);
 							let edgeVect = [activities[0], activities[1], ot];
-							let color = this.stringToColour(ot);
+							let color = this.model.stringToColour(ot);
 							let obj1 = this.activitiesIndipendent[activities[0]];
 							let obj2 = this.activitiesIndipendent[activities[1]];
 							
@@ -453,7 +440,7 @@ class OcdfgVisualization {
 				}
 			}
 			for (let ot in this.model.otObjectsView) {
-				let color = this.stringToColour(ot);
+				let color = this.model.stringToColour(ot);
 				let otObjects = this.model.otObjectsView[ot];
 				let otSa = otObjects.filteredSa(minEdgeCount, this.activitiesIndipendent);
 				let endpointWidth = ot.length * 10;
@@ -492,7 +479,7 @@ class OcdfgVisualization {
 		}
 		else if (this.displayType.startsWith("bpmn")) {
 			for (let ot in this.model.otObjectsView) {
-				let color = this.stringToColour(ot);
+				let color = this.model.stringToColour(ot);
 				if (ot in this.model.otInductiveModelsBPMN) {
 					for (let nodeId in this.model.otInductiveModelsBPMN[ot].nodes) {
 						let node = this.model.otInductiveModelsBPMN[ot].nodes[nodeId];
@@ -575,7 +562,7 @@ class OcdfgVisualization {
 			for (let ot in this.model.otEventLogs) {
 				let activities = Object.keys(this.activitiesIndipendent);
 				if (ot in this.model.otInductiveModels) {
-					let color = this.stringToColour(ot);
+					let color = this.model.stringToColour(ot);
 					let acceptingPetriNet = this.model.otInductiveModels[ot];
 					let replayResult = this.model.otReplayedTraces[ot];
 					for (let placeId in acceptingPetriNet.net.places) {
