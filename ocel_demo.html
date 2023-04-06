@@ -331,26 +331,13 @@
 								<li class="navigation-item">
 									<a class="navigation-link" href="javascript:showConformance()"><i class="fas fa-bell"></i>&nbsp;<span style="font-size: 10pt">&nbsp;Conformance</span></a>
 								</li>
-							
+
 								<li class="navigation-item">
-									<a class="navigation-link" href="#"><i class="fas fa-download"></i>&nbsp;<span style="font-size: 8pt">&nbsp;Download&nbsp;Log</span></a>
-									<div class="navigation-megamenu">
-										<div class="navigation-megamenu-container">
-											<div class="navigation-row">
-												<div><button id="downloadJsonOcel" onclick="downloadJsonOcel()" class="btn btn-primary">Download JSON Ocel</button>&nbsp;</div>
-												<div><button id="downloadXmlOcel" onclick="downloadXmlOcel()" class="btn btn-primary">Download XML Ocel</button>&nbsp;</div>
-												<div><button id="downloadCsvOcel" onclick="downloadCsvOcel()" class="btn btn-primary">Download CSV Ocel</button>&nbsp;</div>
-												<div><button id="downloadXmlOcel2" onclick="downloadXmlOcel2()" class="btn btn-primary">Download XML Ocel 2</button>&nbsp;</div>
-												<button id="celonisUploadOcel" onclick="uploadEntireToCelonis()" class="btn btn-primary" style="display: none">Celonis Upload&nbsp;</button>
-												<div>
-													<span style="font-size: 15pt">Flattening OT:</span> <select id="flatteningOt" class="form-select">
-													</select>
-													<button id="flattenEventLog" onclick="flattenEventLog()" class="btn btn-primary">Flatten (XES)&nbsp;</button>
-													<button id="flattenEventLogUploadCelonis" onclick="uploadFlattenedToCelonis()" class="btn btn-primary" style="display: none">Flattened to Celonis&nbsp;</button>
-												</div>
-											</div>
-										</div>
-									</div>
+									<a class="navigation-link" href="javascript:downloadJsonOcel()"><i class="fas fa-download"></i>&nbsp;<span style="font-size: 10pt">&nbsp;JSON</span></a>
+								</li>
+
+								<li class="navigation-item">
+									<a class="navigation-link" href="javascript:downloadXmlOcel2()"><i class="fas fa-download"></i>&nbsp;<span style="font-size: 10pt">&nbsp;XML2</span></a>
 								</li>
 							</ul>
 						</div>
