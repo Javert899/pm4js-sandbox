@@ -340,6 +340,7 @@
 												<div><button id="downloadJsonOcel" onclick="downloadJsonOcel()" class="btn btn-primary">Download JSON Ocel</button>&nbsp;</div>
 												<div><button id="downloadXmlOcel" onclick="downloadXmlOcel()" class="btn btn-primary">Download XML Ocel</button>&nbsp;</div>
 												<div><button id="downloadCsvOcel" onclick="downloadCsvOcel()" class="btn btn-primary">Download CSV Ocel</button>&nbsp;</div>
+												<div><button id="downloadXmlOcel2" onclick="downloadXmlOcel2()" class="btn btn-primary">Download XML Ocel 2</button>&nbsp;</div>
 												<button id="celonisUploadOcel" onclick="uploadEntireToCelonis()" class="btn btn-primary" style="display: none">Celonis Upload&nbsp;</button>
 												<div>
 													<span style="font-size: 15pt">Flattening OT:</span> <select id="flatteningOt" class="form-select">
@@ -528,6 +529,15 @@
 							setTimeout(function() {
 								let xmlStri = XmlOcelExporter.exportLog(visualization.model.ocel);
 								download(xmlStri, "obj-centr-log.xmlocel", "text/xml");
+								Pm4JS.stopAlgorithm(thisUuid, {});
+							}, 100);
+						}
+
+						function downloadXmlOcel2() {
+							let thisUuid = Pm4JS.startAlgorithm({"name": "OCPM downloadXmlOcel2"});
+							setTimeout(function() {
+								let xmlStri = Xml2OcelExporter.exportLog(visualization.model.ocel);
+								download(xmlStri, "obj-centr-log.xml", "text/xml");
 								Pm4JS.stopAlgorithm(thisUuid, {});
 							}, 100);
 						}
@@ -748,6 +758,10 @@
 										break;
 									}
 								});
+							}
+							else if (fileName.endsWith(".xml") || fileName.endsWith(".xml2")) {
+								eventLog = Xml2OcelImporter.importLog(contentStri);
+								createVisualization();
 							}
 							else if (fileName.endsWith(".xmlocel")) {
 								eventLog = XmlOcelImporter.importLog(contentStri);
@@ -1777,6 +1791,7 @@
 				for (let evId in eventLog["ocel:events"]) {
 					eventLog["ocel:events"][evId]["ocel:timestamp"] = new Date(eventLog["ocel:events"][evId]["ocel:timestamp"]);
 				}
+				Ocel20FormatFixer.apply(eventLog);
 				createVisualization();
 			</script>
 		</div>
