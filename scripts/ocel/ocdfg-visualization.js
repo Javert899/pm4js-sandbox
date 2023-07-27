@@ -361,7 +361,6 @@ class OcdfgVisualization {
 							let consideredLog = LogGeneralFiltering.filterEventsHavingEventAttributeValues(self.model.otEventLogs[ot], activitiesFilter);
 							if (consideredLog.traces.length > 0) {
 								let tbrResult = TokenBasedReplay.apply(consideredLog, self.model.otInductiveModels[ot]);
-								console.log(tbrResult);
 								self.model.otReplayedTraces[ot] = tbrResult;
 							}
 						}
