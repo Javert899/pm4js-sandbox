@@ -24,7 +24,7 @@ class OcdfgVisualization {
 	}
 	
 	exportSvg(graph) {
-		let direction = "";
+		/*let direction = "";
 		if (this.DEFAULT_DIRECTION == "horizontal") {
 			direction = mxConstants.DIRECTION_WEST;
 		}
@@ -34,7 +34,7 @@ class OcdfgVisualization {
 		
 		var layout = new mxHierarchicalLayout(graph);
 		layout.orientation = direction;
-		layout.execute(graph.getDefaultParent());
+		layout.execute(graph.getDefaultParent());*/
 
 		var svgDocument = mxUtils.createXmlDocument();
 		var root = (svgDocument.createElementNS != null) ?
