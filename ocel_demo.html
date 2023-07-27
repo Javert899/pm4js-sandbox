@@ -313,10 +313,6 @@
 								</li>
 								
 								<li class="navigation-item">
-									<a class="navigation-link" href="javascript:showNetworkAnalysis()"><i class="fas fa-address-card"></i>&nbsp;<span style="font-size: 8pt">&nbsp;Network&nbsp;Analysis</span></a>
-								</li>
-								
-								<li class="navigation-item">
 									<a class="navigation-link" href="javascript:showMachineLearning()"><i class="fab fa-mixer"></i>&nbsp;<span style="font-size: 8pt">&nbsp;Machine&nbsp;Learning</span></a>
 								</li>
 								
@@ -330,6 +326,10 @@
 								
 								<li class="navigation-item">
 									<a class="navigation-link" href="javascript:showConformance()"><i class="fas fa-bell"></i>&nbsp;<span style="font-size: 10pt">&nbsp;Conformance</span></a>
+								</li>
+
+								<li class="navigation-item">
+									<a class="navigation-link" href="javascript:downloadSVG()"><i class="fas fa-download"></i>&nbsp;<span style="font-size: 10pt">&nbsp;SVG</span></a>
 								</li>
 
 								<li class="navigation-item">
@@ -507,6 +507,14 @@
 							setTimeout(function() {
 								let jsonStri = JsonOcelExporter.exportLog(visualization.model.ocel);
 								download(jsonStri, "obj-centr-log.jsonocel", "text/json");
+								Pm4JS.stopAlgorithm(thisUuid, {});
+							}, 100);
+						}
+						
+						function downloadSVG() {
+							let thisUuid = Pm4JS.startAlgorithm({"name": "OCPM downloadSVG"});
+							setTimeout(function() {
+								visualization.exportSvg(visualization.graph);
 								Pm4JS.stopAlgorithm(thisUuid, {});
 							}, 100);
 						}

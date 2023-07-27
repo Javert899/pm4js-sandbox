@@ -22,6 +22,39 @@ class OcdfgVisualization {
 		this.petriNetEnableDecorations = false;
 	}
 	
+	exportSvg(graph) {
+		var svgDocument = mxUtils.createXmlDocument();
+		var root = (svgDocument.createElementNS != null) ?
+			svgDocument.createElementNS(mxConstants.NS_SVG, 'svg') : svgDocument.createElement('svg');
+		
+		if (svgDocument.createElementNS == null) {
+			root.setAttribute('xmlns', mxConstants.NS_SVG);
+			root.setAttribute('xmlns:xlink', mxConstants.NS_XLINK);
+		} else {
+			root.setAttributeNS('http://www.w3.org/2000/xmlns/', 'xmlns:xlink', mxConstants.NS_XLINK);
+		}
+
+		var svgCanvas = new mxSvgCanvas2D(root);
+		var graphBounds = graph.getGraphBounds();
+		svgCanvas.translate(Math.floor((graphBounds.x / graph.view.scale) - graph.view.translate.x),
+			Math.floor((graphBounds.y / graph.view.scale) - graph.view.translate.y));
+		svgCanvas.scale(graph.view.scale);
+
+		var imgExport = new mxImageExport();
+		var bounds = new mxRectangle(0, 0, graphBounds.width, graphBounds.height);
+		imgExport.drawState(graph.getView().getState(graph.model.root), svgCanvas, bounds);
+
+		var svg = encodeURIComponent(mxUtils.getXml(root));
+		var link = document.createElement('a');
+		link.setAttribute('href-lang', 'image/svg+xml');
+		link.setAttribute('href', 'data:image/svg+xml,' + svg);
+		link.setAttribute('download', 'graph.svg');
+		
+		document.body.appendChild(link);
+		link.click();
+		document.body.removeChild(link);
+	}
+
 	removeElements() {
 		this.graph.removeCells(this.graph.getChildVertices(this.graph.getDefaultParent()));
 	}
@@ -682,5 +715,7 @@ class OcdfgVisualization {
 		this.graph.isCellMovable = function() { return false; };
 		this.graph.view.rendering = true;
 		this.graph.refresh();
+		
+		//this.exportSvg(this.graph);
 	}
 }
