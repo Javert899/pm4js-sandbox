@@ -24,6 +24,10 @@ class OcdfgVisualization {
 	}
 	
 	exportSvg(graph) {
+		var layout = new mxHierarchicalLayout(graph);
+		layout.orientation = mxConstants.DIRECTION_NORTH;
+		layout.execute(graph.getDefaultParent());
+
 		var svgDocument = mxUtils.createXmlDocument();
 		var root = (svgDocument.createElementNS != null) ?
 			svgDocument.createElementNS(mxConstants.NS_SVG, 'svg') : svgDocument.createElement('svg');
@@ -36,13 +40,19 @@ class OcdfgVisualization {
 		}
 
 		var svgCanvas = new mxSvgCanvas2D(root);
-		var graphBounds = graph.getGraphBounds();
-		svgCanvas.translate(Math.floor((graphBounds.x / graph.view.scale) - graph.view.translate.x),
-			Math.floor((graphBounds.y / graph.view.scale) - graph.view.translate.y));
+
+		// Translate the canvas to ensure there are no negative coordinates
+		svgCanvas.translate(-graph.view.translate.x, -graph.view.translate.y);
+		
+		// Now get the graph bounds
+		var bounds = graph.getGraphBounds();
+		bounds.width += bounds.x;
+		bounds.height += bounds.y;
+
+		// Scale the canvas
 		svgCanvas.scale(graph.view.scale);
 
 		var imgExport = new mxImageExport();
-		var bounds = new mxRectangle(0, 0, graphBounds.width, graphBounds.height);
 		imgExport.drawState(graph.getView().getState(graph.model.root), svgCanvas, bounds);
 
 		var svg = encodeURIComponent(mxUtils.getXml(root));
