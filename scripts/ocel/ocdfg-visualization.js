@@ -8,6 +8,7 @@ class OcdfgVisualization {
 		this.original = model;
 		this.ACTIVITY_FREQUENCY = 0.7;
 		this.PATHS_FREQUENCY = 0.0;
+		this.DEFAULT_DIRECTION = "horizontal";
 		this.IDX = 0;
 		this.expandedActivities = {};
 		this.expandedEdges = {};
@@ -285,7 +286,7 @@ class OcdfgVisualization {
 		return sum;
 	}
 	
-	represent(af = null, pf = null) {
+	represent(af = null, pf = null, direction = null) {
 		let thisUuid = Pm4JS.startAlgorithm({"name": "OcdfgVisualization"});
 		let self = this;
 		this.model.otInductiveModels = null;
@@ -307,6 +308,9 @@ class OcdfgVisualization {
 		}
 		if (pf == null) {
 			pf = this.PATHS_FREQUENCY;
+		}
+		if (direction == null) {
+			direction = this.DEFAULT_DIRECTION;
 		}
 		this.calculatePre();
 		let minActiCount = (1 - af) * this.MAX_INDIPENDENT_ACT_COUNT;
@@ -340,7 +344,7 @@ class OcdfgVisualization {
 						}
 					}
 				}
-				self.representDetail(af, pf);
+				self.representDetail(af, pf, direction);
 				if (self.displayType.startsWith("petriNet")) {
 					setTimeout(function() {
 						for (let ot in self.model.otEventLogs) {
@@ -351,7 +355,7 @@ class OcdfgVisualization {
 								self.model.otReplayedTraces[ot] = tbrResult;
 							}
 						}
-						self.representDetail(af, pf);
+						self.representDetail(af, pf, direction);
 						Pm4JS.stopAlgorithm(thisUuid, {});
 					}, 500);
 				}
@@ -382,19 +386,25 @@ class OcdfgVisualization {
 								self.model.otReplayedTracesBPMN[ot] = tbrResult;
 							}
 						}
-						self.representDetail(af, pf);
+						self.representDetail(af, pf, direction);
 						Pm4JS.stopAlgorithm(thisUuid, {});
 					}, 500);
 				}
 			}
 			else if (self.displayType.startsWith("dfg")) {
-				self.representDetail(af, pf);
+				self.representDetail(af, pf, direction);
 				Pm4JS.stopAlgorithm(thisUuid, {});
 			}
 		}, 100);
 	}
 	
-	representDetail(af = null, pf = null) {
+	representDetail(af = null, pf = null, direction = "horizontal") {
+		if (direction == "horizontal") {
+			direction = mxConstants.DIRECTION_WEST;
+		}
+		else if (direction == "vertical") {
+			direction = mxConstants.DIRECTION_NORTH;
+		}
 		let oldHeight = document.getElementById("graphContainer").offsetHeight;
 		this.resetVariables();
 		this.removeElements();
@@ -702,7 +712,7 @@ class OcdfgVisualization {
 			}
 		}
 		
-		var layout = new mxHierarchicalLayout(this.graph, mxConstants.DIRECTION_WEST);
+		var layout = new mxHierarchicalLayout(this.graph, direction);
 		layout.edgeStyle=2;
 		if (this.displayType.startsWith("petriNet")) {
 			layout.intraCellSpacing=17;
