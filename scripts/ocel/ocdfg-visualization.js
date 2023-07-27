@@ -19,7 +19,7 @@ class OcdfgVisualization {
 		this.callbackEdge = null;
 		this.callbackStatistics = null;
 		this.displayType = "bpmn";
-		this.petriNetEnableDecorations = false;
+		this.petriNetEnableDecorations = true;
 	}
 	
 	exportSvg(graph) {
