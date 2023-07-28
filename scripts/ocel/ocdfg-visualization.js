@@ -24,18 +24,6 @@ class OcdfgVisualization {
 	}
 	
 	exportSvg(graph) {
-		/*let direction = "";
-		if (this.DEFAULT_DIRECTION == "horizontal") {
-			direction = mxConstants.DIRECTION_WEST;
-		}
-		else {
-			direction = mxConstants.DIRECTION_NORTH;
-		}
-		
-		var layout = new mxHierarchicalLayout(graph);
-		layout.orientation = direction;
-		layout.execute(graph.getDefaultParent());*/
-
 		var svgDocument = mxUtils.createXmlDocument();
 		var root = (svgDocument.createElementNS != null) ?
 			svgDocument.createElementNS(mxConstants.NS_SVG, 'svg') : svgDocument.createElement('svg');
@@ -56,7 +44,7 @@ class OcdfgVisualization {
 		var bounds = graph.getGraphBounds();
 		bounds.width += bounds.x;
 		bounds.height += bounds.y;
-
+		
 		// Scale the canvas
 		svgCanvas.scale(graph.view.scale);
 
@@ -422,7 +410,7 @@ class OcdfgVisualization {
 		else if (direction == "vertical") {
 			direction = mxConstants.DIRECTION_NORTH;
 		}
-		let oldHeight = document.getElementById("graphContainer").offsetHeight;
+		let oldHeight = document.getElementById(this.targetContainer).offsetHeight;
 		this.resetVariables();
 		this.removeElements();
 		this.calculatePre();
