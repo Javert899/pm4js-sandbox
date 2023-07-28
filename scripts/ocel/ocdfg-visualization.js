@@ -27,7 +27,7 @@ class OcdfgVisualization {
 		var svgDocument = mxUtils.createXmlDocument();
 		var root = (svgDocument.createElementNS != null) ?
 			svgDocument.createElementNS(mxConstants.NS_SVG, 'svg') : svgDocument.createElement('svg');
-		
+
 		if (svgDocument.createElementNS == null) {
 			root.setAttribute('xmlns', mxConstants.NS_SVG);
 			root.setAttribute('xmlns:xlink', mxConstants.NS_XLINK);
@@ -39,12 +39,16 @@ class OcdfgVisualization {
 
 		// Translate the canvas to ensure there are no negative coordinates
 		svgCanvas.translate(-graph.view.translate.x, -graph.view.translate.y);
-		
+
 		// Now get the graph bounds
 		var bounds = graph.getGraphBounds();
 		bounds.width += bounds.x;
 		bounds.height += bounds.y;
-		
+
+		// Set the width and height of the SVG root element
+		root.setAttribute('width', bounds.width);
+		root.setAttribute('height', bounds.height);
+
 		// Scale the canvas
 		svgCanvas.scale(graph.view.scale);
 
@@ -56,7 +60,7 @@ class OcdfgVisualization {
 		link.setAttribute('href-lang', 'image/svg+xml');
 		link.setAttribute('href', 'data:image/svg+xml,' + svg);
 		link.setAttribute('download', 'graph.svg');
-		
+
 		document.body.appendChild(link);
 		link.click();
 		document.body.removeChild(link);
