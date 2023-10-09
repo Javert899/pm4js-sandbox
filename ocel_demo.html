@@ -511,7 +511,7 @@
 						function downloadJsonOcel() {
 							let thisUuid = Pm4JS.startAlgorithm({"name": "OCPM downloadJsonOcel"});
 							setTimeout(function() {
-								let jsonStri = JsonOcelExporter.exportLog(visualization.model.ocel);
+								let jsonStri = JsonOcel2Exporter.apply(visualization.model.ocel);
 								download(jsonStri, "obj-centr-log.jsonocel", "text/json");
 								Pm4JS.stopAlgorithm(thisUuid, {});
 							}, 100);
@@ -770,6 +770,10 @@
 							}
 							else if (fileName.endsWith(".jsonocel")) {
 								eventLog = JsonOcelImporter.importLog(contentStri);
+								createVisualization();
+							}
+							else if (fileName.endsWith(".sqlite")) {
+								eventLog = SqliteOcel2Importer.importLog(contentStri);
 								createVisualization();
 							}
 							else {
