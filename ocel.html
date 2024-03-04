@@ -781,6 +781,10 @@
 								eventLog = XmlOcelImporter.importLog(contentStri);
 								createVisualization();
 							}
+							else if (fileName.endsWith(".json")) {
+								eventLog = JsonOcel2Importer.apply(contentStri);
+								createVisualization();
+							}
 							else if (fileName.endsWith(".jsonocel")) {
 								eventLog = JsonOcelImporter.importLog(contentStri);
 								createVisualization();
