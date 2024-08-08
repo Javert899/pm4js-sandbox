@@ -359,3 +359,68 @@ function showActOtFilterContainer() {
 		container.style.display = "none";
 	}
 }
+
+function segmentationChildObjectType0() {
+	let leadObjectType = prompt("Insert the Lead Object Type");
+	let childObjectType = prompt("Insert the Child Object Type");
+	let segmentsPrefix = prompt("Insert the Segments Prefix (for example, PO will result in objects of type SEGMENT_PO_xxxx", "DEFAULT");
+	
+	let filteredOcel = OcelSegments.segmentBasedOnChildObjType(visualization.model.ocel, leadObjectType, childObjectType, segmentsPrefix);
+	let filteredModel = new OcdfgModel(filteredOcel);
+	filteredModel.parentOcel = visualization.model.parentOcel;
+	visualization.setFilteredModel(filteredModel);
+}
+
+function segmentationFrom0() {
+	let leadObjectType = prompt("Insert the Lead Object Type");
+	let activity = prompt("Insert the considered Activity");
+	let segmentsPrefix = prompt("Insert the Segments Prefix (for example, FROM_GR will result in objects of type SEGMENT_FROM_GR_xxxx", "DEFAULT");
+
+	let filteredOcel = OcelSegments.segmentFromOrTo(visualization.model.ocel, leadObjectType, activity, segmentsPrefix, true);
+	let filteredModel = new OcdfgModel(filteredOcel);
+	filteredModel.parentOcel = visualization.model.parentOcel;
+	visualization.setFilteredModel(filteredModel);
+}
+
+function segmentationTo0() {
+	let leadObjectType = prompt("Insert the Lead Object Type");
+	let activity = prompt("Insert the considered Activity");
+	let segmentsPrefix = prompt("Insert the Segments Prefix (for example, TO_GR will result in objects of type SEGMENT_TO_GR_xxxx", "DEFAULT");
+
+	let filteredOcel = OcelSegments.segmentFromOrTo(visualization.model.ocel, leadObjectType, activity, segmentsPrefix, false);
+	let filteredModel = new OcdfgModel(filteredOcel);
+	filteredModel.parentOcel = visualization.model.parentOcel;
+	visualization.setFilteredModel(filteredModel);
+}
+
+function segmentationBetween0() {
+	let leadObjectType = prompt("Insert the Lead Object Type");
+	let activity1 = prompt("Insert the first Activity");
+	let activity2 = prompt("Insert the second Activity");
+	let segmentsPrefix = prompt("Insert the Segments Prefix (for example, BTW_CPO_GR will result in objects of type SEGMENT_BTW_CPO_GR_xxxx", "DEFAULT");
+	
+	let filteredOcel = OcelSegments.segmentBetween(visualization.model.ocel, leadObjectType, activity1, activity2, segmentsPrefix);
+	let filteredModel = new OcdfgModel(filteredOcel);
+	filteredModel.parentOcel = visualization.model.parentOcel;
+	visualization.setFilteredModel(filteredModel);
+}
+
+function segmentationChildObjectType() {
+	showProcessModelPage();
+	return addFilter("<i class=\"fas fa-user-minus\"></i>&nbsp;Child-Segment Filter&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;", "segmentationChildObjectType0()");
+}
+
+function segmentationFrom() {
+	showProcessModelPage();
+	return addFilter("<i class=\"fas fa-user-minus\"></i>&nbsp;Between-From Filter&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;", "segmentationFrom0()");
+}
+
+function segmentationTo() {
+	showProcessModelPage();
+	return addFilter("<i class=\"fas fa-user-minus\"></i>&nbsp;Between-To Filter&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;", "segmentationTo0()");
+}
+
+function segmentationBetween() {
+	showProcessModelPage();
+	return addFilter("<i class=\"fas fa-user-minus\"></i>&nbsp;Between-Segment Filter&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;", "segmentationBetween0()");
+}
