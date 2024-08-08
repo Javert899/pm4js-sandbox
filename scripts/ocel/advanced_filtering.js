@@ -424,3 +424,17 @@ function segmentationBetween() {
 	showProcessModelPage();
 	return addFilter("<i class=\"fas fa-user-minus\"></i>&nbsp;Between-Segment Filter&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;", "segmentationBetween0()");
 }
+
+function featurePropagation0() {
+	let leadObjectType = prompt("Insert the Lead Object Type");
+	
+	let filteredOcel = OcelAttributePropagation.propagateObjectAttributes(visualization.model.ocel, leadObjectType);
+	let filteredModel = new OcdfgModel(filteredOcel);
+	filteredModel.parentOcel = visualization.model.parentOcel;
+	visualization.setFilteredModel(filteredModel);
+}
+
+function featurePropagation() {
+	showProcessModelPage();
+	return addFilter("<i class=\"fas fa-user-minus\"></i>&nbsp;Feature Propagation&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;", "featurePropagation0()");
+}
