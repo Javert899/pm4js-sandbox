@@ -3,6 +3,8 @@ function executeSQLQueryInternal(query, targetDiv="machineLearningSQLResult") {
 	setTimeout(function() {
 		let stmt = db.prepare(query);
 		const res = db.exec(query);
+		identifiersSqlTable = null;
+		identifiersSqlTable = [];
 		let ret = ["<table border='1'><thead><tr>"];
 		for (let col of res[0]["columns"]) {
 			ret.push("<th>"+col+"</th>");
@@ -15,6 +17,7 @@ function executeSQLQueryInternal(query, targetDiv="machineLearningSQLResult") {
 				ret.push("<td>"+row[i]+"</td>");
 				i++;
 			}
+			identifiersSqlTable.push(row[0]);
 			ret.push("</tr>");
 		}
 		ret.push("</tbody>");
