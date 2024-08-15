@@ -75,8 +75,24 @@ function insertObjectFeaturesInSQLDatabase() {
 			sqlStatements.push(state);
 			i++;
 		}
-		sqlStatements = sqlStatements.join("\n");
-		db.run(sqlStatements);
+		
+		try {
+			let jointString = sqlStatements.join("\n");
+			db.run(jointString);
+		}
+		catch (err0) {
+			for (let state of sqlStatements) {
+				try {
+					db.run(state);
+				}
+				catch (err) {
+					//console.log(state);
+					//console.log(err);
+					//break;
+				}
+			}
+		}
+
 	}
 }
 
@@ -123,7 +139,22 @@ function insertEventFeaturesInSQLDatabase() {
 			sqlStatements.push(state);
 			i++;
 		}
-		sqlStatements = sqlStatements.join("\n");
-		db.run(sqlStatements);
+		
+		try {
+			let jointString = sqlStatements.join("\n");
+			db.run(jointString);
+		}
+		catch (err0) {
+			for (let state of sqlStatements) {
+				try {
+					db.run(state);
+				}
+				catch (err) {
+					//console.log(state);
+					//console.log(err);
+					//break;
+				}
+			}
+		}
 	}
 }
