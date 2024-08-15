@@ -449,3 +449,17 @@ function filterSQLobjects() {
 	showProcessModelPage();
 	return addFilter("<i class=\"fas fa-user-minus\"></i>&nbsp;SQL&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;", "filterSQLobjects0()");
 }
+
+function setChildOcelAsParentOcel0() {
+	let filteredModel = new OcdfgModel(visualization.model.ocel);
+	visualization.setFilteredModel(filteredModel);
+	visualization.original = visualization.model;
+	visualization.populateObjectTypes();
+	visualization.populateStatistics();
+}
+
+function setChildOcelAsParentOcel() {
+	showProcessModelPage();
+	setChildOcelAsParentOcel0();
+	resetPageFilters();
+}
