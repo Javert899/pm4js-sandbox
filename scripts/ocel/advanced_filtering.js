@@ -438,3 +438,14 @@ function featurePropagation() {
 	showProcessModelPage();
 	return addFilter("<i class=\"fas fa-user-minus\"></i>&nbsp;Feature Propagation&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;", "featurePropagation0()");
 }
+
+function filterSQLobjects0() {
+	let filteredModel = new OcdfgModel(OcelGeneralFiltering.projectOnArrayObjects(visualization.model.ocel, identifiersSqlTable));
+	filteredModel.parentOcel = visualization.model.parentOcel;
+	visualization.setFilteredModel(filteredModel);
+}
+
+function filterSQLobjects() {
+	showProcessModelPage();
+	return addFilter("<i class=\"fas fa-user-minus\"></i>&nbsp;SQL&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;", "filterSQLobjects0()");
+}
