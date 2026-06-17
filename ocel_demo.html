@@ -192,6 +192,42 @@
 			innerHTML.push("</tbody></table>");
 			document.getElementById(targetTable).innerHTML = innerHTML.join();
 		}
+
+		function CSVisOcel20(content) {
+			try {
+				let arr0 = CsvImporter.parseCSV(content, ",", '"');
+				if (arr0.length == 0 || arr0[0].length < 4) {
+					return false;
+				}
+				let header = arr0[0].slice();
+				if (header.length > 0 && header[0].length > 0 && header[0].charCodeAt(0) == 0xFEFF) {
+					header[0] = header[0].substring(1);
+				}
+				if (header[0] != "id" || header[1] != "activity" || header[2] != "timestamp") {
+					return false;
+				}
+				for (let i = 3; i < header.length; i++) {
+					if (header[i].startsWith("ot:") && header[i].length > 3) {
+						return true;
+					}
+				}
+			}
+			catch (err) {
+				console.log(err);
+			}
+			return false;
+		}
+
+		function CSVloadOcel20(content) {
+			try {
+				eventLog = CsvOcel2Importer.apply(content);
+				createVisualization();
+			}
+			catch (err) {
+				alert("OCEL 2.0 CSV import failed: "+err.message);
+				console.log(err);
+			}
+		}
 		
 		function CSVconvertToOCEL() {
 			let sep = document.getElementById("CSVseparator").value;
@@ -339,6 +375,10 @@
 
 								<li class="navigation-item">
 									<a class="navigation-link" href="javascript:downloadXmlOcel2()"><i class="fas fa-download"></i>&nbsp;<span style="font-size: 10pt">&nbsp;XML2</span></a>
+								</li>
+
+								<li class="navigation-item">
+									<a class="navigation-link" href="javascript:downloadCsvOcel2()"><i class="fas fa-download"></i>&nbsp;<span style="font-size: 10pt">&nbsp;CSV2</span></a>
 								</li>
 
 								<!--<li class="navigation-item">
@@ -568,6 +608,15 @@
 								Pm4JS.stopAlgorithm(thisUuid, {});
 							}, 100);
 						}
+
+						function downloadCsvOcel2() {
+							let thisUuid = Pm4JS.startAlgorithm({"name": "OCPM downloadCsvOcel2"});
+							setTimeout(function() {
+								let csvStri = CsvOcel2Exporter.apply(visualization.model.ocel);
+								download(csvStri, "obj-centr-log.ocel.csv", "text/csv");
+								Pm4JS.stopAlgorithm(thisUuid, {});
+							}, 100);
+						}
 						
 						function flattenEventLog() {
 							let thisUuid = Pm4JS.startAlgorithm({"name": "OCPM downloadCsvOcel"});
@@ -735,6 +784,16 @@
 						function allowDrop(ev) {
 						  ev.preventDefault();
 						}
+
+						function readUploadedOcelFile(reader, f) {
+							let fileName = f.name.toLowerCase();
+							if (fileName.endsWith(".zip") || fileName.endsWith(".sqlite")) {
+								reader.readAsBinaryString(f);
+							}
+							else {
+								reader.readAsText(f);
+							}
+						}
 						
 						function handleFileSelect2(evt) {
 							console.log(evt);
@@ -745,8 +804,7 @@
 							reader.onload = function(e) {
 								loadFileCommon(e, f);
 							}
-							reader.readAsBinaryString(f);
-							//reader.readAsText(f);
+							readUploadedOcelFile(reader, f);
 						}
 						
 						function handleFileSelect(evt) {
@@ -757,8 +815,7 @@
 							reader.onload = function(e) {
 								loadFileCommon(e, f);
 							}
-							reader.readAsBinaryString(f);
-							//reader.readAsText(f);
+							readUploadedOcelFile(reader, f);
 						}
 						
 						function loadFileCommon(e, f) {
@@ -798,10 +855,15 @@
 								createVisualization();
 							}
 							else {
-								document.getElementById("uploadPart").style.display = "none";
-								document.getElementById("mainApplication").style.display = "none";
-								document.getElementById("csvUpload").style.display = "";
-								CSVrenderTable(contentStri);
+								if (CSVisOcel20(contentStri)) {
+									CSVloadOcel20(contentStri);
+								}
+								else {
+									document.getElementById("uploadPart").style.display = "none";
+									document.getElementById("mainApplication").style.display = "none";
+									document.getElementById("csvUpload").style.display = "";
+									CSVrenderTable(contentStri);
+								}
 							}
 						}
 						
